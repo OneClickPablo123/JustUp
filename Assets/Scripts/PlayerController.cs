@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.ShortcutManagement;
+using UnityEditorInternal;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -22,7 +23,9 @@ public class PlayerController : MonoBehaviour
     public float jumpForce;
     public float jumpForceTimer;
     public bool loadJump;
-    public float jumpDelayTimer;
+    public float coyoteTime;
+    public float coyoteCounter;
+    
 
     // ==========================
     //     Components
@@ -70,22 +73,33 @@ public class PlayerController : MonoBehaviour
         //     Methoden Aufrufe
         // ==========================
         Movement();
-        Jump();
 
 
 
         // ==========================
         //    Dauerhafte Abfragen
         // ==========================
-       
-        if (!IsGrounded())
+        
+        if (IsGrounded())
         {
-            jumpDelayTimer += Time.deltaTime;
-        } else
-        {
-            jumpDelayTimer = 0;
+            coyoteCounter = coyoteTime;
         }
-     
+        else
+        {
+            coyoteCounter -= Time.deltaTime;
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Jump();
+        }
+
+        if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
+        }
+
     }
 
 
@@ -158,45 +172,12 @@ public class PlayerController : MonoBehaviour
         // ==========================
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, groundMask);
     }
-
+  
     public void Jump()
     {
-        jump = Vector2.up;
-
-        if (Input.GetKey(KeyCode.Space) && IsGrounded())
+        if (coyoteCounter < 0) return;
         {
-                  
-            if (moveX == 0)
-            {
-                jumpForceTimer += Time.deltaTime;
-                loadJump = true;
-            }
-
-            if (jumpForceTimer < 1)
-            {
-                jumpForceTimer = 1;
-            }
-
-            if (jumpForceTimer > 1.6)
-            {
-                jumpForceTimer = 1.6f;
-            }
-        }
-        else
-        {
-            loadJump = false;
-
-            if (moveX != 0 && Input.GetKeyDown(KeyCode.Space) && jumpDelayTimer < .1f)
-            {
-                rb.AddForce(new Vector2(0f, jump.y * jumpForce), ForceMode2D.Impulse);
-            } 
-            
-            else
-            {
-                rb.AddForce(new Vector2(0f, jump.y * jumpForce * jumpForceTimer), ForceMode2D.Impulse);
-                jumpForceTimer = 0f;
-            }
-            
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpForceTimer);
         }
     }
 

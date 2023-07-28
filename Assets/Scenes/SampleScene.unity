@@ -880,10 +880,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 0.9
   maxSpeed: 13
-  jumpForce: 60
-  jumpForceTimer: 0
+  jumpForce: 30
+  jumpForceTimer: 1
   loadJump: 0
-  jumpDelayTimer: 0
+  coyoteTime: 0.12
+  coyoteCounter: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 8

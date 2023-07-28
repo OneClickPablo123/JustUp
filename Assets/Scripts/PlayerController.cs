@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     // Movement
     // ==========================
     public float speed;
+    public float runSpeed;
     public float maxSpeed;
     private float moveX;
     int moveDir = 1;
@@ -21,6 +22,8 @@ public class PlayerController : MonoBehaviour
     // ==========================
     Vector2 jump;
     public float jumpForce;
+    public float fallSpeed;
+    public float moveXAir;
     public float jumpForceTimer;
     public bool loadJump;
     public float coyoteTime;
@@ -83,14 +86,22 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded())
         {
             coyoteCounter = coyoteTime;
+            rb.gravityScale = 10;
         }
         else
         {
             coyoteCounter -= Time.deltaTime;
+            rb.gravityScale = 8;
+
+            if (rb.velocity.y < fallSpeed *-1)
+            {
+
+                rb.velocity = new Vector2(rb.velocity.x, fallSpeed *-1);
+            }
         }
 
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0)
         {
             Jump();
         }
@@ -99,7 +110,6 @@ public class PlayerController : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
         }
-
     }
 
 
@@ -119,15 +129,16 @@ public class PlayerController : MonoBehaviour
 
         if (IsGrounded())
         {
-            if (rb.velocity.x > 7 && moveX != 0 || rb.velocity.x < -7 && moveX != 0)
+            if (rb.velocity.x > 6.2 && moveX != 0 || rb.velocity.x < -6.2 && moveX != 0)
             {
                 ChangeAnimationState(PLAYER_WALK);
             } 
             
-            else if (rb.velocity.x < 7 && moveX != 0 || rb.velocity.x > -7 && moveX != 0)
+            else if (rb.velocity.x < 6 && moveX != 0 || rb.velocity.x > -6 && moveX != 0)
             {
                 ChangeAnimationState(PLAYER_RSTART);
             }
+
         } 
         
         else
@@ -155,11 +166,26 @@ public class PlayerController : MonoBehaviour
                 moveDir = 0;
             }
 
-
-            if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
+            if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
             {
-                rb.AddForce(new Vector2(moveX * speed, 0f), ForceMode2D.Impulse);
+                maxSpeed = 13.5f;
+
+                if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
+                {
+                    rb.AddForce(new Vector2(moveX * runSpeed, 0f), ForceMode2D.Impulse);
+                }
+            } 
+            else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
+            
+            {
+                maxSpeed = 12f;
+                if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
+                {
+                    rb.AddForce(new Vector2(moveX * speed, 0f), ForceMode2D.Impulse);
+                }
             }
+
+           
 
 
         }
@@ -175,9 +201,9 @@ public class PlayerController : MonoBehaviour
   
     public void Jump()
     {
-        if (coyoteCounter < 0) return;
+        if (coyoteCounter < 0.1) return;
         {
-            rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpForceTimer);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         }
     }
 

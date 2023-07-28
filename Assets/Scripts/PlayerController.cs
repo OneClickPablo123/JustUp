@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     public float jumpForce;
     public float jumpForceTimer;
     public bool loadJump;
-    float jumpAnimationTimer;
+    public float jumpDelayTimer;
 
     // ==========================
     //     Components
@@ -42,6 +42,7 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_IDLE = ("player_idle");
     const string PLAYER_WALK = ("player_walk");
     const string PLAYER_JUMP = ("player_jump");
+    const string PLAYER_RSTART = ("player_runstart");
     private Animator anim;
 
 
@@ -76,15 +77,15 @@ public class PlayerController : MonoBehaviour
         // ==========================
         //    Dauerhafte Abfragen
         // ==========================
-        
-        //Legt den Beginn der Walk Animation fest.
+       
         if (!IsGrounded())
         {
-            jumpAnimationTimer += Time.deltaTime;
+            jumpDelayTimer += Time.deltaTime;
+        } else
+        {
+            jumpDelayTimer = 0;
         }
-
-
-
+     
     }
 
 
@@ -95,22 +96,27 @@ public class PlayerController : MonoBehaviour
         // Animation 
         // =================================
 
+        
         if (moveX == 0 && IsGrounded()) 
         
         {
             ChangeAnimationState(PLAYER_IDLE);
-        } 
-        
-        else if (moveX != 0 && IsGrounded() && !loadJump)
-        {   
-           if (jumpAnimationTimer == 0)
+        }
+
+        if (IsGrounded())
+        {
+            if (rb.velocity.x > 7 && moveX != 0 || rb.velocity.x < -7 && moveX != 0)
             {
                 ChangeAnimationState(PLAYER_WALK);
-            }     
-        }
+            } 
+            
+            else if (rb.velocity.x < 7 && moveX != 0 || rb.velocity.x > -7 && moveX != 0)
+            {
+                ChangeAnimationState(PLAYER_RSTART);
+            }
+        } 
         
-        else if (!IsGrounded() && moveX == 0 || !IsGrounded() && moveX != 0) 
-        
+        else
         {
             ChangeAnimationState(PLAYER_JUMP);
         }
@@ -135,6 +141,7 @@ public class PlayerController : MonoBehaviour
                 moveDir = 0;
             }
 
+
             if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
             {
                 rb.AddForce(new Vector2(moveX * speed, 0f), ForceMode2D.Impulse);
@@ -156,11 +163,14 @@ public class PlayerController : MonoBehaviour
     {
         jump = Vector2.up;
 
-        if (Input.GetKey(KeyCode.Space) && IsGrounded() && moveX == 0)
+        if (Input.GetKey(KeyCode.Space) && IsGrounded())
         {
-            jumpAnimationTimer += Time.deltaTime;
-            jumpForceTimer += Time.deltaTime;
-            loadJump = true;
+                  
+            if (moveX == 0)
+            {
+                jumpForceTimer += Time.deltaTime;
+                loadJump = true;
+            }
 
             if (jumpForceTimer < 1)
             {
@@ -176,10 +186,12 @@ public class PlayerController : MonoBehaviour
         {
             loadJump = false;
 
-            if (moveX != 0 && IsGrounded() && Input.GetKeyDown(KeyCode.Space))
+            if (moveX != 0 && Input.GetKeyDown(KeyCode.Space) && jumpDelayTimer < .1f)
             {
                 rb.AddForce(new Vector2(0f, jump.y * jumpForce), ForceMode2D.Impulse);
-            } else
+            } 
+            
+            else
             {
                 rb.AddForce(new Vector2(0f, jump.y * jumpForce * jumpForceTimer), ForceMode2D.Impulse);
                 jumpForceTimer = 0f;

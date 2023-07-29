@@ -34,7 +34,7 @@ public class PlayerController : MonoBehaviour
     //     Components
     // ==========================
     Rigidbody2D rb;
-    private BoxCollider2D coll;
+    private CapsuleCollider2D coll;
 
     // ==========================
     //     Masks
@@ -57,7 +57,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<BoxCollider2D>();
+        coll = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
                 
@@ -101,7 +101,7 @@ public class PlayerController : MonoBehaviour
         }
 
 
-        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0)
+        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1)
         {
             Jump();
         }
@@ -205,7 +205,7 @@ public class PlayerController : MonoBehaviour
         // ==========================
         //   BOXCAST GROUND ABFRAGE
         // ==========================
-        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .1f, groundMask);
+        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .25f, groundMask);
     }
   
     public void Jump()

@@ -129,12 +129,12 @@ public class PlayerController : MonoBehaviour
 
         if (IsGrounded())
         {
-            if (rb.velocity.x > 6.2 && moveX != 0 || rb.velocity.x < -6.2 && moveX != 0)
+            if (rb.velocity.x > 4.7 && moveX != 0 || rb.velocity.x < -4.7 && moveX != 0)
             {
                 ChangeAnimationState(PLAYER_WALK);
             } 
             
-            else if (rb.velocity.x < 6 && moveX != 0 || rb.velocity.x > -6 && moveX != 0)
+            else if (rb.velocity.x < 4.5 && moveX != 0 || rb.velocity.x > -4.5 && moveX != 0)
             {
                 ChangeAnimationState(PLAYER_RSTART);
             }
@@ -183,6 +183,15 @@ public class PlayerController : MonoBehaviour
                 {
                     rb.AddForce(new Vector2(moveX * speed, 0f), ForceMode2D.Impulse);
                 }
+            }
+
+            if (rb.velocity.x > 9.5f || rb.velocity.x < -9.5f)
+            {
+                anim.speed = 1.5f;
+            }
+            else
+            {
+                anim.speed = 1f;
             }
 
            

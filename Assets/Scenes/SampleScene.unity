@@ -2413,7 +2413,7 @@ Transform:
   m_GameObject: {fileID: 271626344}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -14.66, y: 8.66, z: 0}
+  m_LocalPosition: {x: -1.58, y: -0.57, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2433,12 +2433,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 0.79
   runSpeed: 0.82
-  maxSpeed: 9.5
+  maxSpeed: 12
   jumpForce: 30
   fallSpeed: 15
-  moveXAir: 0
-  jumpForceTimer: 1
-  loadJump: 0
   coyoteTime: 0.3
   coyoteCounter: 0
   groundMask:

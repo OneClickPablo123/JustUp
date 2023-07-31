@@ -1,7 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShortcutManagement;
-using UnityEditorInternal;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -14,7 +12,7 @@ public class PlayerController : MonoBehaviour
     public float runSpeed;
     public float maxSpeed;
     private float moveX;
-    private int moveDir = 1;
+    //private int moveDir = 1;
 
 
     // ==========================
@@ -157,13 +155,13 @@ public class PlayerController : MonoBehaviour
                 {
                     //Flip Player Sprite depend on Horizontal Input.
                     GetComponent<SpriteRenderer>().flipX = false;
-                    moveDir = 1;
+                    //moveDir = 1;
                 }
 
                 if (moveX < 0)
                 {
                     GetComponent<SpriteRenderer>().flipX = true;
-                    moveDir = 0;
+                   // moveDir = 0;
                 }
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
@@ -173,7 +171,7 @@ public class PlayerController : MonoBehaviour
                     if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
                     {
                         //Checks if Velocity is Bigger as MaxSpeed / 2
-                        if (rb.velocity.x < maxSpeed / 2)
+                        if (rb.velocity.x < maxSpeed / 2 || rb.velocity.x > -maxSpeed / 2)
                         {
                             //Multiply the RunSpeed * 1.5f 
                             rb.AddForce(new Vector2(moveX * runSpeed * 1.5f, 0f), ForceMode2D.Impulse);

@@ -2315,9 +2315,9 @@ GameObject:
   - component: {fileID: 271626348}
   - component: {fileID: 271626347}
   - component: {fileID: 271626349}
+  - component: {fileID: 271626351}
   - component: {fileID: 271626345}
   - component: {fileID: 271626350}
-  - component: {fileID: 271626351}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -2338,10 +2338,10 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 2.5
-  m_LinearDrag: 2
+  m_LinearDrag: 3
   m_AngularDrag: 0.09
   m_GravityScale: 10
-  m_Material: {fileID: 6200000, guid: 24f00eb9fdccc774585d994a4aa20b6a, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -2413,7 +2413,7 @@ Transform:
   m_GameObject: {fileID: 271626344}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.58, y: -0.57, z: 0}
+  m_LocalPosition: {x: -2.54, y: 5.82, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2431,13 +2431,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 54dcb74f0acc4a14f977c29a0013a3ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 0.79
-  runSpeed: 0.82
+  speed: 125
+  runSpeed: 130
   maxSpeed: 12
-  jumpForce: 30
+  jumpForce: 75
   fallSpeed: 15
   coyoteTime: 0.3
   coyoteCounter: 0
+  isJumping: 0
   groundMask:
     serializedVersion: 2
     m_Bits: 8
@@ -2471,7 +2472,7 @@ CapsuleCollider2D:
   m_GameObject: {fileID: 271626344}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 24f00eb9fdccc774585d994a4aa20b6a, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -4720,11 +4721,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!4 &721968071 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-  m_PrefabInstance: {fileID: 2108647353}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &725826664 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4815235850804891603, guid: e3ef72d9f2a941b479a3bda87147db32, type: 3}
@@ -5118,6 +5114,11 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 3564026850829729314, guid: 72a905bcc22e3e443be6f48bfb173c00, type: 3}
   m_PrefabInstance: {fileID: 1448706727}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &797191328 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
+  m_PrefabInstance: {fileID: 1757666214}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &814781523
 GameObject:
@@ -7912,12 +7913,16 @@ PrefabInstance:
       value: -5
       objectReference: {fileID: 0}
     - target: {fileID: 5373330553216305745, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.3094
+      objectReference: {fileID: 0}
+    - target: {fileID: 5373330553216305745, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
       propertyPath: m_LocalPosition.x
       value: -3.8381443
       objectReference: {fileID: 0}
     - target: {fileID: 5373330553216305745, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.51164484
+      value: -0.502
       objectReference: {fileID: 0}
     - target: {fileID: 5373330553216305745, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
       propertyPath: m_LocalPosition.z
@@ -7955,9 +7960,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PF Village Props - Obstacle Platform X40 (18)
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 846718474016397756, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
-    - {fileID: 3967369844333200862, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
+    - target: {fileID: 5373330553216305747, guid: 19c814d7a6d59b74686e74ddb900f806, type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -9876,11 +9883,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70e4f80265d902443a6249697d613d81, type: 3}
---- !u!4 &1591969368 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-  m_PrefabInstance: {fileID: 1681719507}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1600344564
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10363,69 +10365,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 70e4f80265d902443a6249697d613d81, type: 3}
---- !u!1001 &1681719507
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 2146224218}
-    m_Modifications:
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -3.834144
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0.7493553
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.28993583
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305747, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_Name
-      value: PF Village Props - Obstacle Platform X24
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305747, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-      propertyPath: m_Layer
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 846718474016397756, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-    - {fileID: -1626062711600851145, guid: bad53070b28240b4282bc102e6922c83, type: 3}
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: bad53070b28240b4282bc102e6922c83, type: 3}
 --- !u!1001 &1699079804
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10623,19 +10562,19 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 2146224218}
     m_Modifications:
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.92
+      value: 9.421856
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.64697385
+      value: -8.027618
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.28993583
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -10643,15 +10582,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4973302571607540861, guid: b076c268235cb7348a5d9a036ec254c4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -13357,67 +13296,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b51901e6748833e4695e0c1db509dcd4, type: 3}
---- !u!1001 &2108647353
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 2146224218}
-    m_Modifications:
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -3.8358
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.2693548
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.28993583
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305745, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305747, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_Name
-      value: PF Village Props - Obstacle Platform X16
-      objectReference: {fileID: 0}
-    - target: {fileID: 5373330553216305747, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
-      propertyPath: m_Layer
-      value: 3
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 419378b134eda754c9a1e3bbae048765, type: 3}
 --- !u!4 &2111762167 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3564026850829729314, guid: b51901e6748833e4695e0c1db509dcd4, type: 3}
@@ -13823,11 +13701,10 @@ Transform:
   - {fileID: 307798130}
   - {fileID: 1266220619}
   - {fileID: 1456455950}
-  - {fileID: 1591969368}
-  - {fileID: 721968071}
   - {fileID: 852912573}
   - {fileID: 648117723}
   - {fileID: 1655617963}
+  - {fileID: 797191328}
   m_Father: {fileID: 814781524}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
@@ -13840,4 +13717,3 @@ SceneRoots:
   - {fileID: 2079083760}
   - {fileID: 918632542}
   - {fileID: 1865470705}
-  - {fileID: 1757666214}

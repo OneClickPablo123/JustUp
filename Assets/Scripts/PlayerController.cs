@@ -23,6 +23,7 @@ public class PlayerController : MonoBehaviour
     public float fallSpeed;
     public float coyoteTime;
     public float coyoteCounter;
+    public bool isJumping;
     
 
     // ==========================
@@ -56,7 +57,7 @@ public class PlayerController : MonoBehaviour
         coll = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
     }
-
+   
     void Update()
     {
         // ==========================
@@ -72,6 +73,8 @@ public class PlayerController : MonoBehaviour
         //     Methoden Aufrufe
         // ==========================
         Movement();
+        Jump();
+
 
 
 
@@ -83,11 +86,13 @@ public class PlayerController : MonoBehaviour
         {
             coyoteCounter = coyoteTime;
             rb.gravityScale = 10;
+            isJumping = false;
         }
         else
         {
             coyoteCounter -= Time.deltaTime;
             rb.gravityScale = 8;
+            
 
             //Limit the Vertical Velocity if the Player is falling down.
             if (rb.velocity.y < fallSpeed * -1)
@@ -95,17 +100,6 @@ public class PlayerController : MonoBehaviour
 
                 rb.velocity = new Vector2(rb.velocity.x, fallSpeed * -1);
             }
-        }
-
-
-        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1)
-        {
-            Jump();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
         }
     }
 
@@ -126,12 +120,12 @@ public class PlayerController : MonoBehaviour
 
             if (IsGrounded())
             {
-                if (rb.velocity.x > 4.7 && moveX != 0 || rb.velocity.x < -4.7 && moveX != 0)
+                if (rb.velocity.x > 2.35 && moveX != 0 || rb.velocity.x < -2.35 && moveX != 0)
                 {
                     ChangeAnimationState(PLAYER_WALK);
                 }
 
-                else if (rb.velocity.x < 4.5 && moveX != 0 || rb.velocity.x > -4.5 && moveX != 0)
+                else if (rb.velocity.x < 2.5 && moveX != 0 || rb.velocity.x > -2.5 && moveX != 0 && anim.name != PLAYER_WALK)
                 {
                     ChangeAnimationState(PLAYER_RSTART);
                 }
@@ -166,7 +160,7 @@ public class PlayerController : MonoBehaviour
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
                 {
-                    maxSpeed = 13.5f;
+                    maxSpeed = 10.6f;
                     //Checks if Velocity is Bigger as maxSpeed
                     if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
                     {
@@ -174,12 +168,12 @@ public class PlayerController : MonoBehaviour
                         if (rb.velocity.x < maxSpeed / 2 || rb.velocity.x > -maxSpeed / 2)
                         {
                             //Multiply the RunSpeed * 1.5f 
-                            rb.AddForce(new Vector2(moveX * runSpeed * 1.5f, 0f), ForceMode2D.Impulse);
+                            rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime * 1.5f, 0f), ForceMode2D.Impulse);
                         } else
 
                         {
                             //Set the Runspeed to normal Value
-                            rb.AddForce(new Vector2(moveX * runSpeed, 0f), ForceMode2D.Impulse);
+                            rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
                         }
                     }
                 }
@@ -187,11 +181,11 @@ public class PlayerController : MonoBehaviour
                 else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
 
                 {
-                    maxSpeed = 12f;
+                    maxSpeed = 10f;
                     //Only Apply force if the players velocity is smaller as maxSpeed
                     if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
                     {
-                        rb.AddForce(new Vector2(moveX * speed, 0f), ForceMode2D.Impulse);
+                        rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
                     }
                 }
                 //Change Animation speed depend on the Players Velocity
@@ -203,10 +197,6 @@ public class PlayerController : MonoBehaviour
                 {
                     anim.speed = 1f;
                 }
-
-
-
-
             }
         }
 
@@ -220,12 +210,20 @@ public class PlayerController : MonoBehaviour
 
         public void Jump()
         {
-            //Checks if CoyoteCounter is Ready to Avoid double jumps.
-            if (coyoteCounter < 0.1) return;
-            {
-                rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-            }
+        
+        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1 && coyoteCounter > 0)
+        {
+           rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
+
+        if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
+           
+            //Set Counter to 0 to avoid Double Jump
+            coyoteCounter = 0;
+        }
+    }
 
         void ChangeAnimationState(string newState)
         {

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -8,6 +9,7 @@ public class Gamemanager : MonoBehaviour
 
     public GameObject player;
     public TextMeshProUGUI heightText;
+    public TextMeshProUGUI timer;
 
     // Start is called before the first frame update
     void Start()
@@ -25,6 +27,9 @@ public class Gamemanager : MonoBehaviour
         {
             heightText.text = Mathf.Round(player.transform.position.y).ToString() + "m";
         }
+
+        timer.text = TimeSpan.FromSeconds(Time.time).ToString("hh':'mm':'ss");
+
 
     }
 }

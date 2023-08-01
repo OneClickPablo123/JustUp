@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -13,6 +14,10 @@ public class PlayerController : MonoBehaviour
     public float maxSpeed;
     private float moveX;
     //private int moveDir = 1;
+    public float maxSpeedRun;
+    private float originalMaxSpeed;
+    private float originalMaxSpeedRun;
+    public float airDrag;
 
 
     // ==========================
@@ -56,6 +61,8 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         coll = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
+        originalMaxSpeed = maxSpeed;
+        originalMaxSpeedRun = maxSpeedRun;  
     }
    
     void Update()
@@ -87,19 +94,21 @@ public class PlayerController : MonoBehaviour
             coyoteCounter = coyoteTime;
             rb.gravityScale = 10;
             isJumping = false;
+            maxSpeed = originalMaxSpeed;
+            maxSpeedRun = originalMaxSpeedRun;
         }
         else
         {
             coyoteCounter -= Time.deltaTime;
-            rb.gravityScale = 8;
-            
-
             //Limit the Vertical Velocity if the Player is falling down.
-            if (rb.velocity.y < fallSpeed * -1)
-            {
+            maxSpeed = 11.4f;
+            maxSpeedRun = 11.8f;
+            rb.gravityScale = 8f;
 
-                rb.velocity = new Vector2(rb.velocity.x, fallSpeed * -1);
-            }
+            //Change the Velocity.y -.07, maximum till fallspeed
+            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.07f, -fallSpeed));
+            //Get some airDrag at velocity.x to reduce acceleration while jumping
+            rb.velocity = new Vector2(rb.velocity.x * (1f - airDrag), rb.velocity.y);
         }
     }
 
@@ -160,28 +169,33 @@ public class PlayerController : MonoBehaviour
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
                 {
-                    maxSpeed = 10.6f;
-                    //Checks if Velocity is Bigger as maxSpeed
-                    if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
+                    
+                
+                    //Checks if Velocity is Bigger as maxrunSpeed
+                    if (rb.velocity.x < maxSpeedRun && rb.velocity.x > -maxSpeedRun)
                     {
                         //Checks if Velocity is Bigger as MaxSpeed / 2
-                        if (rb.velocity.x < maxSpeed / 2 || rb.velocity.x > -maxSpeed / 2)
+                        if (rb.velocity.x < maxSpeedRun / 2 || rb.velocity.x > -maxSpeedRun / 2)
                         {
                             //Multiply the RunSpeed * 1.5f 
-                            rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime * 1.5f, 0f), ForceMode2D.Impulse);
-                        } else
+                            rb.AddForce(new Vector2(moveX * runSpeed * 1.5f * Time.deltaTime, 0f), ForceMode2D.Impulse);
+                        }
+                        else
 
                         {
                             //Set the Runspeed to normal Value
                             rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
                         }
                     }
+
+                
+                    
                 }
                 //Set the Velocity to normal Speed if the player is not pushing Shift
                 else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
 
                 {
-                    maxSpeed = 10f;
+                    
                     //Only Apply force if the players velocity is smaller as maxSpeed
                     if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
                     {
@@ -189,9 +203,9 @@ public class PlayerController : MonoBehaviour
                     }
                 }
                 //Change Animation speed depend on the Players Velocity
-                if (rb.velocity.x > 9.5f || rb.velocity.x < -9.5f)
+                if (rb.velocity.x < 7 || rb.velocity.x > -7f)
                 {
-                    anim.speed = 1.5f;
+                    anim.speed = 0.9f;
                 }
                 else
                 {

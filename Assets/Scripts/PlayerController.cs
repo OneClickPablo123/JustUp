@@ -232,7 +232,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
            
             //Set Counter to 0 to avoid Double Jump
             coyoteCounter = 0;

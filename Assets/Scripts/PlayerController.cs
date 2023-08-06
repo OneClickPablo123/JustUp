@@ -52,7 +52,11 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_RSTART = ("player_runstart");
     private Animator anim;
 
+    // ==========================
+    //     Script Verweise
+    // ==========================
 
+    
 
 
     void Start()
@@ -96,8 +100,7 @@ public class PlayerController : MonoBehaviour
             isJumping = false;
             maxSpeed = originalMaxSpeed;
             maxSpeedRun = originalMaxSpeedRun;
-        }
-        else
+        }else
         {
             coyoteCounter -= Time.deltaTime;
             //Limit the Vertical Velocity if the Player is falling down.
@@ -248,4 +251,18 @@ public class PlayerController : MonoBehaviour
             anim.Play(newState);
             currentState = newState;
         }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
+        //Check if player collide with jumpbed, add force based on the players y velocity
+        if (collision.gameObject.tag == "bouncebed")
+        {
+            float bounce;
+            bounce = collision.gameObject.GetComponent<JumpBed>().bounce;
+            float bounceforce = bounce * rb.velocity.y;
+            //Add Force to y axis, MathAbs for positiv Numbers only
+            rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);          
+        }
+    }
 }

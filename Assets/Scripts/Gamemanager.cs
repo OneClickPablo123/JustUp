@@ -1,8 +1,6 @@
+using JetBrains.Annotations;
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -13,18 +11,34 @@ public class Gamemanager : MonoBehaviour
 
     //Height Text
     public TextMeshProUGUI heightText;
+    public TextMeshProUGUI highScore;
+    float highScoreHeight;
+    private bool newHighScore;
+    
     //Timer
     public TextMeshProUGUI timer;
+    public TextMeshProUGUI bestTime;
+    public float bestTimef;
 
     //Pause Panel
     public GameObject pausePanel;
     public bool isPanelActive;
 
-    // Start is called before the first frame update
+    //Others
+    public bool gameCompleted;
+
+    //Player Stats
+
+
     void Start()
     {
         isPanelActive = false;
         pausePanel.SetActive(false);
+        highScoreHeight = PlayerPrefs.GetFloat("highscore");
+        highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
+        bestTimef = PlayerPrefs.GetFloat("bestTime");
+        Debug.Log(bestTimef);
+        gameCompleted = false;
     }
 
     // Update is called once per frame
@@ -38,7 +52,31 @@ public class Gamemanager : MonoBehaviour
 
     public void Timer()
     {
-        timer.text = TimeSpan.FromSeconds(Time.time).ToString("hh':'mm':'ss");
+
+        TimeSpan timeSpanActual = TimeSpan.FromSeconds(Time.time);
+        string formattedActualTime = FormatTimeSpan(timeSpanActual);
+        timer.text = formattedActualTime;      
+        TimeSpan timeSpanbest = TimeSpan.FromSeconds(bestTimef);
+        string formattedBest = FormatTimeSpan(timeSpanbest);
+
+        if (bestTimef != 0)
+        {
+            bestTime.text = formattedBest;
+
+        } else
+        {
+            bestTime.text = "n/a";
+        }
+
+        float actualTime = Time.time;
+        //Debug.Log(actualTime);
+
+        if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
+        {
+            bestTimef = actualTime;
+            PlayerPrefs.SetFloat("bestTime", bestTimef);
+            Debug.Log("bestTime Set");
+        }
     }
 
     public void HeightCounter()
@@ -50,7 +88,23 @@ public class Gamemanager : MonoBehaviour
         }
         else
         {
-            heightText.text = Mathf.Round(player.transform.position.y).ToString() + "m";
+            heightText.text = "Jumped: " + Mathf.Round(player.transform.position.y).ToString() + "m";
+        }
+
+        float actualHeight;
+        actualHeight = Mathf.Round(player.transform.position.y);
+
+        if (actualHeight > highScoreHeight)
+        {
+            highScoreHeight = actualHeight;
+            highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
+            newHighScore = true;
+            
+        } else if (actualHeight < highScoreHeight && newHighScore) 
+        
+        {
+            PlayerPrefs.SetFloat("highscore", highScoreHeight);
+            newHighScore = false;
         }
 
     }
@@ -92,5 +146,29 @@ public class Gamemanager : MonoBehaviour
         pausePanel.SetActive(false);
         Time.timeScale = 1f;
         isPanelActive = false;
+    }
+
+    public string FormatTimeSpan(TimeSpan timeSpan)
+    {
+        string formattedTime = "";
+
+        if (timeSpan.Hours > 0)
+        {
+            formattedTime += timeSpan.Hours.ToString("0") + ":";
+        }
+
+        if (timeSpan.Minutes > 0 || formattedTime != "")
+        {
+            formattedTime += timeSpan.Minutes.ToString("0") + ":";
+        }
+
+        formattedTime += timeSpan.Seconds.ToString("0");
+
+        if (timeSpan.Milliseconds > 0)
+        {
+            formattedTime += "." + timeSpan.Milliseconds.ToString("000");
+        }
+
+        return formattedTime;
     }
 }

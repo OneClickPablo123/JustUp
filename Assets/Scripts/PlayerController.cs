@@ -1,11 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
+    [Header("Movement Settings")]
     // ==========================
     // Movement
     // ==========================
@@ -20,6 +18,7 @@ public class PlayerController : MonoBehaviour
     public float airDrag;
 
 
+    [Header("Jump Settings")]
     // ==========================
     //     Jumps
     // ==========================
@@ -29,7 +28,19 @@ public class PlayerController : MonoBehaviour
     public float coyoteTime;
     public float coyoteCounter;
     public bool isJumping;
-    
+
+    [Header("Ladder")]
+    public bool isLadder;
+    public bool isClimbing;
+    public float ladderSpeed;
+    float moveY;
+
+    // ==========================
+    //     Other Variables
+    // ==========================
+
+    private float originalGravity;
+    PlayerStats playerStats;
 
     // ==========================
     //     Components
@@ -40,6 +51,7 @@ public class PlayerController : MonoBehaviour
     // ==========================
     //     Masks
     // ==========================
+    [Header("Layermask Settings")]
     [SerializeField] LayerMask groundMask;
 
     // ==========================
@@ -49,7 +61,7 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_IDLE = ("player_idle");
     const string PLAYER_WALK = ("player_walk");
     const string PLAYER_JUMP = ("player_jump");
-    const string PLAYER_RSTART = ("player_runstart");
+    const string PLAYER_FALL = ("player_fall");
     private Animator anim;
 
     // ==========================
@@ -66,7 +78,8 @@ public class PlayerController : MonoBehaviour
         coll = GetComponent<CapsuleCollider2D>();
         anim = GetComponent<Animator>();
         originalMaxSpeed = maxSpeed;
-        originalMaxSpeedRun = maxSpeedRun;  
+        originalMaxSpeedRun = maxSpeedRun;
+        originalGravity = rb.gravityScale;
     }
    
     void Update()
@@ -77,6 +90,8 @@ public class PlayerController : MonoBehaviour
 
         //Check if Player is Pressing Left or Right (-1 / 1)
         moveX = Input.GetAxisRaw("Horizontal");
+        moveY = Input.GetAxisRaw("Vertical");
+
 
 
 
@@ -85,6 +100,7 @@ public class PlayerController : MonoBehaviour
         // ==========================
         Movement();
         Jump();
+        LadderMove();
 
 
 
@@ -96,7 +112,7 @@ public class PlayerController : MonoBehaviour
         if (IsGrounded())
         {
             coyoteCounter = coyoteTime;
-            rb.gravityScale = 10;
+            rb.gravityScale = originalGravity;
             isJumping = false;
             maxSpeed = originalMaxSpeed;
             maxSpeedRun = originalMaxSpeedRun;
@@ -106,7 +122,11 @@ public class PlayerController : MonoBehaviour
             //Limit the Vertical Velocity if the Player is falling down.
             maxSpeed = 11.4f;
             maxSpeedRun = 11.8f;
-            rb.gravityScale = 8f;
+            
+            if (!isClimbing)
+            {
+                rb.gravityScale = 8f;
+            }
 
             //Change the Velocity.y -.07, maximum till fallspeed
             rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.07f, -fallSpeed));
@@ -135,18 +155,19 @@ public class PlayerController : MonoBehaviour
                 if (rb.velocity.x > 2.35 && moveX != 0 || rb.velocity.x < -2.35 && moveX != 0)
                 {
                     ChangeAnimationState(PLAYER_WALK);
-                }
-
-                else if (rb.velocity.x < 2.5 && moveX != 0 || rb.velocity.x > -2.5 && moveX != 0 && anim.name != PLAYER_WALK)
-                {
-                    ChangeAnimationState(PLAYER_RSTART);
-                }
-
+                }            
             }
 
             else
             {
+            if (rb.velocity.y < 0)
+            {
+                ChangeAnimationState(PLAYER_FALL);
+            } else
+            {
                 ChangeAnimationState(PLAYER_JUMP);
+            }
+               
             }
 
 
@@ -208,11 +229,11 @@ public class PlayerController : MonoBehaviour
                 //Change Animation speed depend on the Players Velocity
                 if (rb.velocity.x < 7 || rb.velocity.x > -7f)
                 {
-                    anim.speed = 0.9f;
+                    anim.speed = 1.1f;
                 }
                 else
                 {
-                    anim.speed = 1f;
+                    anim.speed = 1.4f;
                 }
             }
         }
@@ -240,6 +261,11 @@ public class PlayerController : MonoBehaviour
             //Set Counter to 0 to avoid Double Jump
             coyoteCounter = 0;
         }
+
+        if (isClimbing && Input.GetKeyDown(KeyCode.Space))
+        {
+            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+        }
     }
 
         void ChangeAnimationState(string newState)
@@ -252,6 +278,61 @@ public class PlayerController : MonoBehaviour
             currentState = newState;
         }
 
+    public void LadderMove()
+    {
+        if (isLadder)
+        {
+
+            if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.Space))
+            {
+                rb.gravityScale = originalGravity;
+                isClimbing = false;
+                isLadder = false;
+                Jump();
+            }
+            else if (Input.GetKey(KeyCode.LeftShift))
+            {
+                isClimbing = true;
+            }
+            else
+            {
+                isClimbing = false;
+            }
+
+            if (isClimbing)
+            {
+                rb.gravityScale = 0f;
+
+                if (moveY != 0)
+                
+                {
+                    rb.velocity = new Vector2(moveX * 1.5f, moveY * ladderSpeed);
+                }
+
+                if (moveY == 0)
+                {
+                    rb.velocity = new Vector2(moveX, 0);
+                }
+
+
+            }
+            else
+            {
+                rb.gravityScale = originalGravity;
+            }
+
+
+        }
+        else
+
+        {
+            isClimbing = false;
+        }
+
+
+    }
+
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
@@ -263,6 +344,20 @@ public class PlayerController : MonoBehaviour
             float bounceforce = bounce * rb.velocity.y;
             //Add Force to y axis, MathAbs for positiv Numbers only
             rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);          
+        }
+
+        if (collision.CompareTag("Ladder"))
+        {
+            isLadder = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.CompareTag("Ladder"))
+        {
+            isLadder = false;
+            isClimbing = false;
         }
     }
 }

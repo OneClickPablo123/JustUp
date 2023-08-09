@@ -1,18 +1,28 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using TMPro;
 using UnityEngine;
 
 public class NpcManager : MonoBehaviour
 {
    
     public GameObject dialogBox;
-    // Start is called before the first frame update
+    //Not Longer as 130 characters
+    public string npcText;
+    public TextMeshProUGUI dialogBoxText;
+    Gamemanager gamemanager;
+    GameObject gameManagerO;
+    
+
+
     void Start()
     {
         dialogBox.gameObject.SetActive(false);
+        gameManagerO = GameObject.Find("gamemanager");
+        gamemanager = gameManagerO.GetComponent<Gamemanager>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         
@@ -24,6 +34,7 @@ public class NpcManager : MonoBehaviour
             
         {
             dialogBox.SetActive(true);
+            
         }
     }
 
@@ -34,5 +45,16 @@ public class NpcManager : MonoBehaviour
         {
             dialogBox.SetActive(false);
         }
+    }
+
+    public void ContinueText()
+    {
+
+
+    }
+
+    public void StartDialog()
+    {
+        
     }
 }

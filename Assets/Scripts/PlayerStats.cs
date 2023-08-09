@@ -1,4 +1,4 @@
-
+[System.Serializable]
 public class PlayerStats
 {
     
@@ -6,13 +6,15 @@ public class PlayerStats
     public string name;
     public float highscore;
     public float bestTime;
-    
+
+    //NPC Querys
+    public int tutorialDialog;
 
     public PlayerStats (string name, float highscore, float bestTime)
     {
         this.name = name;
         this.highscore = highscore;
-        this.bestTime = bestTime; 
+        this.bestTime = bestTime;
     }
 
 

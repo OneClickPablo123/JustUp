@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SaveGame : MonoBehaviour
@@ -8,9 +6,9 @@ public class SaveGame : MonoBehaviour
     private PlayerStats playerStats;
 
 
-    private void CreatePlayerStats()
+    public void CreatePlayerStats()
     {
-        playerStats = new PlayerStats("Lefty", 0f , 0);
+        playerStats = new PlayerStats("", 0f , 0);
     }
 
     public void SaveStats()

@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using System;
 using TMPro;
 using UnityEngine;
@@ -12,7 +11,7 @@ public class Gamemanager : MonoBehaviour
     //Height Text
     public TextMeshProUGUI heightText;
     public TextMeshProUGUI highScore;
-    float highScoreHeight;
+    public float highScoreHeight;
     private bool newHighScore;
     
     //Timer
@@ -26,19 +25,21 @@ public class Gamemanager : MonoBehaviour
 
     //Others
     public bool gameCompleted;
+    SaveGame saveGame;
+    public PlayerStats playerStats;
 
-    //Player Stats
 
 
     void Start()
     {
         isPanelActive = false;
         pausePanel.SetActive(false);
-        highScoreHeight = PlayerPrefs.GetFloat("highscore");
+        highScoreHeight = playerStats.highscore;
         highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
-        bestTimef = PlayerPrefs.GetFloat("bestTime");
-        Debug.Log(bestTimef);
+        bestTimef = playerStats.bestTime;
         gameCompleted = false;
+        saveGame = GetComponent<SaveGame>();
+        saveGame.CreatePlayerStats();
     }
 
     // Update is called once per frame
@@ -46,8 +47,7 @@ public class Gamemanager : MonoBehaviour
     {
         Timer();
         HeightCounter();
-        PausePanel();
-   
+        PausePanel();  
     }
 
     public void Timer()
@@ -74,7 +74,7 @@ public class Gamemanager : MonoBehaviour
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
         {
             bestTimef = actualTime;
-            PlayerPrefs.SetFloat("bestTime", bestTimef);
+            saveGame.SaveStats();
             Debug.Log("bestTime Set");
         }
     }
@@ -103,7 +103,8 @@ public class Gamemanager : MonoBehaviour
         } else if (actualHeight < highScoreHeight && newHighScore) 
         
         {
-            PlayerPrefs.SetFloat("highscore", highScoreHeight);
+            playerStats.highscore = highScoreHeight;
+            saveGame.SaveStats();
             newHighScore = false;
         }
 

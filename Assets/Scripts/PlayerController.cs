@@ -80,6 +80,7 @@ public class PlayerController : MonoBehaviour
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
+        
     }
    
     void Update()

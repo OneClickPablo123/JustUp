@@ -8,7 +8,7 @@ public class SaveGame : MonoBehaviour
 
     public void CreatePlayerStats()
     {
-        playerStats = new PlayerStats("", 0f , 0);
+        playerStats = new PlayerStats("", 0f , 0,0);
     }
 
     public void SaveStats()
@@ -16,11 +16,12 @@ public class SaveGame : MonoBehaviour
         PlayerPrefs.SetString("name", playerStats.name);
         PlayerPrefs.SetFloat("highscore", playerStats.highscore);
         PlayerPrefs.SetFloat("bestTime", playerStats.bestTime);
+        PlayerPrefs.SetFloat("hasItem", playerStats.hasItem);
     }
 
     public void LoadStats()
     {
-        playerStats = new PlayerStats(PlayerPrefs.GetString("name"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"));
+        playerStats = new PlayerStats(PlayerPrefs.GetString("name"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"));
     }
 
 }

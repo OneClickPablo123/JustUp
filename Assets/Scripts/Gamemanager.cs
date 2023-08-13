@@ -29,17 +29,22 @@ public class Gamemanager : MonoBehaviour
     public PlayerStats playerStats;
 
 
-
     void Start()
     {
+        //Pause Panel
         isPanelActive = false;
         pausePanel.SetActive(false);
+        
+        //High Score
         highScoreHeight = playerStats.highscore;
         highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
+        //Best Time
         bestTimef = playerStats.bestTime;
         gameCompleted = false;
+
+        //Load SaveGame 
         saveGame = GetComponent<SaveGame>();
-        saveGame.CreatePlayerStats();
+        saveGame.LoadStats();
     }
 
     // Update is called once per frame

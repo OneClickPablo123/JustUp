@@ -6,15 +6,15 @@ public class PlayerStats
     public string name;
     public float highscore;
     public float bestTime;
+    public int hasItem;
 
-    //NPC Querys
-    public int tutorialDialog;
 
-    public PlayerStats (string name, float highscore, float bestTime)
+    public PlayerStats (string name, float highscore, float bestTime, int hasItem)
     {
         this.name = name;
         this.highscore = highscore;
         this.bestTime = bestTime;
+        this.hasItem = hasItem;
     }
 
 

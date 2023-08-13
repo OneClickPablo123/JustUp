@@ -1,4 +1,5 @@
 
+using System.Collections;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -40,13 +41,15 @@ public class PlayerController : MonoBehaviour
     // ==========================
 
     private float originalGravity;
-    PlayerStats playerStats;
+    public bool usedItem;
 
     // ==========================
     //     Components
     // ==========================
     private Rigidbody2D rb;
     private CapsuleCollider2D coll;
+    Gamemanager managerscript;
+    GameObject gamemanager;
 
     // ==========================
     //     Masks
@@ -68,9 +71,14 @@ public class PlayerController : MonoBehaviour
     //     Script Verweise
     // ==========================
 
-    
 
 
+
+    private void Awake()
+    {
+        gamemanager = GameObject.Find("gamemanager");
+        managerscript = gamemanager.GetComponent<Gamemanager>();
+    }
     void Start()
     {
     //Get Components
@@ -80,7 +88,7 @@ public class PlayerController : MonoBehaviour
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-        
+   
     }
    
     void Update()
@@ -102,6 +110,8 @@ public class PlayerController : MonoBehaviour
         Movement();
         Jump();
         LadderMove();
+        Animation();
+
 
 
 
@@ -112,19 +122,22 @@ public class PlayerController : MonoBehaviour
 
         if (IsGrounded())
         {
-            coyoteCounter = coyoteTime;
-            rb.gravityScale = originalGravity;
+            if (!usedItem)
+            {
+                rb.gravityScale = originalGravity;
+                maxSpeed = originalMaxSpeed;
+                maxSpeedRun = originalMaxSpeedRun;
+            }
+            
+            coyoteCounter = coyoteTime;       
             isJumping = false;
-            maxSpeed = originalMaxSpeed;
-            maxSpeedRun = originalMaxSpeedRun;
-        }else
+
+        }
+        else
         {
             coyoteCounter -= Time.deltaTime;
-            //Limit the Vertical Velocity if the Player is falling down.
-            maxSpeed = 11.4f;
-            maxSpeedRun = 11.8f;
-            
-            if (!isClimbing)
+                    
+            if (!isClimbing && !usedItem)
             {
                 rb.gravityScale = 8f;
             }
@@ -136,42 +149,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-
-        public void Movement()
+    public void Movement()
         {
 
-            // =================================
-            // Animation 
-            // =================================
-
-            //If Player not Moving & isGrounded
-            if (moveX == 0 && IsGrounded())
-
-            {
-                ChangeAnimationState(PLAYER_IDLE);
-            }
-
-            if (IsGrounded())
-            {
-                if (rb.velocity.x > 2.35 && moveX != 0 || rb.velocity.x < -2.35 && moveX != 0)
-                {
-                    ChangeAnimationState(PLAYER_WALK);
-                }            
-            }
-
-            else
-            {
-            if (rb.velocity.y < 0)
-            {
-                ChangeAnimationState(PLAYER_FALL);
-            } else
-            {
-                ChangeAnimationState(PLAYER_JUMP);
-            }
-               
-            }
-
-
+           
             // =================================
             // Abfrage Move +X / -X && Facing 
             // =================================
@@ -237,9 +218,31 @@ public class PlayerController : MonoBehaviour
                     anim.speed = 1.4f;
                 }
             }
+
+        // =================================
+        // Item Usage
+        // =================================
+
+        if (managerscript.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            StartCoroutine(JumpItemPower());
+            managerscript.playerStats.hasItem = 0;
         }
 
-        public bool IsGrounded()
+        if (managerscript.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            StartCoroutine(RunItemPower());
+            managerscript.playerStats.hasItem = 0;            
+        }
+
+        if (managerscript.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            StartCoroutine(GravityItemPower());
+            managerscript.playerStats.hasItem = 0;           
+        }
+    }
+
+    public bool IsGrounded()
         {
             // ==========================
             //   BOXCAST GROUND ABFRAGE
@@ -247,7 +250,7 @@ public class PlayerController : MonoBehaviour
             return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .25f, groundMask);
         }
 
-        public void Jump()
+    public void Jump()
         {
         
         if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1 && coyoteCounter > 0)
@@ -269,7 +272,45 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-        void ChangeAnimationState(string newState)
+    private void Animation()
+    {
+
+        // =================================
+        // Animation 
+        // =================================
+
+        //If Player not Moving & isGrounded
+        if (moveX == 0 && IsGrounded())
+
+        {
+            ChangeAnimationState(PLAYER_IDLE);
+        }
+
+        if (IsGrounded())
+        {
+            if (rb.velocity.x > 2.35 && moveX != 0 || rb.velocity.x < -2.35 && moveX != 0)
+            {
+                ChangeAnimationState(PLAYER_WALK);
+            }
+        }
+
+        else
+        {
+            if (rb.velocity.y < 0)
+            {
+                ChangeAnimationState(PLAYER_FALL);
+            }
+            else
+            {
+                ChangeAnimationState(PLAYER_JUMP);
+            }
+
+        }
+
+
+    }
+
+    void ChangeAnimationState(string newState)
         {
             // ====================================
             //  CONVERT ANIMATION STATE INTO STRING
@@ -331,6 +372,39 @@ public class PlayerController : MonoBehaviour
         }
 
 
+    }
+
+    IEnumerator JumpItemPower()
+    {
+        
+        float originalJumpForce = jumpForce;
+        jumpForce += 75f;
+        usedItem = true;
+        yield return new WaitForSeconds(5f);
+        jumpForce = originalJumpForce;
+        usedItem = false;
+    }
+
+    IEnumerator RunItemPower()
+    {
+        float originalRunSpeed = runSpeed;
+        float originalMaxSpeed = maxSpeed;
+        runSpeed += 20f;
+        maxSpeed += 20f;
+        usedItem = true;
+        yield return new WaitForSeconds(5f);
+        runSpeed = originalRunSpeed;
+        maxSpeed = originalMaxSpeed;
+        usedItem = false;
+    }
+
+    IEnumerator GravityItemPower()
+    {
+        rb.gravityScale = 2;
+        usedItem = true;
+        yield return new WaitForSeconds(5f);
+        rb.gravityScale = originalGravity;
+        usedItem = false;
     }
 
 

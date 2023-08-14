@@ -71,14 +71,6 @@ public class PlayerController : MonoBehaviour
     //     Script Verweise
     // ==========================
 
-
-
-
-    private void Awake()
-    {
-        gamemanager = GameObject.Find("gamemanager");
-        managerscript = gamemanager.GetComponent<Gamemanager>();
-    }
     void Start()
     {
     //Get Components
@@ -88,7 +80,9 @@ public class PlayerController : MonoBehaviour
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-   
+        gamemanager = GameObject.Find("gamemanager");
+        managerscript = gamemanager.GetComponent<Gamemanager>();
+
     }
    
     void Update()
@@ -111,10 +105,6 @@ public class PlayerController : MonoBehaviour
         Jump();
         LadderMove();
         Animation();
-
-
-
-
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -389,12 +379,15 @@ public class PlayerController : MonoBehaviour
     {
         float originalRunSpeed = runSpeed;
         float originalMaxSpeed = maxSpeed;
+        float originalMaxSpeedRun = maxSpeedRun;
         runSpeed += 20f;
         maxSpeed += 20f;
+        maxSpeedRun = 13f;
         usedItem = true;
         yield return new WaitForSeconds(5f);
         runSpeed = originalRunSpeed;
         maxSpeed = originalMaxSpeed;
+        maxSpeedRun = originalMaxSpeedRun; 
         usedItem = false;
     }
 

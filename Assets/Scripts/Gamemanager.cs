@@ -144,7 +144,8 @@ public class Gamemanager : MonoBehaviour
 
     public void ExitGame()
     {
-        Application.Quit();
+        saveGame.SaveStats();
+        Application.Quit();       
     }
 
     public void ResumeGame()

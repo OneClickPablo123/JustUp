@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -9,7 +10,12 @@ public class ItemPickUp : MonoBehaviour
     Gamemanager managerScript;
     SaveGame saveGame;
     SpriteRenderer spriteRenderer;
-
+    public PowerUps jumpPowerUp;
+    public PowerUps runPowerUp;
+    public PowerUps gravityPowerUp;
+    Canvas canvas;
+    public TextMeshProUGUI itemName;
+    public TextMeshProUGUI itemDescription;
     //Item Types 
 
     //Item2
@@ -22,12 +28,36 @@ public class ItemPickUp : MonoBehaviour
     private bool canPickUp;
 
     public void Start()
-{
-    gamemanager = GameObject.Find("gamemanager"); 
-    managerScript = gamemanager.GetComponent<Gamemanager>();
-    spriteRenderer = GetComponent<SpriteRenderer>();
-    
-}
+    {
+        gamemanager = GameObject.Find("gamemanager");
+        managerScript = gamemanager.GetComponent<Gamemanager>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        canvas = GetComponentInChildren<Canvas>();
+        
+        canvas.enabled = false;
+
+        if (jumpItem == true)
+        {
+            spriteRenderer.sprite = jumpPowerUp.powerUpSprite;
+            itemName.text = jumpPowerUp.powerUpName;
+            itemDescription.text = jumpPowerUp.description;
+
+        }
+
+        if (runItem == true)
+        {
+            spriteRenderer.sprite = runPowerUp.powerUpSprite;
+            itemName.text = runPowerUp.powerUpName;
+            itemDescription.text = runPowerUp.description;
+        }
+
+        if (gravityItem == true)
+        {
+            spriteRenderer.sprite = gravityPowerUp.powerUpSprite;
+            itemName.text = gravityPowerUp.powerUpName;
+            itemDescription.text = gravityPowerUp.description;
+        }
+    }
     
     public void Update()
     
@@ -63,6 +93,7 @@ public class ItemPickUp : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
            canPickUp = true;
+           canvas.enabled = true;
         }
     }
 
@@ -71,6 +102,7 @@ public class ItemPickUp : MonoBehaviour
         if (collision.gameObject.CompareTag("Player"))
         {
             canPickUp = false;
+            canvas.enabled = false;
         }
     }
 

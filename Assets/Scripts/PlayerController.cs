@@ -409,9 +409,14 @@ public class PlayerController : MonoBehaviour
         {
             float bounce;
             bounce = collision.gameObject.GetComponent<JumpBed>().bounce;
-            float bounceforce = bounce * rb.velocity.y;
-            //Add Force to y axis, MathAbs for positiv Numbers only
-            rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);          
+            if (rb.velocity.y < 0)
+            {
+                float bounceforce = bounce * rb.velocity.y;
+                //Add Force to y axis, MathAbs for positiv Numbers only
+                rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
+            }           
+            
+                   
         }
 
         if (collision.CompareTag("Ladder"))

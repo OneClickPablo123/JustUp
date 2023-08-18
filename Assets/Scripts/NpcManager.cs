@@ -51,28 +51,28 @@ public class NpcManager : MonoBehaviour
         {
             dialogBox.SetActive(true);
 
-            if (playerName == "")
+            if (playerName == "" && transform.position.y < 25)
             {
                 dialogBoxText.text = "Greetings, fellow traveler. \n My name is Renaldo, son of my father. \n For generations, we've been trying to escape from this place. \nThe only way is upwards...\n Please, it would be an honor \n to know your name, sir.";
                 inputBox.SetActive(true);
                 inputfield.onEndEdit.AddListener(ConfirmInput);
             }
-            else if (playerHighscore > 25)
+            else if (playerHighscore > 25 && transform.position.y > 25)
             {
                 dialogBoxText.text = "Ahhh Sir " + playerName + ",\nI have decided to face the challenge.\nThe time has finally come.\nI hope to see you at the top!\nMay the best-trained legs win.";
                 UpdateTextCanvas();
             }
-            else if (playerHighscore > 150)
+            else if (playerHighscore > 150 && transform.position.y > 150)
+            {
+                dialogBoxText.text = "Ooh " + playerName + ",\n We made some progress so far... \n You should check the beds here, \n They got some nice bounce! \n Until we meet again!";
+                UpdateTextCanvas();
+            }
+            else if (playerHighscore > 450 && transform.position.y > 450)
             {
                 dialogBoxText.text = "";
                 UpdateTextCanvas();
             }
-            else if (playerHighscore > 450)
-            {
-                dialogBoxText.text = "";
-                UpdateTextCanvas();
-            }
-            else if (playerHighscore > 800)
+            else if (playerHighscore > 800 transform.position.y > 800)
             {
                 dialogBoxText.text = "";
                 UpdateTextCanvas();
@@ -97,9 +97,9 @@ public class NpcManager : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player")) 
         {
-            if (playerName != "" && playerHighscore < 25)
+            if (playerName != "" && playerHighscore < 25 && transform.position.y < 25)
             {                
-                dialogBoxText.text = "Great Mr. " + playerName + "\nA pleasure to meet you. \n My father used to say: \n 'Son, Never Skip Leg Day!'";
+                dialogBoxText.text = "Great Mr. " + playerName + "\nA pleasure to meet you. \n My father always used to say: \n 'Son, Never Skip Leg Day!'";
                 UpdateTextCanvas();
             }
         }

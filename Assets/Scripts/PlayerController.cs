@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     public float speed;
     public float runSpeed;
     public float maxSpeed;
-    private float moveX;
+    public float moveX;
     //private int moveDir = 1;
     public float maxSpeedRun;
     private float originalMaxSpeed;
@@ -96,7 +96,7 @@ public class PlayerController : MonoBehaviour
         moveY = Input.GetAxisRaw("Vertical");
 
 
-
+        Debug.Log(moveX);
 
         // ==========================
         //     Methoden Aufrufe
@@ -105,6 +105,7 @@ public class PlayerController : MonoBehaviour
         Jump();
         LadderMove();
         Animation();
+        HandleTouchInputs();
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -362,6 +363,34 @@ public class PlayerController : MonoBehaviour
         }
 
 
+    }
+
+    private void HandleTouchInputs()
+    {
+
+        if (Input.touchCount > 0)
+        {
+            Touch touch = Input.GetTouch(0);
+
+            // Bewegung nach links oder rechts
+            if (touch.position.x < Screen.width / 3) // Linker Drittel des Bildschirms
+            {
+                rb.AddForce(new Vector2 (touch.position.x, 0));
+            }
+            else if (touch.position.x > 2 * Screen.width / 3) // Rechter Drittel des Bildschirms
+            {
+                moveX = 1;
+            }
+            else // Mittleres Drittel des Bildschirms
+            {
+                //Jump();
+            }
+        }
+        else
+        {
+            // Keine Touch-Eingabe, also Bewegung stoppen
+            //moveX = 0;
+        }
     }
 
     IEnumerator JumpItemPower()

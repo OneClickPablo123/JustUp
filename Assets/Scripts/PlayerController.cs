@@ -344,10 +344,8 @@ public class PlayerController : MonoBehaviour
 
                 if (moveY == 0)
                 {
-                    rb.velocity = new Vector2(moveX, 0);
+                    rb.velocity = new Vector2(moveX, moveY);
                 }
-
-
             }
             else
             {

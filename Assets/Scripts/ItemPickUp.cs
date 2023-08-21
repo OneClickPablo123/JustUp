@@ -16,7 +16,6 @@ public class ItemPickUp : MonoBehaviour
     Canvas canvas;
     public TextMeshProUGUI itemName;
     public TextMeshProUGUI itemDescription;
-    //Item Types 
 
     //Item2
     public bool jumpItem;
@@ -24,7 +23,6 @@ public class ItemPickUp : MonoBehaviour
     public bool runItem;
     //Item4
     public bool gravityItem;
-
     private bool canPickUp;
 
     public void Start()
@@ -33,7 +31,6 @@ public class ItemPickUp : MonoBehaviour
         managerScript = gamemanager.GetComponent<Gamemanager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         canvas = GetComponentInChildren<Canvas>();
-        
         canvas.enabled = false;
 
         if (jumpItem == true)
@@ -68,21 +65,21 @@ public class ItemPickUp : MonoBehaviour
             {
                 managerScript.playerStats.hasItem = 2;
                 Destroy(this.gameObject);
-                Debug.Log("JumpItem Collected " + managerScript.playerStats.hasItem);
+                Debug.Log("Jump Item Collected Item ID = " + managerScript.playerStats.hasItem);
             }
 
             if (runItem == true)
             {
                 managerScript.playerStats.hasItem = 3;
                 Destroy(this.gameObject);
-                Debug.Log("RunItem Collected " + managerScript.playerStats.hasItem);
+                Debug.Log("Run Item Collected Item ID = " + managerScript.playerStats.hasItem);
             }
 
             if (gravityItem == true)
             {
                 managerScript.playerStats.hasItem = 4;
                 Destroy(this.gameObject);
-                Debug.Log("Gravity Collected " + managerScript.playerStats.hasItem);
+                Debug.Log("Gravity Item Collected, Item ID = " + managerScript.playerStats.hasItem);
             }
 
         }

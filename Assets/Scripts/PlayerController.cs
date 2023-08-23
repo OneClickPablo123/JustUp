@@ -28,7 +28,8 @@ public class PlayerController : MonoBehaviour
     public float fallSpeed;
     public float coyoteTime;
     public float coyoteCounter;
-    public bool isJumping;
+    private bool isJumping = false;
+    private float touchStartTime = 0f;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -92,8 +93,13 @@ public class PlayerController : MonoBehaviour
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-        moveX = Input.GetAxisRaw("Horizontal");
-        moveY = Input.GetAxisRaw("Vertical");
+       
+        if (Input.touchCount == 0)
+        {
+            moveX = Input.GetAxisRaw("Horizontal");
+            moveY = Input.GetAxisRaw("Vertical");
+        }
+
 
 
         Debug.Log(moveX);
@@ -261,8 +267,10 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
-    }
 
+
+
+    }
     private void Animation()
     {
 
@@ -366,29 +374,109 @@ public class PlayerController : MonoBehaviour
     private void HandleTouchInputs()
     {
 
+        //Normal Laufen und Springen mit einer Touch eingabe
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
+            float middleThirdStart = Screen.width * 0.25f;
+            float middleThirdEnd = Screen.width * 0.75f;
 
-            // Bewegung nach links oder rechts
-            if (touch.position.x < Screen.width / 3) // Linker Drittel des Bildschirms
+            if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd) // Mitte des Bildschirms
             {
-                rb.AddForce(new Vector2 (touch.position.x, 0));
+
+                if (touch.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                }
+                else if (touch.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                    coyoteCounter = 0;
+                }
             }
-            else if (touch.position.x > 2 * Screen.width / 3) // Rechter Drittel des Bildschirms
+            // Bewegung nach links oder rechts
+            if (touch.position.x < middleThirdStart) // Linker Drittel des Bildschirms
+            {
+                moveX = -1;
+            }
+            else if (touch.position.x > middleThirdEnd) // Rechter Drittel des Bildschirms
             {
                 moveX = 1;
             }
-            else // Mittleres Drittel des Bildschirms
+            else
             {
-                //Jump();
+                // Keine Touch-Eingabe, also Bewegung stoppen
+                moveX = 0;
             }
         }
-        else
+
+        //Laufen + Springen mit 2 Touch eingaben gleichzeitig.
+        if (Input.touchCount >= 2)
         {
-            // Keine Touch-Eingabe, also Bewegung stoppen
-            //moveX = 0;
+            Touch touch1 = Input.GetTouch(0);
+            Touch touch2 = Input.GetTouch(1);
+
+            float middleThirdStart = Screen.width * 0.25f;
+            float middleThirdEnd = Screen.width * 0.75f;
+           
+            //Laufen dann Springen
+            if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
+            {
+                moveX = -1;
+
+                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                }
+                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                    coyoteCounter = 0;
+                }
+            } else if (touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
+            {
+                moveX = 1;
+                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                }
+                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                    coyoteCounter = 0;
+                }
+            }
+
+            //Springen dann Laufen
+            else if (touch1.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd && touch2.position.x < middleThirdStart)
+            {
+                moveX = -1;
+
+                if (touch1.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                }
+                else if (touch1.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                    coyoteCounter = 0;
+                }
+            } else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x > middleThirdEnd)
+            {
+                moveX = 1;
+                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                }
+                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                    coyoteCounter = 0;
+                }
+            }
+
         }
+        
     }
 
     IEnumerator JumpItemPower()

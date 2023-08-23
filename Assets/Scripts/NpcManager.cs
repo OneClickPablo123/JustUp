@@ -47,7 +47,7 @@ public class NpcManager : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
-            
+
         {
             dialogBox.SetActive(true);
 
@@ -72,15 +72,16 @@ public class NpcManager : MonoBehaviour
                 dialogBoxText.text = "";
                 UpdateTextCanvas();
             }
-            else if (playerHighscore > 800 transform.position.y > 800)
+            else if (playerHighscore > 800 && transform.position.y > 800)
             {
                 dialogBoxText.text = "";
                 UpdateTextCanvas();
             }
 
-            
+
+
         }
-            
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)

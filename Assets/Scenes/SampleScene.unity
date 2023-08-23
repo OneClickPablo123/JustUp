@@ -3583,7 +3583,7 @@ Transform:
   m_GameObject: {fileID: 271626344}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.34, y: 0.34, z: 0}
+  m_LocalPosition: {x: -1.34, y: 0.18, z: 0}
   m_LocalScale: {x: 3.5, y: 3.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3611,7 +3611,6 @@ MonoBehaviour:
   fallSpeed: 15
   coyoteTime: 0.2
   coyoteCounter: 0
-  isJumping: 0
   isLadder: 0
   isClimbing: 0
   ladderSpeed: 5
@@ -6101,7 +6100,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 18.03, z: -10}
+  m_LocalPosition: {x: 0, y: 5.25, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

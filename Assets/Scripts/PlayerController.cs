@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour
     //     Components
     // ==========================
     private Rigidbody2D rb;
-    private CapsuleCollider2D coll;
+    private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
 
@@ -76,7 +76,7 @@ public class PlayerController : MonoBehaviour
     {
     //Get Components
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<CapsuleCollider2D>();
+        coll = GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;

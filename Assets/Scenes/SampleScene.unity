@@ -3486,8 +3486,8 @@ GameObject:
   - component: {fileID: 271626347}
   - component: {fileID: 271626349}
   - component: {fileID: 271626345}
-  - component: {fileID: 271626351}
   - component: {fileID: 271626350}
+  - component: {fileID: 271626351}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -3639,8 +3639,8 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &271626351
-CapsuleCollider2D:
+--- !u!61 &271626351
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -3671,9 +3671,19 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.000927278, y: 0.0040840423}
-  m_Size: {x: 0.2057379, y: 0.37640247}
-  m_Direction: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 0.19, y: 0.37}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.19, y: 0.37}
+  m_EdgeRadius: 0
 --- !u!4 &285625693 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5303919849738125435, guid: 4d8ad400922c4a343911784077c26568, type: 3}

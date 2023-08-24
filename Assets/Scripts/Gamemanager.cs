@@ -28,13 +28,17 @@ public class Gamemanager : MonoBehaviour
     public bool gameCompleted;
     SaveGame saveGame;
     public PlayerStats playerStats;
-    public AudioSource audioSource1;
-    public AudioSource audioSource2;
+    public AudioSource audioSource;
 
     //Sounds
     public AudioClip spawnMusic;
     public AudioClip level2Sound;
     public AudioClip level3Sound;
+
+    public float spawnMusicThreshold = 30f;
+    public float level2Threshold = 50f;
+    public float level3Threshold = 80f; 
+    public float volumeChangeSpeed = 0.15f;
         
 
 
@@ -55,7 +59,9 @@ public class Gamemanager : MonoBehaviour
         saveGame = GetComponent<SaveGame>();
         saveGame.LoadStats();
 
-        //Get Audio Source
+        //Audio Handler
+        audioSource.clip = null;
+        
     }
 
     // Update is called once per frame
@@ -64,7 +70,7 @@ public class Gamemanager : MonoBehaviour
         Timer();
         HeightCounter();
         PausePanel();
-        SoundHandler();
+        AudioHandler();
     }
 
     public void Timer()
@@ -191,7 +197,7 @@ public class Gamemanager : MonoBehaviour
         return formattedTime;
     }
 
-    public void SoundHandler()
+  /*  public void SoundHandler()
     {
         if (player.transform.position.y < 30)
         {
@@ -264,5 +270,47 @@ public class Gamemanager : MonoBehaviour
             }
         }
 
+    }
+*/
+    public void HandleClip (AudioClip clip) 
+    
+    {
+     if (audioSource.clip != clip) 
+     {
+       audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, volumeChangeSpeed * Time.deltaTime);
+
+       if (audioSource.volume == 0)
+       {
+            audioSource.Stop();
+            audioSource.clip = clip;
+            audioSource.Play();
+       }
+     }
+     else if (audioSource.volume < 0.14f)
+    {
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.14f, volumeChangeSpeed * Time.deltaTime);
+    }
+    else if (audioSource.volume > 0)
+    {
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, volumeChangeSpeed * Time.deltaTime);
+    }
+    }
+
+    public void AudioHandler() 
+    {
+    float playerY = player.transform.position.y;
+
+        if (playerY < spawnMusicThreshold)
+        {
+            HandleClip(spawnMusic);
+        }
+        else if (playerY < level2Threshold && playerY > spawnMusicThreshold)
+        {
+            HandleClip(level2Sound);
+        }
+        else if (playerY < level3Threshold && playerY > level2Threshold)
+        {
+            HandleClip(level3Sound);
+        }
     }
 }

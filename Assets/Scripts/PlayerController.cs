@@ -35,6 +35,10 @@ public class PlayerController : MonoBehaviour
     public float ladderSpeed;
     float moveY;
 
+    [Header("Audio Clips")]
+    public AudioClip[] audioClip;
+    private AudioSource audioSource;
+
     // ==========================
     //     Other Variables
     // ==========================
@@ -46,7 +50,7 @@ public class PlayerController : MonoBehaviour
     //     Components
     // ==========================
     private Rigidbody2D rb;
-   [SerializeField] private BoxCollider2D coll;
+    [SerializeField] private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
 
@@ -72,7 +76,7 @@ public class PlayerController : MonoBehaviour
 
     void Start()
     {
-    //Get Components
+        //Get Components
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
@@ -81,6 +85,7 @@ public class PlayerController : MonoBehaviour
         originalGravity = rb.gravityScale;
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
+        audioSource = GetComponent<AudioSource>();
     }
    
     void Update()
@@ -105,6 +110,8 @@ public class PlayerController : MonoBehaviour
         LadderMove();
         Animation();
         HandleTouchInputs();
+        ItemUsage();
+        HandlePlayerAudio();
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -206,28 +213,6 @@ public class PlayerController : MonoBehaviour
                     anim.speed = 1.4f;
                 }
             }
-
-        // =================================
-        // Item Usage
-        // =================================
-
-        if (managerscript.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            StartCoroutine(JumpItemPower());
-            managerscript.playerStats.hasItem = 0;
-        }
-
-        if (managerscript.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            StartCoroutine(RunItemPower());
-            managerscript.playerStats.hasItem = 0;            
-        }
-
-        if (managerscript.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            StartCoroutine(GravityItemPower());
-            managerscript.playerStats.hasItem = 0;           
-        }
     }
 
     public bool IsGrounded()
@@ -262,17 +247,46 @@ public class PlayerController : MonoBehaviour
         {
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
-
-
-
     }
+
+    public void ItemUsage()
+    
+    {
+        // =================================
+        // Item Usage
+        // =================================
+
+        if (managerscript.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            StartCoroutine(JumpItemPower());
+            managerscript.playerStats.hasItem = 0;
+        }
+
+        if (managerscript.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            Time.timeScale = 0.7f;
+            if (Input.GetKeyUp(KeyCode.LeftAlt)) 
+            {
+              Time.timeScale = 1f;
+              managerscript.playerStats.hasItem = 0;            
+            }
+        }
+
+        if (managerscript.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
+        {
+            StartCoroutine(GravityItemPower());
+            managerscript.playerStats.hasItem = 0;           
+        }
+    
+    }
+    
     private void Animation()
     {
 
         // =================================
         // Animation 
         // =================================
-
+        
         //If Player not Moving & isGrounded
         if (moveX == 0 && IsGrounded())
 
@@ -290,7 +304,7 @@ public class PlayerController : MonoBehaviour
 
         else
         {
-            if (rb.velocity.y < 0)
+            if (rb.velocity.y < 0.1f)
             {
                 ChangeAnimationState(PLAYER_FALL);
             }
@@ -485,22 +499,6 @@ public class PlayerController : MonoBehaviour
         usedItem = false;
     }
 
-    IEnumerator RunItemPower()
-    {
-        float originalRunSpeed = runSpeed;
-        float originalMaxSpeed = maxSpeed;
-        float originalMaxSpeedRun = maxSpeedRun;
-        runSpeed += 20f;
-        maxSpeed += 20f;
-        maxSpeedRun = 13f;
-        usedItem = true;
-        yield return new WaitForSeconds(5f);
-        runSpeed = originalRunSpeed;
-        maxSpeed = originalMaxSpeed;
-        maxSpeedRun = originalMaxSpeedRun; 
-        usedItem = false;
-    }
-
     IEnumerator GravityItemPower()
     {
         rb.gravityScale = 2;
@@ -508,6 +506,25 @@ public class PlayerController : MonoBehaviour
         yield return new WaitForSeconds(5f);
         rb.gravityScale = originalGravity;
         usedItem = false;
+    }
+
+    public void HandlePlayerAudio()
+    {
+        //WalkSound
+        if (moveX != 0 && IsGrounded())
+        {
+            audioSource.PlayOneShot(audioClip[0]);     
+        } 
+        //Jump Sound
+        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
+        {
+            audioSource.PlayOneShot(audioClip[1]);
+        }
+        //Item Usage Sound
+        if (Input.GetKeyDown(KeyCode.LAlt) && playerStats.hasItem != 0)
+        {
+            audioSource.PlayOneShot(audioClip[2]);
+        }
     }
 
 
@@ -524,9 +541,7 @@ public class PlayerController : MonoBehaviour
                 float bounceforce = bounce * rb.velocity.y;
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
-            }           
-            
-                   
+            }                              
         }
 
         if (collision.CompareTag("Ladder"))

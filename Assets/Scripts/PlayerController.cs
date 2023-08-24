@@ -28,8 +28,6 @@ public class PlayerController : MonoBehaviour
     public float fallSpeed;
     public float coyoteTime;
     public float coyoteCounter;
-    private bool isJumping = false;
-    private float touchStartTime = 0f;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -48,7 +46,7 @@ public class PlayerController : MonoBehaviour
     //     Components
     // ==========================
     private Rigidbody2D rb;
-    private BoxCollider2D coll;
+   [SerializeField] private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
 
@@ -76,14 +74,13 @@ public class PlayerController : MonoBehaviour
     {
     //Get Components
         rb = GetComponent<Rigidbody2D>();
-        coll = GetComponent<BoxCollider2D>();
+        coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
-
     }
    
     void Update()
@@ -99,10 +96,6 @@ public class PlayerController : MonoBehaviour
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
         }
-
-
-
-        Debug.Log(moveX);
 
         // ==========================
         //     Methoden Aufrufe
@@ -127,8 +120,6 @@ public class PlayerController : MonoBehaviour
             }
             
             coyoteCounter = coyoteTime;       
-            isJumping = false;
-
         }
         else
         {
@@ -241,10 +232,14 @@ public class PlayerController : MonoBehaviour
 
     public bool IsGrounded()
         {
-            // ==========================
-            //   BOXCAST GROUND ABFRAGE
-            // ==========================
-            return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0f, Vector2.down, .25f, groundMask);
+        // ==========================
+        //   BOXCAST GROUND ABFRAGE
+        // ==========================
+        //Debug.DrawRay(new Vector2(this.transform.position.x, this.transform.position.y), Vector2.down * 1f, Color.blue);
+        //return Physics2D.Raycast(new Vector2(this.transform.position.x, this.transform.position.y), Vector2.down, 1f, groundMask);
+        
+        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.5f, groundMask);
+        
         }
 
     public void Jump()

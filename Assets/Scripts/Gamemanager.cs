@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -27,6 +28,14 @@ public class Gamemanager : MonoBehaviour
     public bool gameCompleted;
     SaveGame saveGame;
     public PlayerStats playerStats;
+    public AudioSource audioSource1;
+    public AudioSource audioSource2;
+
+    //Sounds
+    public AudioClip spawnMusic;
+    public AudioClip level2Sound;
+    public AudioClip level3Sound;
+        
 
 
     void Start()
@@ -45,6 +54,8 @@ public class Gamemanager : MonoBehaviour
         //Load SaveGame 
         saveGame = GetComponent<SaveGame>();
         saveGame.LoadStats();
+
+        //Get Audio Source
     }
 
     // Update is called once per frame
@@ -52,7 +63,8 @@ public class Gamemanager : MonoBehaviour
     {
         Timer();
         HeightCounter();
-        PausePanel();  
+        PausePanel();
+        SoundHandler();
     }
 
     public void Timer()
@@ -74,7 +86,7 @@ public class Gamemanager : MonoBehaviour
         }
 
         float actualTime = Time.time;
-        //Debug.Log(actualTime);
+        
 
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
         {
@@ -177,5 +189,80 @@ public class Gamemanager : MonoBehaviour
         }
 
         return formattedTime;
+    }
+
+    public void SoundHandler()
+    {
+        if (player.transform.position.y < 30)
+        {
+            audioSource1.clip = spawnMusic;
+            
+            if (!audioSource1.isPlaying && audioSource2.volume == 0)
+            {
+                audioSource1.Play();    
+            }
+            
+            if (audioSource1.volume <= 0.14f)
+            {
+                audioSource1.volume = Mathf.MoveTowards(audioSource1.volume, 0.14f, 0.15f * Time.deltaTime);
+            }
+
+        } else
+        {
+            if (audioSource1.clip == spawnMusic)
+            {
+                audioSource1.volume = Mathf.MoveTowards(audioSource1.volume, 0, 0.2f * Time.deltaTime);
+            }
+        }
+
+        
+        if (player.transform.position.y > 30 && player.transform.position.y < 50)
+        {                     
+            audioSource2.clip = level2Sound;
+            
+            if (!audioSource2.isPlaying && audioSource1.volume == 0)
+            {
+                audioSource2.Play();
+            }
+
+            if (audioSource2.volume < 0.14f)
+            {
+                audioSource2.volume = Mathf.MoveTowards(audioSource2.volume, 0.14f, 0.15f * Time.deltaTime);
+            }
+        } 
+        
+        else
+        {
+            if (audioSource2.clip == level2Sound)
+            {
+                audioSource2.volume = Mathf.MoveTowards(audioSource2.volume, 0, 0.2f * Time.deltaTime);
+                Debug.Log("LOWEER");
+            }
+           
+        }
+
+        if (player.transform.position.y > 50)
+        {
+            audioSource1.clip = level3Sound;
+
+            if (!audioSource1.isPlaying && audioSource2.volume == 0)
+            {
+                audioSource1.Play();
+            }
+
+            if (audioSource1.volume < 0.14f)
+            {
+                audioSource1.volume = Mathf.MoveTowards(audioSource1.volume, 0.14f, 0.15f * Time.deltaTime);
+            }
+        }
+
+        else
+        {
+            if (audioSource1.clip == level3Sound)
+            {
+                audioSource1.volume = Mathf.MoveTowards(audioSource1.volume, 0, 0.2f * Time.deltaTime);
+            }
+        }
+
     }
 }

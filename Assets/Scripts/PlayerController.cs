@@ -36,8 +36,7 @@ public class PlayerController : MonoBehaviour
     float moveY;
 
     [Header("Audio Clips")]
-    public AudioClip[] audioClip;
-    private AudioSource audioSource;
+
 
     // ==========================
     //     Other Variables
@@ -49,7 +48,7 @@ public class PlayerController : MonoBehaviour
     // ==========================
     //     Components
     // ==========================
-    private Rigidbody2D rb;
+    internal Rigidbody2D rb;
     [SerializeField] private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
@@ -85,7 +84,7 @@ public class PlayerController : MonoBehaviour
         originalGravity = rb.gravityScale;
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
-        audioSource = GetComponent<AudioSource>();
+        
     }
    
     void Update()
@@ -111,7 +110,7 @@ public class PlayerController : MonoBehaviour
         Animation();
         HandleTouchInputs();
         ItemUsage();
-        HandlePlayerAudio();
+
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -508,26 +507,6 @@ public class PlayerController : MonoBehaviour
         usedItem = false;
     }
 
-    public void HandlePlayerAudio()
-    {
-        //WalkSound
-        if (moveX != 0 && IsGrounded())
-        {
-            audioSource.PlayOneShot(audioClip[0]);     
-        } 
-        //Jump Sound
-        if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
-        {
-            audioSource.PlayOneShot(audioClip[1]);
-        }
-        //Item Usage Sound
-        if (Input.GetKeyDown(KeyCode.LAlt) && playerStats.hasItem != 0)
-        {
-            audioSource.PlayOneShot(audioClip[2]);
-        }
-    }
-
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
@@ -542,7 +521,7 @@ public class PlayerController : MonoBehaviour
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
                 //BounceBed Sound
-                audioSource.PlayOneShot(audioClip[3])
+               
             }                              
         }
 

@@ -541,6 +541,8 @@ public class PlayerController : MonoBehaviour
                 float bounceforce = bounce * rb.velocity.y;
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
+                //BounceBed Sound
+                audioSource.PlayOneShot(audioClip[3])
             }                              
         }
 

@@ -36,10 +36,10 @@ public class PlayerController : MonoBehaviour
     float moveY;
 
     //Surfaces
-    private bool isWood;
-    private bool isStone;
-    private bool isGras;
-    private bool isSnow;
+    internal bool isWood;
+    internal bool isStone;
+    internal bool isGras;
+    internal bool isSnow;
     Surface surface;
 
     // ==========================

@@ -143,7 +143,7 @@ public class AudioManager : MonoBehaviour
             if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd && isGrounded)
             {
 
-                if (touch.phase == TouchPhase.Began)
+                if (touch.phase == TouchPhase.Began && isGrounded)
                 {
                     jumpAudioSource.clip = jumpAudio[currentJumpIndex];
                     jumpAudioSource.Play();
@@ -169,7 +169,7 @@ public class AudioManager : MonoBehaviour
             
             if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd || touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
             {
-                if (touch2.phase == TouchPhase.Began)
+                if (touch2.phase == TouchPhase.Began && isGrounded)
                 {
                     jumpAudioSource.clip = jumpAudio[currentJumpIndex];
                     jumpAudioSource.Play();

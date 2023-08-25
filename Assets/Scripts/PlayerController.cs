@@ -13,6 +13,7 @@ public class PlayerController : MonoBehaviour
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
     public float airDrag;
+    float moveDir;
     
 
     [Header("Jump Settings")]
@@ -21,6 +22,11 @@ public class PlayerController : MonoBehaviour
     public float fallSpeed;
     public float coyoteTime;
     public float coyoteCounter;
+
+    [Header("Hang Settings")]
+    [SerializeField] BoxCollider2D hangCollider;
+    Vector2 facePosition;
+    private bool isHang;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -49,6 +55,7 @@ public class PlayerController : MonoBehaviour
     private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
+    private BoxCollider2D playerColl;
 
     // ==========================
     //    LayerMask's
@@ -71,10 +78,11 @@ public class PlayerController : MonoBehaviour
         //Get Components / Objects
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
+        hangCollider = GameObject.Find("Hangcollider").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
-        
+        playerColl = GetComponent<BoxCollider2D>();
         
         //Start Variables
         originalMaxSpeed = maxSpeed;
@@ -108,6 +116,8 @@ public class PlayerController : MonoBehaviour
         Animation();
         HandleTouchInputs();
         ItemUsage();
+        HandleHang();
+        HandleFallSpeed();
 
 
         // ==========================
@@ -129,13 +139,17 @@ public class PlayerController : MonoBehaviour
         {
             coyoteCounter -= Time.deltaTime;
                     
-            if (!isClimbing && !usedItem)
+            if (!isClimbing && !usedItem && !isHang)
             {
                 rb.gravityScale = 8f;
             }
 
-            //Change the Velocity.y -.07, maximum till fallspeed
-            rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.07f, -fallSpeed));
+            //Reduce Velocity.y -0.01, maximum till fallspeed
+            if (!isHang)
+            {
+                
+               rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.01f, -fallSpeed));
+            }         
             //Get some airDrag at velocity.x to reduce acceleration while jumping
             rb.velocity = new Vector2(rb.velocity.x * (1f - airDrag), rb.velocity.y);
         }
@@ -149,20 +163,20 @@ public class PlayerController : MonoBehaviour
             // Abfrage Move +X / -X && Facing 
             // =================================
 
-            if (moveX > 0.1f || moveX < 0.1f)
+            if (moveX > 0.1f && !isHang || moveX < 0.1f && !isHang)
             {
 
                 if (moveX > 0)
                 {
                     //Flip Player Sprite depend on Horizontal Input.
                     GetComponent<SpriteRenderer>().flipX = false;
-                    //moveDir = 1;
+                    moveDir = 1;
                 }
 
                 if (moveX < 0)
                 {
                     GetComponent<SpriteRenderer>().flipX = true;
-                   // moveDir = 0;
+                   moveDir = -1;
                 }
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
@@ -211,6 +225,32 @@ public class PlayerController : MonoBehaviour
         
         }
 
+    public bool canHang()
+    {
+        Debug.DrawRay(hangCollider.bounds.center, facePosition * 0.45f, Color.red);
+        return Physics2D.Raycast(hangCollider.bounds.center, facePosition, 0.45f, groundMask);       
+    }
+
+    public void HandleHang()
+    {       
+        facePosition = new Vector2(moveDir, 0);  
+        if (Input.GetKey(KeyCode.G))
+        {
+            if (canHang() && !IsGrounded())
+            {
+                isHang = true;
+                rb.velocity = Vector2.zero;
+                rb.gravityScale = 0;
+               
+            } 
+        }
+        else if (Input.GetKeyUp(KeyCode.G))
+        {
+            isHang = false;
+            rb.gravityScale = originalGravity;
+        }
+    }
+
     public void Jump()
         {
         
@@ -221,10 +261,13 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
         {
-            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-           
-            //Set Counter to 0 to avoid Double Jump
-            coyoteCounter = 0;
+            if (!isHang || !isClimbing)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2.5f);
+                //Set Counter to 0 to avoid Double Jump
+                coyoteCounter = 0;
+            } 
+            
         }
 
         if (isClimbing && Input.GetKeyDown(KeyCode.Space))

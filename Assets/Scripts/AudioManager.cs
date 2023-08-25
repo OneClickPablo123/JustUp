@@ -10,8 +10,14 @@ public class AudioManager : MonoBehaviour
     public AudioSource jumpVoiceManager;
 
     //Steps
-    public AudioClip[] stepSounds;
-    private int currentStepIndex = 0;
+    public AudioClip[] stoneSounds;
+    public AudioClip[] grasSounds;
+    public AudioClip[] woodSounds;
+    public AudioClip[] snowSounds;
+    private int currentStepStoneIndex = 0;
+    private int currentStepGrasIndex = 0;
+    private int currentStepWoodIndex = 0;
+    private int currentStepSnowIndex = 0;
     
     //Jump
     public AudioClip[] jumpAudio;
@@ -65,10 +71,35 @@ public class AudioManager : MonoBehaviour
 
             if (!audioSource.isPlaying)
             {
-                audioSource.clip = stepSounds[currentStepIndex];
-                audioSource.Play();
+                if (playerController.isStone)
+                {
+                    audioSource.clip = stoneSounds[currentStepStoneIndex];
+                    audioSource.Play();
+                }
+
+                if (playerController.isWood)
+                {
+                    audioSource.clip = woodSounds[currentStepWoodIndex];
+                    audioSource.Play();
+                }
+
+                if (playerController.isSnow)
+                {
+                    audioSource.clip = snowSounds[currentStepSnowIndex];
+                    audioSource.Play();
+                }
+
+                if (playerController.isGras)
+                {
+                    audioSource.clip = grasSounds[currentStepGrasIndex];
+                    audioSource.Play();
+                }
+                
             }
-            currentStepIndex = (currentStepIndex + 1) % stepSounds.Length;
+            currentStepStoneIndex = (currentStepStoneIndex + 1) % stoneSounds.Length;
+            currentStepWoodIndex = (currentStepWoodIndex + 1) % woodSounds.Length;
+            currentStepSnowIndex = (currentStepSnowIndex + 1) % snowSounds.Length;
+            currentStepGrasIndex = (currentStepGrasIndex + 1) % grasSounds.Length;
 
         }
         //Jump Sound

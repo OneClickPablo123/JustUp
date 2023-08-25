@@ -72,8 +72,9 @@ public class PlayerController : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
-        managerscript = gamemanager.GetComponent<Gamemanager>();
         gamemanager = GameObject.Find("gamemanager");
+        managerscript = gamemanager.GetComponent<Gamemanager>();
+        
         
         //Start Variables
         originalMaxSpeed = maxSpeed;
@@ -520,7 +521,7 @@ public class PlayerController : MonoBehaviour
         }
 
         //Checks the Collision Surface to change Audio
-        if (collision.gameObject.GetComponent<Surface>() != 0)
+        if (collision.gameObject.GetComponent<Surface>() != null)
         {
            surface = collision.gameObject.GetComponent<Surface>();
 

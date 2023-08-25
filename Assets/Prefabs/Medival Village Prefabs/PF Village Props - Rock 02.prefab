@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4973302571607540862}
   - component: {fileID: 1241709196517927977}
   - component: {fileID: 1738384952967142826}
+  - component: {fileID: -6339635603875450394}
   m_Layer: 3
   m_Name: PF Village Props - Rock 02
   m_TagString: Untagged
@@ -150,3 +151,19 @@ PlatformEffector2D:
   m_UseSideFriction: 0
   m_UseSideBounce: 0
   m_SideArc: 1
+--- !u!114 &-6339635603875450394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4973302571607540863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1bb1c13b024c5f40acc92baa500d784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWood: 0
+  isStone: 1
+  isGras: 0
+  isSnow: 0

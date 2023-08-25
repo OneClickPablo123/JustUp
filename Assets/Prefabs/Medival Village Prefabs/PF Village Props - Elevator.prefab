@@ -482,6 +482,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 796464614996848183}
+  - component: {fileID: 512558954233000145}
   m_Layer: 0
   m_Name: PF Village Props - Elevator
   m_TagString: Untagged
@@ -511,6 +512,22 @@ Transform:
   - {fileID: 8564596755824686578}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &512558954233000145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 796464614996848182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1bb1c13b024c5f40acc92baa500d784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWood: 1
+  isStone: 0
+  isGras: 0
+  isSnow: 0
 --- !u!1 &796464615045801945
 GameObject:
   m_ObjectHideFlags: 0

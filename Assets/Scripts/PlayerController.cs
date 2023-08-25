@@ -5,14 +5,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
-    // ==========================
-    // Movement
-    // ==========================
     public float speed;
     public float runSpeed;
     public float maxSpeed;
     public float moveX;
-    //private int moveDir = 1;
     public float maxSpeedRun;
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
@@ -20,9 +16,6 @@ public class PlayerController : MonoBehaviour
     
 
     [Header("Jump Settings")]
-    // ==========================
-    //     Jumps
-    // ==========================
     private Vector2 jump;
     public float jumpForce;
     public float fallSpeed;
@@ -33,7 +26,7 @@ public class PlayerController : MonoBehaviour
     public bool isLadder;
     public bool isClimbing;
     public float ladderSpeed;
-    float moveY;
+    private float moveY;
 
     //Surfaces
     internal bool isWood;
@@ -47,24 +40,24 @@ public class PlayerController : MonoBehaviour
     // ==========================
 
     private float originalGravity;
-    public bool usedItem;
+    internal bool usedItem;
 
     // ==========================
     //     Components
     // ==========================
     internal Rigidbody2D rb;
-    [SerializeField] private BoxCollider2D coll;
+    private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
 
     // ==========================
-    //     Masks
+    //    LayerMask's
     // ==========================
     [Header("Layermask Settings")]
     [SerializeField] LayerMask groundMask;
 
     // ==========================
-    //     Animation
+    //    Animation Strings
     // ==========================
     private string currentState;
     const string PLAYER_IDLE = ("player_idle");
@@ -73,21 +66,21 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_FALL = ("player_fall");
     private Animator anim;
 
-    // ==========================
-    //     Script Verweise
-    // ==========================
-
     void Start()
     {
-        //Get Components
+        //Get Components / Objects
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
+        managerscript = gamemanager.GetComponent<Gamemanager>();
+        gamemanager = GameObject.Find("gamemanager");
+        
+        //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-        gamemanager = GameObject.Find("gamemanager");
-        managerscript = gamemanager.GetComponent<Gamemanager>();
+        
+        //Start Conditions
         
     }
    
@@ -206,26 +199,13 @@ public class PlayerController : MonoBehaviour
                         rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
                     }
                 }
-                //Change Animation speed depend on the Players Velocity
-                if (rb.velocity.x < 7 || rb.velocity.x > -7f)
-                {
-                    anim.speed = 1.1f;
-                }
-                else
-                {
-                    anim.speed = 1.4f;
-                }
+                
             }
     }
 
     public bool IsGrounded()
         {
-        // ==========================
-        //   BOXCAST GROUND ABFRAGE
-        // ==========================
-        //Debug.DrawRay(new Vector2(this.transform.position.x, this.transform.position.y), Vector2.down * 1f, Color.blue);
-        //return Physics2D.Raycast(new Vector2(this.transform.position.x, this.transform.position.y), Vector2.down, 1f, groundMask);
-        
+        //BoxCast if LayerMask == Groundmask
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.5f, groundMask);
         
         }
@@ -318,6 +298,16 @@ public class PlayerController : MonoBehaviour
 
         }
 
+        //Change Animation speed depend on the Players Velocity
+                if (rb.velocity.x < 7 || rb.velocity.x > -7f)
+                {
+                    anim.speed = 1.1f;
+                }
+                else
+                {
+                    anim.speed = 1.4f;
+                }
+
 
     }
 
@@ -386,7 +376,7 @@ public class PlayerController : MonoBehaviour
     private void HandleTouchInputs()
     {
 
-        //Normal Laufen und Springen mit einer Touch eingabe
+        //Run OR Jump with One Touch Input
         if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
@@ -406,23 +396,23 @@ public class PlayerController : MonoBehaviour
                     coyoteCounter = 0;
                 }
             }
-            // Bewegung nach links oder rechts
-            if (touch.position.x < middleThirdStart) // Linker Drittel des Bildschirms
+            // Set MoveX depend on Input
+            if (touch.position.x < middleThirdStart) // Left Screen Side
             {
                 moveX = -1;
             }
-            else if (touch.position.x > middleThirdEnd) // Rechter Drittel des Bildschirms
+            else if (touch.position.x > middleThirdEnd) // Right Screen Side
             {
                 moveX = 1;
             }
             else
             {
-                // Keine Touch-Eingabe, also Bewegung stoppen
+                // No Touch Input = 0
                 moveX = 0;
             }
         }
 
-        //Laufen + Springen mit 2 Touch eingaben gleichzeitig.
+        //Run & Jump with two Touch Inputs 
         if (Input.touchCount >= 2)
         {
             Touch touch1 = Input.GetTouch(0);
@@ -431,7 +421,7 @@ public class PlayerController : MonoBehaviour
             float middleThirdStart = Screen.width * 0.25f;
             float middleThirdEnd = Screen.width * 0.75f;
            
-            //Laufen dann Springen
+            //First run, second Jump
             if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
             {
                 moveX = -1;
@@ -459,7 +449,7 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            //Springen dann Laufen
+            //First Jump, second Run
             else if (touch1.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd && touch2.position.x < middleThirdStart)
             {
                 moveX = -1;
@@ -567,6 +557,7 @@ public class PlayerController : MonoBehaviour
            }
         }
 
+        //Checks if Player hit Ladder
         if (collision.CompareTag("Ladder"))
         {
             isLadder = true;
@@ -575,6 +566,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D collision)
     {
+        //Check if Player leave ladder
         if (collision.CompareTag("Ladder"))
         {
             isLadder = false;

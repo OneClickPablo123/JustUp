@@ -17,7 +17,7 @@ public class PlayerController : MonoBehaviour
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
     public float airDrag;
-
+    
 
     [Header("Jump Settings")]
     // ==========================
@@ -35,8 +35,12 @@ public class PlayerController : MonoBehaviour
     public float ladderSpeed;
     float moveY;
 
-    [Header("Audio Clips")]
-
+    //Surfaces
+    private bool isWood;
+    private bool isStone;
+    private bool isGras;
+    private bool isSnow;
+    Surface surface;
 
     // ==========================
     //     Other Variables
@@ -523,6 +527,44 @@ public class PlayerController : MonoBehaviour
                 //BounceBed Sound
                
             }                              
+        }
+
+        //Checks the Collision Surface to change Audio
+        if (collision.gameObject.GetComponent<Surface>() != 0)
+        {
+           surface = collision.gameObject.GetComponent<Surface>();
+
+           if (surface.isWood)
+           {
+            isWood = true;
+           } else 
+           {
+            isWood = false;
+           }
+
+            if (surface.isStone)
+           {
+            isStone = true;
+           } else 
+           {
+            isStone = false;
+           }
+
+            if (surface.isGras)
+           {
+            isGras = true;
+           } else 
+           {
+            isGras = false;
+           }
+
+            if (surface.isSnow)
+           {
+            isSnow = true;
+           } else 
+           {
+            isSnow = false;
+           }
         }
 
         if (collision.CompareTag("Ladder"))

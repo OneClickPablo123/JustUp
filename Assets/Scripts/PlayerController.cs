@@ -1,5 +1,5 @@
-
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
@@ -13,7 +13,6 @@ public class PlayerController : MonoBehaviour
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
     public float airDrag;
-    float moveDir;
     
 
     [Header("Jump Settings")]
@@ -27,11 +26,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] BoxCollider2D hangCollider;
     Vector2 facePosition;
     private bool isHang;
-    GameObject playerGrabPoint;
-    Vector2 grabPoint1pos;
-    Vector2 grabPoint2pos;
-    Transform grabPoint1;
-    Transform grabPoint2;
+    Vector2 lgrabPos;
+    Vector2 rgrabPos;
+    Transform leftgrab;
+    Transform rightgrab;
+    private bool isPullUp;
+    Vector2 platformpos;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
     internal bool isStone;
     internal bool isGras;
     internal bool isSnow;
-    Surface surface;
+    PlatformHandler platformHandler;
 
     // ==========================
     //     Other Variables
@@ -61,6 +61,7 @@ public class PlayerController : MonoBehaviour
     Gamemanager managerscript;
     GameObject gamemanager;
     private BoxCollider2D playerColl;
+    SpriteRenderer spriteRenderer;
 
     // ==========================
     //    LayerMask's
@@ -77,7 +78,7 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_JUMP = ("player_jump");
     const string PLAYER_FALL = ("player_fall");
     const string PLAYER_HANG = ("player_hang");
-    const string PLAYER_CLIMB = ("player_climb");
+    const string PLAYER_PULL = ("player_pull");
     private Animator anim;
 
     void Start()
@@ -90,7 +91,7 @@ public class PlayerController : MonoBehaviour
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
         playerColl = GetComponent<BoxCollider2D>();
-        playerGrabPoint = GameObject.Find("Grabpoint");
+        spriteRenderer = GetComponent<SpriteRenderer>();
         
         //Start Variables
         originalMaxSpeed = maxSpeed;
@@ -178,13 +179,11 @@ public class PlayerController : MonoBehaviour
                 {
                     //Flip Player Sprite depend on Horizontal Input.
                     GetComponent<SpriteRenderer>().flipX = false;
-                moveDir = 1;
                 }
 
                 if (moveX < 0)
                 {
-                   GetComponent<SpriteRenderer>().flipX = true;
-                moveDir = -1;
+                GetComponent<SpriteRenderer>().flipX = true; 
                 }
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
@@ -235,29 +234,37 @@ public class PlayerController : MonoBehaviour
 
     public bool canHang()
     {
-        Debug.DrawRay(hangCollider.bounds.center, facePosition * 0.45f, Color.red);
-        facePosition = new Vector2(moveDir, 0);
-        return Physics2D.Raycast(hangCollider.bounds.center, facePosition, 0.45f, groundMask);       
+        facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
+        return Physics2D.BoxCast(hangCollider.bounds.center, coll.bounds.size, 0, facePosition, 0.5f, groundMask);       
     }
 
     public void HandleHang()
-    {       
-  
+    {
+
         if (Input.GetKey(KeyCode.G))
         {
-            if (canHang() && !IsGrounded())
+            if (!IsGrounded() && canHang() && !isPullUp)
             {
-                isHang = true;
-                float distanceToGrabPoint1 = Vector2.Distance(this.transform.position, grabPoint1pos);
-                float distanceToGrabPoint2 = Vector2.Distance(this.transform.position, grabPoint2pos);
-                Transform closerGrabPoint = distanceToGrabPoint1 < distanceToGrabPoint2 ? grabPoint1 : grabPoint2;        
-                playerGrabPoint.transform.position = closerGrabPoint.position;
-                this.transform.position = playerGrabPoint.transform.position;
-                
-                rb.velocity = Vector2.zero;
-                rb.gravityScale = 0;
-               
-            } 
+
+                if (lgrabPos != Vector2.zero && rgrabPos != Vector2.zero)
+                {
+                    if (this.transform.position.x < lgrabPos.x && this.transform.position.x < rgrabPos.x)
+                    {
+                        isHang = true;
+                        this.transform.position = lgrabPos;
+                        rb.gravityScale = 0;
+
+                    }
+
+                    if (this.transform.position.x > rgrabPos.x && this.transform.position.x > lgrabPos.x)
+                    {
+                        isHang = true;
+                        this.transform.position = rgrabPos;
+                        rb.gravityScale = 0;
+                    }
+                }
+            }
+
         }
         else if (Input.GetKeyUp(KeyCode.G))
         {
@@ -266,6 +273,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+  
     public void Jump()
         {
         
@@ -349,7 +357,16 @@ public class PlayerController : MonoBehaviour
             
             if (isHang)
             {
-                ChangeAnimationState(PLAYER_HANG);
+                
+                if (isPullUp)
+                {
+                    ChangeAnimationState(PLAYER_PULL);
+                } else
+                {
+                    ChangeAnimationState(PLAYER_HANG);
+                }
+
+                
             }
             else if (rb.velocity.y < 0.1f)
             {
@@ -584,11 +601,11 @@ public class PlayerController : MonoBehaviour
         }
 
         //Checks the Collision Surface to change Audio
-        if (collision.gameObject.GetComponent<Surface>() != null)
+        if (collision.gameObject.GetComponent<PlatformHandler>() != null)
         {
-           surface = collision.gameObject.GetComponent<Surface>();
-
-           if (surface.isWood)
+          platformHandler = collision.gameObject.GetComponent<PlatformHandler>();
+           
+            if (platformHandler.isWood)
            {
             isWood = true;
            } else 
@@ -596,7 +613,7 @@ public class PlayerController : MonoBehaviour
             isWood = false;
            }
 
-            if (surface.isStone)
+            if (platformHandler.isStone)
            {
             isStone = true;
            } else 
@@ -604,7 +621,7 @@ public class PlayerController : MonoBehaviour
             isStone = false;
            }
 
-            if (surface.isGras)
+            if (platformHandler.isGras)
            {
             isGras = true;
            } else 
@@ -612,7 +629,7 @@ public class PlayerController : MonoBehaviour
             isGras = false;
            }
 
-            if (surface.isSnow)
+            if (platformHandler.isSnow)
            {
             isSnow = true;
            } else 
@@ -627,22 +644,15 @@ public class PlayerController : MonoBehaviour
             isLadder = true;
         }
 
-        if (collision.gameObject.CompareTag("Platform"))
+        if (collision.CompareTag("Platform"))
         {
-            Transform platform = collision.gameObject.transform;
-
-            // Find GrabPoints in Child
-            grabPoint1 = platform.Find("grabPoint1");
-            if (grabPoint1 != null)
+            if (collision.gameObject.GetComponent<PlatformHandler>().canGrab)
             {
-                grabPoint1pos = grabPoint1.position;
-            }
-
-            grabPoint2 = platform.Find("grabPoint2");
-            if (grabPoint2 != null)
-            {
-                grabPoint2pos = grabPoint2.position;
-            }
+                platformpos = platformHandler.platform;
+            }      
+            lgrabPos = collision.gameObject.GetComponent<PlatformHandler>().grabL;
+            rgrabPos = collision.gameObject.GetComponent<PlatformHandler>().grabR;
+            
         }
     }
 
@@ -654,5 +664,11 @@ public class PlayerController : MonoBehaviour
             isLadder = false;
             isClimbing = false;
         }
+        if (collision.CompareTag("Platform"))
+        {
+            lgrabPos = Vector2.zero;
+            rgrabPos = Vector2.zero;
+        }
+
     }
 }

@@ -97,8 +97,8 @@ GameObject:
   - component: {fileID: 467847904420241048}
   - component: {fileID: 1781861138851377361}
   - component: {fileID: 1452764488577433704}
-  - component: {fileID: 4637522233478144209}
   - component: {fileID: 4474760067235889761}
+  - component: {fileID: 1487032446097737131}
   m_Layer: 3
   m_Name: Platform
   m_TagString: Untagged
@@ -290,22 +290,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.9369539, y: 0.21800995}
   m_EdgeRadius: 0
---- !u!114 &4637522233478144209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 173672594434494891}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de569c3b7ae353446ab4b30bfa1c9b25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waypoints:
-  - {fileID: 7855723393155163936}
-  - {fileID: 1929753568397492590}
-  speed: 2
 --- !u!251 &4474760067235889761
 PlatformEffector2D:
   m_ObjectHideFlags: 0
@@ -325,6 +309,32 @@ PlatformEffector2D:
   m_UseSideFriction: 0
   m_UseSideBounce: 0
   m_SideArc: 1
+--- !u!114 &1487032446097737131
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 173672594434494891}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e1bb1c13b024c5f40acc92baa500d784, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isWood: 0
+  isStone: 0
+  isGras: 0
+  isSnow: 0
+  canMove: 1
+  canDisappear: 0
+  removePlatform: 0
+  canGrab: 1
+  waypoints:
+  - {fileID: 7855723393155163936}
+  - {fileID: 1929753568397492590}
+  speed: 2
+  disappearTime: 3
+  appearTime: 1
 --- !u!1 &1643359480722135990
 GameObject:
   m_ObjectHideFlags: 0

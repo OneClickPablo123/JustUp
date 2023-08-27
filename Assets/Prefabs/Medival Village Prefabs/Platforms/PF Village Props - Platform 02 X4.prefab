@@ -286,6 +286,14 @@ MonoBehaviour:
   isStone: 0
   isGras: 0
   isSnow: 0
+  canMove: 0
+  canDisappear: 0
+  removePlatform: 0
+  canGrab: 0
+  waypoints: []
+  speed: 0
+  disappearTime: 3
+  appearTime: 1
 --- !u!1 &6697664604491603851
 GameObject:
   m_ObjectHideFlags: 0

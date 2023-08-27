@@ -27,6 +27,11 @@ public class PlayerController : MonoBehaviour
     [SerializeField] BoxCollider2D hangCollider;
     Vector2 facePosition;
     private bool isHang;
+    GameObject playerGrabPoint;
+    Vector2 grabPoint1pos;
+    Vector2 grabPoint2pos;
+    Transform grabPoint1;
+    Transform grabPoint2;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -71,6 +76,8 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_WALK = ("player_walk");
     const string PLAYER_JUMP = ("player_jump");
     const string PLAYER_FALL = ("player_fall");
+    const string PLAYER_HANG = ("player_hang");
+    const string PLAYER_CLIMB = ("player_climb");
     private Animator anim;
 
     void Start()
@@ -83,24 +90,27 @@ public class PlayerController : MonoBehaviour
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
         playerColl = GetComponent<BoxCollider2D>();
+        playerGrabPoint = GameObject.Find("Grabpoint");
         
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-        
+
         //Start Conditions
-        
+       
+
     }
    
     void Update()
     {
+        
         // ==========================
         //     Input Abfrage X
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-       
+
         if (Input.touchCount == 0)
         {
             moveX = Input.GetAxisRaw("Horizontal");
@@ -117,7 +127,6 @@ public class PlayerController : MonoBehaviour
         HandleTouchInputs();
         ItemUsage();
         HandleHang();
-        HandleFallSpeed();
 
 
         // ==========================
@@ -157,7 +166,6 @@ public class PlayerController : MonoBehaviour
 
     public void Movement()
         {
-
            
             // =================================
             // Abfrage Move +X / -X && Facing 
@@ -170,13 +178,13 @@ public class PlayerController : MonoBehaviour
                 {
                     //Flip Player Sprite depend on Horizontal Input.
                     GetComponent<SpriteRenderer>().flipX = false;
-                    moveDir = 1;
+                moveDir = 1;
                 }
 
                 if (moveX < 0)
                 {
-                    GetComponent<SpriteRenderer>().flipX = true;
-                   moveDir = -1;
+                   GetComponent<SpriteRenderer>().flipX = true;
+                moveDir = -1;
                 }
                 //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
                 if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
@@ -228,17 +236,24 @@ public class PlayerController : MonoBehaviour
     public bool canHang()
     {
         Debug.DrawRay(hangCollider.bounds.center, facePosition * 0.45f, Color.red);
+        facePosition = new Vector2(moveDir, 0);
         return Physics2D.Raycast(hangCollider.bounds.center, facePosition, 0.45f, groundMask);       
     }
 
     public void HandleHang()
     {       
-        facePosition = new Vector2(moveDir, 0);  
+  
         if (Input.GetKey(KeyCode.G))
         {
             if (canHang() && !IsGrounded())
             {
                 isHang = true;
+                float distanceToGrabPoint1 = Vector2.Distance(this.transform.position, grabPoint1pos);
+                float distanceToGrabPoint2 = Vector2.Distance(this.transform.position, grabPoint2pos);
+                Transform closerGrabPoint = distanceToGrabPoint1 < distanceToGrabPoint2 ? grabPoint1 : grabPoint2;        
+                playerGrabPoint.transform.position = closerGrabPoint.position;
+                this.transform.position = playerGrabPoint.transform.position;
+                
                 rb.velocity = Vector2.zero;
                 rb.gravityScale = 0;
                
@@ -331,11 +346,16 @@ public class PlayerController : MonoBehaviour
 
         else
         {
-            if (rb.velocity.y < 0.1f)
+            
+            if (isHang)
+            {
+                ChangeAnimationState(PLAYER_HANG);
+            }
+            else if (rb.velocity.y < 0.1f)
             {
                 ChangeAnimationState(PLAYER_FALL);
             }
-            else
+            else if (rb.velocity.y > 0)
             {
                 ChangeAnimationState(PLAYER_JUMP);
             }
@@ -605,6 +625,24 @@ public class PlayerController : MonoBehaviour
         if (collision.CompareTag("Ladder"))
         {
             isLadder = true;
+        }
+
+        if (collision.gameObject.CompareTag("Platform"))
+        {
+            Transform platform = collision.gameObject.transform;
+
+            // Find GrabPoints in Child
+            grabPoint1 = platform.Find("grabPoint1");
+            if (grabPoint1 != null)
+            {
+                grabPoint1pos = grabPoint1.position;
+            }
+
+            grabPoint2 = platform.Find("grabPoint2");
+            if (grabPoint2 != null)
+            {
+                grabPoint2pos = grabPoint2.position;
+            }
         }
     }
 

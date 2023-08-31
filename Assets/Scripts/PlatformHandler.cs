@@ -33,10 +33,6 @@ public class PlatformHandler : MonoBehaviour
     private float fadeSpeed;
 
     //Position
-    internal Vector2 grabL;
-    internal Vector2 grabR;
-    Transform leftGrab;
-    Transform rightGrab;
     internal Vector2 platform;
 
 
@@ -59,10 +55,6 @@ public class PlatformHandler : MonoBehaviour
         if (canGrab)
         {
           platform = this.transform.position;  
-          leftGrab = transform.Find("grab_L");
-          rightGrab = transform.Find("grab_R");
-          grabL = leftGrab.transform.position;
-          grabR = rightGrab.transform.position;
         }
 
 
@@ -95,7 +87,7 @@ public class PlatformHandler : MonoBehaviour
         if (canMove)
         
         {
-            Debug.Log("currentWaypointIndex: " + currentWaypointIndex); // Debug-Ausgabe hinzugefügt
+            
             if (Vector2.Distance(waypoints[currentWaypointIndex].transform.position, transform.position) < 1f)
             {
                 currentWaypointIndex++;

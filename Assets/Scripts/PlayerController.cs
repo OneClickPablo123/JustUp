@@ -1,6 +1,7 @@
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,7 +14,7 @@ public class PlayerController : MonoBehaviour
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
     public float airDrag;
-    
+
 
     [Header("Jump Settings")]
     private Vector2 jump;
@@ -39,6 +40,12 @@ public class PlayerController : MonoBehaviour
     public float ladderSpeed;
     private float moveY;
 
+    [Header("Touch Settings")]
+    MobileJoyStick virtualJoystick;
+    bool canJump;
+    public float landTimer;
+    public float landTime;
+
     //Surfaces
     internal bool isWood;
     internal bool isStone;
@@ -62,12 +69,16 @@ public class PlayerController : MonoBehaviour
     GameObject gamemanager;
     private BoxCollider2D playerColl;
     SpriteRenderer spriteRenderer;
+    Camera cam;
+    camBrain camBrain;
+
 
     // ==========================
     //    LayerMask's
     // ==========================
     [Header("Layermask Settings")]
     [SerializeField] LayerMask groundMask;
+    [SerializeField] LayerMask grabMask;
 
     // ==========================
     //    Animation Strings
@@ -92,20 +103,21 @@ public class PlayerController : MonoBehaviour
         managerscript = gamemanager.GetComponent<Gamemanager>();
         playerColl = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        
+        virtualJoystick = managerscript.GetComponent<MobileJoyStick>();
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-
+        cam = Camera.main;
+        camBrain = cam.GetComponent<camBrain>();
         //Start Conditions
-       
+
 
     }
-   
+
     void Update()
     {
-        
+
         // ==========================
         //     Input Abfrage X
         // ==========================
@@ -117,6 +129,7 @@ public class PlayerController : MonoBehaviour
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
         }
+
 
         // ==========================
         //     Methoden Aufrufe
@@ -142,100 +155,103 @@ public class PlayerController : MonoBehaviour
                 maxSpeed = originalMaxSpeed;
                 maxSpeedRun = originalMaxSpeedRun;
             }
-            
-            coyoteCounter = coyoteTime;       
+            isHang = false;
+            isPullUp = false;
+            canJump = true;
+
+            landTimer -= Time.deltaTime;
+            coyoteCounter = coyoteTime;
         }
         else
         {
+            landTimer = landTime;
+            canJump = false;
             coyoteCounter -= Time.deltaTime;
-                    
-            if (!isClimbing && !usedItem && !isHang)
+
+            if (!isClimbing && !usedItem && !isHang && !isPullUp)
             {
                 rb.gravityScale = 8f;
             }
 
             //Reduce Velocity.y -0.01, maximum till fallspeed
-            if (!isHang)
+            if (!isHang && !isPullUp)
             {
-                
-               rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.01f, -fallSpeed));
-            }         
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.01f, -fallSpeed));
+            }
             //Get some airDrag at velocity.x to reduce acceleration while jumping
             rb.velocity = new Vector2(rb.velocity.x * (1f - airDrag), rb.velocity.y);
         }
+
+        //Get Face Position of Player
+        facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
     }
 
     public void Movement()
-        {
-           
-            // =================================
-            // Abfrage Move +X / -X && Facing 
-            // =================================
+    {
 
-            if (moveX > 0.1f && !isHang || moveX < 0.1f && !isHang)
+        // =================================
+        // Abfrage Move +X / -X && Facing 
+        // =================================
+
+        if (moveX > 0.1f && !isHang || moveX < 0.1f && !isHang)
+        {
+
+            if (moveX > 0)
+            {
+                //Flip Player Sprite depend on Horizontal Input.
+                GetComponent<SpriteRenderer>().flipX = false;
+            }
+
+            if (moveX < 0)
+            {
+                GetComponent<SpriteRenderer>().flipX = true;
+            }
+            //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
+            if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
+            {
+                //Checks if Velocity is Bigger as maxrunSpeed
+                if (rb.velocity.x < maxSpeedRun && rb.velocity.x > -maxSpeedRun)
+                {
+                    //Checks if Velocity is Bigger as MaxSpeed / 2
+                    if (rb.velocity.x < maxSpeedRun / 2 || rb.velocity.x > -maxSpeedRun / 2)
+                    {
+                        //Multiply the RunSpeed * 1.5f 
+                        rb.AddForce(new Vector2(moveX * runSpeed * 1.5f * Time.deltaTime, 0f), ForceMode2D.Impulse);
+                    }
+                    else
+
+                    {
+                        //Set the Runspeed to normal Value
+                        rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
+                    }
+                }
+            }
+            //Set the Velocity to normal Speed if the player is not pushing Shift
+            else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
+
             {
 
-                if (moveX > 0)
+                //Only Apply force if the players velocity is smaller as maxSpeed
+                if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
                 {
-                    //Flip Player Sprite depend on Horizontal Input.
-                    GetComponent<SpriteRenderer>().flipX = false;
+                    rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
                 }
-
-                if (moveX < 0)
-                {
-                GetComponent<SpriteRenderer>().flipX = true; 
-                }
-                //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
-                if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
-                {
-                    
-                
-                    //Checks if Velocity is Bigger as maxrunSpeed
-                    if (rb.velocity.x < maxSpeedRun && rb.velocity.x > -maxSpeedRun)
-                    {
-                        //Checks if Velocity is Bigger as MaxSpeed / 2
-                        if (rb.velocity.x < maxSpeedRun / 2 || rb.velocity.x > -maxSpeedRun / 2)
-                        {
-                            //Multiply the RunSpeed * 1.5f 
-                            rb.AddForce(new Vector2(moveX * runSpeed * 1.5f * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                        }
-                        else
-
-                        {
-                            //Set the Runspeed to normal Value
-                            rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                        }
-                    }
-
-                
-                    
-                }
-                //Set the Velocity to normal Speed if the player is not pushing Shift
-                else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
-
-                {
-                    
-                    //Only Apply force if the players velocity is smaller as maxSpeed
-                    if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
-                    {
-                        rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                    }
-                }
-                
             }
+
+        }
     }
 
     public bool IsGrounded()
-        {
+    {
         //BoxCast if LayerMask == Groundmask
-        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.5f, groundMask);
-        
-        }
+        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.3f, groundMask);
+
+    }
 
     public bool canHang()
     {
-        facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
-        return Physics2D.BoxCast(hangCollider.bounds.center, coll.bounds.size, 0, facePosition, 0.5f, groundMask);       
+        Debug.DrawRay(hangCollider.bounds.center, facePosition * 5f, Color.blue);
+        return Physics2D.Raycast(hangCollider.bounds.center, facePosition, 2.5f, grabMask);
     }
 
     public void HandleHang()
@@ -245,41 +261,71 @@ public class PlayerController : MonoBehaviour
         {
             if (!IsGrounded() && canHang() && !isPullUp)
             {
-
-                if (lgrabPos != Vector2.zero && rgrabPos != Vector2.zero)
-                {
-                    if (this.transform.position.x < lgrabPos.x && this.transform.position.x < rgrabPos.x)
-                    {
-                        isHang = true;
-                        this.transform.position = lgrabPos;
-                        rb.gravityScale = 0;
-
-                    }
-
-                    if (this.transform.position.x > rgrabPos.x && this.transform.position.x > lgrabPos.x)
-                    {
-                        isHang = true;
-                        this.transform.position = rgrabPos;
-                        rb.gravityScale = 0;
-                    }
-                }
+                SnapToEdge();
             }
-
         }
         else if (Input.GetKeyUp(KeyCode.G))
         {
             isHang = false;
             rb.gravityScale = originalGravity;
         }
+
+        if (Input.GetKey(KeyCode.Space) && isHang)
+        {
+            PullUp();
+
+        } else if (Input.GetKeyUp(KeyCode.Space) && isHang)
+        {
+            isPullUp = false;
+        }
+
     }
 
-  
-    public void Jump()
+    public void SnapToEdge()
+    {
+        if (lgrabPos != Vector2.zero && transform.position.x < lgrabPos.x && transform.position.x < rgrabPos.x && facePosition.x == 1)
         {
-        
+            isHang = true;
+            if (isHang)
+            {
+                rb.velocity = Vector2.zero;
+                this.transform.position = lgrabPos;
+                rb.gravityScale = 0;
+            }
+        }
+
+        if (rgrabPos != Vector2.zero && transform.position.x > rgrabPos.x && transform.position.x > lgrabPos.x && facePosition.x == -1)
+        {
+            isHang = true;
+            if (isHang)
+            {
+                rb.velocity = Vector2.zero;
+                this.transform.position = rgrabPos;
+                rb.gravityScale = 0;
+            }
+        }
+    }
+
+    public void PullUp()
+    {
+        isPullUp = true;
+        rb.gravityScale = 0;
+        float normalizedTime = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+
+        if (normalizedTime >= 0.7f && anim.GetCurrentAnimatorStateInfo(0).IsName(PLAYER_PULL))
+        {
+            float climbspeed = 50f;
+            Vector2 climbDirection = new Vector2(facePosition.x / 2.5f, 1);
+            transform.Translate(climbDirection * climbspeed * Time.deltaTime);
+        }
+    }
+
+    public void Jump()
+    {
+
         if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1 && coyoteCounter > 0)
         {
-           rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
 
         if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
@@ -289,8 +335,8 @@ public class PlayerController : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2.5f);
                 //Set Counter to 0 to avoid Double Jump
                 coyoteCounter = 0;
-            } 
-            
+            }
+
         }
 
         if (isClimbing && Input.GetKeyDown(KeyCode.Space))
@@ -300,7 +346,7 @@ public class PlayerController : MonoBehaviour
     }
 
     public void ItemUsage()
-    
+
     {
         // =================================
         // Item Usage
@@ -315,28 +361,28 @@ public class PlayerController : MonoBehaviour
         if (managerscript.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
         {
             Time.timeScale = 0.7f;
-            if (Input.GetKeyUp(KeyCode.LeftAlt)) 
+            if (Input.GetKeyUp(KeyCode.LeftAlt))
             {
-              Time.timeScale = 1f;
-              managerscript.playerStats.hasItem = 0;            
+                Time.timeScale = 1f;
+                managerscript.playerStats.hasItem = 0;
             }
         }
 
         if (managerscript.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
         {
             StartCoroutine(GravityItemPower());
-            managerscript.playerStats.hasItem = 0;           
+            managerscript.playerStats.hasItem = 0;
         }
-    
+
     }
-    
+
     private void Animation()
     {
 
         // =================================
         // Animation 
         // =================================
-        
+
         //If Player not Moving & isGrounded
         if (moveX == 0 && IsGrounded())
 
@@ -354,19 +400,15 @@ public class PlayerController : MonoBehaviour
 
         else
         {
-            
-            if (isHang)
-            {
-                
-                if (isPullUp)
-                {
-                    ChangeAnimationState(PLAYER_PULL);
-                } else
-                {
-                    ChangeAnimationState(PLAYER_HANG);
-                }
 
-                
+            if (isHang && !isPullUp)
+            {
+                ChangeAnimationState(PLAYER_HANG);
+            }
+
+            else if (isPullUp)
+            {
+                ChangeAnimationState(PLAYER_PULL);
             }
             else if (rb.velocity.y < 0.1f)
             {
@@ -380,27 +422,27 @@ public class PlayerController : MonoBehaviour
         }
 
         //Change Animation speed depend on the Players Velocity
-                if (rb.velocity.x < 7 || rb.velocity.x > -7f)
-                {
-                    anim.speed = 1.1f;
-                }
-                else
-                {
-                    anim.speed = 1.4f;
-                }
+        if (rb.velocity.x < 7 || rb.velocity.x > -7f)
+        {
+            anim.speed = 1.1f;
+        }
+        else
+        {
+            anim.speed = 1.4f;
+        }
 
 
     }
 
     void ChangeAnimationState(string newState)
-        {
-            // ====================================
-            //  CONVERT ANIMATION STATE INTO STRING
-            // ====================================
-            if (currentState == newState) return;
-            anim.Play(newState);
-            currentState = newState;
-        }
+    {
+        // ====================================
+        //  CONVERT ANIMATION STATE INTO STRING
+        // ====================================
+        if (currentState == newState) return;
+        anim.Play(newState);
+        currentState = newState;
+    }
 
     public void LadderMove()
     {
@@ -428,7 +470,7 @@ public class PlayerController : MonoBehaviour
                 rb.gravityScale = 0f;
 
                 if (moveY != 0)
-                
+
                 {
                     rb.velocity = new Vector2(moveX * 1.5f, moveY * ladderSpeed);
                 }
@@ -466,24 +508,53 @@ public class PlayerController : MonoBehaviour
 
             if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd) // Mitte des Bildschirms
             {
+                if (touch.phase == TouchPhase.Began)
+                {
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                    {
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
 
-                if (touch.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }                  
                 }
-                else if (touch.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
+                else if (isHang)
                 {
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                    coyoteCounter = 0;
+                    if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+                    {
+                        PullUp();
+                    } else
+                    {
+                        isPullUp = false;
+                    }
                 }
+                else if (touch.phase == TouchPhase.Ended)
+                {
+                    if (rb.velocity.y > 0.1)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                        coyoteCounter = 0;
+                    }
+                }
+                
             }
             // Set MoveX depend on Input
             if (touch.position.x < middleThirdStart) // Left Screen Side
             {
-                moveX = -1;
+                if (Input.touchCount <= 1)
+                {
+                    isHang = false;
+                }
+                moveX = -1;              
             }
             else if (touch.position.x > middleThirdEnd) // Right Screen Side
             {
+                if (Input.touchCount <= 1)
+                {
+                    isHang = false;
+                }
                 moveX = 1;
             }
             else
@@ -501,27 +572,44 @@ public class PlayerController : MonoBehaviour
 
             float middleThirdStart = Screen.width * 0.25f;
             float middleThirdEnd = Screen.width * 0.75f;
-           
+
             //First run, second Jump
             if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
             {
                 moveX = -1;
 
-                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                if (touch2.phase == TouchPhase.Began)
                 {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                    {
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }
+
                 }
                 else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
                 {
                     rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
                     coyoteCounter = 0;
                 }
-            } else if (touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
+            }
+            else if (touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
             {
                 moveX = 1;
-                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                if (touch2.phase == TouchPhase.Began)
                 {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                    {
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }
+
                 }
                 else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
                 {
@@ -531,25 +619,43 @@ public class PlayerController : MonoBehaviour
             }
 
             //First Jump, second Run
-            else if (touch1.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd && touch2.position.x < middleThirdStart)
+            else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x < middleThirdStart)
             {
                 moveX = -1;
 
-                if (touch1.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                if (touch1.phase == TouchPhase.Began)
                 {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                    {
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }
+
                 }
                 else if (touch1.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
                 {
                     rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
                     coyoteCounter = 0;
                 }
-            } else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x > middleThirdEnd)
+            }
+            else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x > middleThirdEnd)
             {
                 moveX = 1;
-                if (touch2.phase == TouchPhase.Began && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                
+                if (touch2.phase == TouchPhase.Began)
                 {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                    {
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }
+
                 }
                 else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
                 {
@@ -559,12 +665,38 @@ public class PlayerController : MonoBehaviour
             }
 
         }
-        
+
+    } 
+
+        private void HandleJoyStickInput()
+        {
+            /*
+            if (Application.isMobilePlatform)
+            {
+                Vector2 input = virtualJoystick.GetJoystickInput();
+                moveX = input.x;
+                moveY = input.y;
+
+                //JUMP
+                if (input.y >= 0.65f && rb.velocity.y <= 0 && coyoteCounter > 0 && landTimer <= 0)
+                {
+                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                } 
+                else if (input.y <= 0.3f && rb.velocity.y > 0)
+                {
+                    if (!isHang || !isClimbing)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
+                        coyoteCounter = 0;
+                    }           
+                }          
+            } 
+            */
     }
 
     IEnumerator JumpItemPower()
     {
-        
+
         float originalJumpForce = jumpForce;
         jumpForce += 75f;
         usedItem = true;
@@ -596,46 +728,46 @@ public class PlayerController : MonoBehaviour
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
                 //BounceBed Sound
-               
-            }                              
+
+            }
         }
 
         //Checks the Collision Surface to change Audio
         if (collision.gameObject.GetComponent<PlatformHandler>() != null)
         {
-          platformHandler = collision.gameObject.GetComponent<PlatformHandler>();
-           
+            platformHandler = collision.gameObject.GetComponent<PlatformHandler>();
+
             if (platformHandler.isWood)
-           {
-            isWood = true;
-           } else 
-           {
-            isWood = false;
-           }
+            {
+                isWood = true;
+            } else
+            {
+                isWood = false;
+            }
 
             if (platformHandler.isStone)
-           {
-            isStone = true;
-           } else 
-           {
-            isStone = false;
-           }
+            {
+                isStone = true;
+            } else
+            {
+                isStone = false;
+            }
 
             if (platformHandler.isGras)
-           {
-            isGras = true;
-           } else 
-           {
-            isGras = false;
-           }
+            {
+                isGras = true;
+            } else
+            {
+                isGras = false;
+            }
 
             if (platformHandler.isSnow)
-           {
-            isSnow = true;
-           } else 
-           {
-            isSnow = false;
-           }
+            {
+                isSnow = true;
+            } else
+            {
+                isSnow = false;
+            }
         }
 
         //Checks if Player hit Ladder
@@ -644,15 +776,14 @@ public class PlayerController : MonoBehaviour
             isLadder = true;
         }
 
-        if (collision.CompareTag("Platform"))
+        if (collision.CompareTag("leftGrab"))
         {
-            if (collision.gameObject.GetComponent<PlatformHandler>().canGrab)
-            {
-                platformpos = platformHandler.platform;
-            }      
-            lgrabPos = collision.gameObject.GetComponent<PlatformHandler>().grabL;
-            rgrabPos = collision.gameObject.GetComponent<PlatformHandler>().grabR;
-            
+            lgrabPos = collision.gameObject.transform.position;     
+        }
+
+        if (collision.CompareTag("rightGrab"))
+        {
+            rgrabPos = collision.gameObject.transform.position;
         }
     }
 
@@ -669,6 +800,6 @@ public class PlayerController : MonoBehaviour
             lgrabPos = Vector2.zero;
             rgrabPos = Vector2.zero;
         }
-
     }
+    
 }

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 1695898385294845528}
   - component: {fileID: 2475888503798674575}
   m_Layer: 3
-  m_Name: PF Village Props - Obstacle Platform X40
+  m_Name: PF Village Props - Obstacle Platform X40 1
   m_TagString: Platform
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

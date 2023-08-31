@@ -8,6 +8,8 @@ TagManager:
   - dashpowerup
   - Ladder
   - Platform
+  - leftGrab
+  - rightGrab
   layers:
   - Default
   - TransparentFX
@@ -15,7 +17,7 @@ TagManager:
   - ground
   - Water
   - UI
-  - 
+  - grab
   - 
   - 
   - 

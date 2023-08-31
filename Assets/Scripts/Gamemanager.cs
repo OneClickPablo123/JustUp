@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -38,7 +39,6 @@ public class Gamemanager : MonoBehaviour
     public float level2Threshold = 50f;
     public float level3Threshold = 80f; 
     public float volumeChangeSpeed = 0.15f;
-        
 
 
     void Start()
@@ -60,7 +60,6 @@ public class Gamemanager : MonoBehaviour
 
         //Audio Handler
         audioSource.clip = null;
-        
     }
 
     // Update is called once per frame

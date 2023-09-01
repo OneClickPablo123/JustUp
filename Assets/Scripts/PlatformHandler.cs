@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class PlatformHandler : MonoBehaviour
@@ -33,11 +34,7 @@ public class PlatformHandler : MonoBehaviour
     private float fadeSpeed;
 
     //Position
-    internal Vector2 platform;
-
-
-
-
+    [SerializeField]internal Transform pullPos;
 
 
     private void Awake()
@@ -51,13 +48,6 @@ public class PlatformHandler : MonoBehaviour
                 waypoint.transform.SetParent(null);
             }
         }
-        
-        if (canGrab)
-        {
-          platform = this.transform.position;  
-        }
-
-
     }
 
     private void Start()
@@ -70,8 +60,11 @@ public class PlatformHandler : MonoBehaviour
             originalColor = spriteRenderer.color;
             fadeSpeed = disappearTime;    
         }
-       
-       
+
+        if (canGrab)
+        {
+            pullPos = gameObject.transform.Find("pull_pos");
+        }
     }
 
     private void Update()

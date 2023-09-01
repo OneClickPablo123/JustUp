@@ -1,7 +1,7 @@
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,7 +17,6 @@ public class PlayerController : MonoBehaviour
 
 
     [Header("Jump Settings")]
-    private Vector2 jump;
     public float jumpForce;
     public float fallSpeed;
     public float coyoteTime;
@@ -26,13 +25,11 @@ public class PlayerController : MonoBehaviour
     [Header("Hang Settings")]
     [SerializeField] BoxCollider2D hangCollider;
     Vector2 facePosition;
-    private bool isHang;
+    public bool isHang;
     Vector2 lgrabPos;
     Vector2 rgrabPos;
-    Transform leftgrab;
-    Transform rightgrab;
-    private bool isPullUp;
-    Vector2 platformpos;
+    public bool isPullUp;
+    Vector2 pullPos;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -42,7 +39,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Touch Settings")]
     MobileJoyStick virtualJoystick;
-    bool canJump;
+    GameObject virtualJoyStickCanvas;
     public float landTimer;
     public float landTime;
 
@@ -51,7 +48,7 @@ public class PlayerController : MonoBehaviour
     internal bool isStone;
     internal bool isGras;
     internal bool isSnow;
-    PlatformHandler platformHandler;
+
 
     // ==========================
     //     Other Variables
@@ -67,11 +64,8 @@ public class PlayerController : MonoBehaviour
     private BoxCollider2D coll;
     Gamemanager managerscript;
     GameObject gamemanager;
-    private BoxCollider2D playerColl;
     SpriteRenderer spriteRenderer;
-    Camera cam;
-    camBrain camBrain;
-
+    [SerializeField] PlatformHandler platformHandler;
 
     // ==========================
     //    LayerMask's
@@ -101,17 +95,24 @@ public class PlayerController : MonoBehaviour
         anim = GetComponent<Animator>();
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
-        playerColl = GetComponent<BoxCollider2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         virtualJoystick = managerscript.GetComponent<MobileJoyStick>();
+        virtualJoyStickCanvas = GameObject.Find("VirtualJoyStick");
+        
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-        cam = Camera.main;
-        camBrain = cam.GetComponent<camBrain>();
+        
         //Start Conditions
-
+        if (Application.isMobilePlatform)
+        {
+            virtualJoyStickCanvas.SetActive(true);
+        }
+        else
+        {
+            virtualJoyStickCanvas.SetActive(false);
+        }
 
     }
 
@@ -138,7 +139,8 @@ public class PlayerController : MonoBehaviour
         Jump();
         LadderMove();
         Animation();
-        HandleTouchInputs();
+        //HandleTouchInputs();
+        HandleJoyStickInput();
         ItemUsage();
         HandleHang();
 
@@ -155,17 +157,12 @@ public class PlayerController : MonoBehaviour
                 maxSpeed = originalMaxSpeed;
                 maxSpeedRun = originalMaxSpeedRun;
             }
-            isHang = false;
-            isPullUp = false;
-            canJump = true;
-
             landTimer -= Time.deltaTime;
             coyoteCounter = coyoteTime;
         }
         else
         {
             landTimer = landTime;
-            canJump = false;
             coyoteCounter -= Time.deltaTime;
 
             if (!isClimbing && !usedItem && !isHang && !isPullUp)
@@ -259,22 +256,24 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKey(KeyCode.G))
         {
+
             if (!IsGrounded() && canHang() && !isPullUp)
             {
                 SnapToEdge();
             }
+       
         }
         else if (Input.GetKeyUp(KeyCode.G))
         {
-            isHang = false;
             rb.gravityScale = originalGravity;
+            isHang = false;
         }
 
         if (Input.GetKey(KeyCode.Space) && isHang)
         {
             PullUp();
-
-        } else if (Input.GetKeyUp(KeyCode.Space) && isHang)
+        } 
+        else if (Input.GetKeyUp(KeyCode.Space))
         {
             isPullUp = false;
         }
@@ -283,27 +282,22 @@ public class PlayerController : MonoBehaviour
 
     public void SnapToEdge()
     {
-        if (lgrabPos != Vector2.zero && transform.position.x < lgrabPos.x && transform.position.x < rgrabPos.x && facePosition.x == 1)
+        if (lgrabPos != Vector2.zero && transform.position.x < lgrabPos.x && transform.position.x < rgrabPos.x && facePosition.x == 1 && !isHang && canHang())
         {
             isHang = true;
-            if (isHang)
-            {
-                rb.velocity = Vector2.zero;
-                this.transform.position = lgrabPos;
-                rb.gravityScale = 0;
-            }
-        }
+            this.transform.position = lgrabPos;
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0;
+        } 
 
-        if (rgrabPos != Vector2.zero && transform.position.x > rgrabPos.x && transform.position.x > lgrabPos.x && facePosition.x == -1)
+        if (rgrabPos != Vector2.zero && transform.position.x > rgrabPos.x && transform.position.x > lgrabPos.x && facePosition.x == -1 && !isHang && canHang())
         {
             isHang = true;
-            if (isHang)
-            {
-                rb.velocity = Vector2.zero;
-                this.transform.position = rgrabPos;
-                rb.gravityScale = 0;
-            }
+            this.transform.position = rgrabPos;
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0;
         }
+       
     }
 
     public void PullUp()
@@ -311,26 +305,32 @@ public class PlayerController : MonoBehaviour
         isPullUp = true;
         rb.gravityScale = 0;
         float normalizedTime = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        //float climbspeed = 50f;
 
-        if (normalizedTime >= 0.7f && anim.GetCurrentAnimatorStateInfo(0).IsName(PLAYER_PULL))
+        if (normalizedTime >= 0.7f && anim.GetCurrentAnimatorStateInfo(0).IsName(PLAYER_PULL) && (Vector2)transform.position != pullPos)
         {
-            float climbspeed = 50f;
-            Vector2 climbDirection = new Vector2(facePosition.x / 2.5f, 1);
-            transform.Translate(climbDirection * climbspeed * Time.deltaTime);
+            // rb.MovePosition(pullPos * Time.deltaTime);
+            this.transform.position = pullPos;
+        } 
+        else if ((Vector2)transform.position == pullPos)
+        {
+            isHang = false;
         }
+
     }
+            
 
     public void Jump()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1 && coyoteCounter > 0)
+        if (Input.GetKeyDown(KeyCode.Space) && rb.velocity.y <= 0.1 && coyoteCounter > 0 && !isHang && !isPullUp)
         {
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
 
         if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
         {
-            if (!isHang || !isClimbing)
+            if (!isHang || !isClimbing || !isPullUp)
             {
                 rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2.5f);
                 //Set Counter to 0 to avoid Double Jump
@@ -410,7 +410,7 @@ public class PlayerController : MonoBehaviour
             {
                 ChangeAnimationState(PLAYER_PULL);
             }
-            else if (rb.velocity.y < 0.1f)
+            else if (rb.velocity.y < 0f)
             {
                 ChangeAnimationState(PLAYER_FALL);
             }
@@ -504,7 +504,7 @@ public class PlayerController : MonoBehaviour
         {
             Touch touch = Input.GetTouch(0);
             float middleThirdStart = Screen.width * 0.25f;
-            float middleThirdEnd = Screen.width * 0.75f;
+            float middleThirdEnd =   Screen.height * 0.75f;
 
             if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd) // Mitte des Bildschirms
             {
@@ -522,7 +522,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else if (isHang)
                 {
-                    if (touch.phase == TouchPhase.Moved || touch.phase == TouchPhase.Stationary)
+                    if (touch.phase == TouchPhase.Stationary)
                     {
                         PullUp();
                     } else
@@ -546,16 +546,25 @@ public class PlayerController : MonoBehaviour
                 if (Input.touchCount <= 1)
                 {
                     isHang = false;
+                    isPullUp = false;
                 }
-                moveX = -1;              
+                if (!isPullUp)
+                {
+                    moveX = -1;
+                }
+           
             }
             else if (touch.position.x > middleThirdEnd) // Right Screen Side
             {
                 if (Input.touchCount <= 1)
                 {
                     isHang = false;
+                    isPullUp = false;
                 }
-                moveX = 1;
+                if (!isPullUp)
+                {
+                    moveX = 1;
+                }
             }
             else
             {
@@ -570,7 +579,7 @@ public class PlayerController : MonoBehaviour
             Touch touch1 = Input.GetTouch(0);
             Touch touch2 = Input.GetTouch(1);
 
-            float middleThirdStart = Screen.width * 0.25f;
+            float middleThirdStart = Screen.height * 0.25f;
             float middleThirdEnd = Screen.width * 0.75f;
 
             //First run, second Jump
@@ -668,32 +677,93 @@ public class PlayerController : MonoBehaviour
 
     } 
 
-        private void HandleJoyStickInput()
+
+    private void HandleJoyStickInput()
+    {
+        
+        moveX = virtualJoystick.GetMappedJoystickInput();   
+        float screenHeight = Screen.height * 0.75f;
+
+        if (Input.touchCount > 0)
         {
-            /*
-            if (Application.isMobilePlatform)
+            Touch touch = Input.GetTouch(0);
+
+            if (touch.position.y >= screenHeight * 0.75f)
             {
-                Vector2 input = virtualJoystick.GetJoystickInput();
-                moveX = input.x;
-                moveY = input.y;
-
-                //JUMP
-                if (input.y >= 0.65f && rb.velocity.y <= 0 && coyoteCounter > 0 && landTimer <= 0)
+                // Dieser Bereich ist für Aktionen reserviert (oberen 75% des Bildschirms)
+                if (touch.phase == TouchPhase.Began)
                 {
-                    rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                } 
-                else if (input.y <= 0.3f && rb.velocity.y > 0)
-                {
-                    if (!isHang || !isClimbing)
+                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
                     {
-                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2);
+                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                    }
+                    else if (!IsGrounded() && !isHang && !isPullUp)
+                    {
+                        SnapToEdge();
+                    }
+                }
+                else if (isHang)
+                {
+                    if (touch.phase == TouchPhase.Stationary)
+                    {
+                        PullUp();
+                    }
+                    else
+                    {
+                        isPullUp = false;
+                    }
+                }
+                else if (touch.phase == TouchPhase.Ended)
+                {
+                    if (rb.velocity.y > 0.1)
+                    {
+                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
                         coyoteCounter = 0;
-                    }           
-                }          
-            } 
-            */
-    }
+                    }
+                }
+                if (Input.touchCount >= 2)
+                {
+                    Touch touch1 = Input.GetTouch(0);
+                    Touch touch2 = Input.GetTouch(1);
 
+                    if (touch.position.y >= screenHeight && touch2.position.y > screenHeight)
+                    {
+                        if (touch1.phase == TouchPhase.Began)
+                        {
+                            if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                            {
+                                rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                            }
+
+                            else if (!IsGrounded() && !isHang && !isPullUp)
+                            {
+                                SnapToEdge();
+                            }
+                        }
+                        else if (isHang)
+                        {
+                            if (touch1.phase == TouchPhase.Stationary)
+                            {
+                                PullUp();
+                            }
+                            else
+                            {
+                                isPullUp = false;
+                            }
+                        }
+                        else if (touch1.phase == TouchPhase.Ended)
+                        {
+                            if (rb.velocity.y > 0.1)
+                            {
+                                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                                coyoteCounter = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }           
+    }                  
     IEnumerator JumpItemPower()
     {
 
@@ -728,7 +798,6 @@ public class PlayerController : MonoBehaviour
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
                 //BounceBed Sound
-
             }
         }
 
@@ -736,6 +805,11 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.GetComponent<PlatformHandler>() != null)
         {
             platformHandler = collision.gameObject.GetComponent<PlatformHandler>();
+            
+            if (platformHandler.canGrab)
+            {
+                pullPos = platformHandler.pullPos.transform.position;
+            }
 
             if (platformHandler.isWood)
             {

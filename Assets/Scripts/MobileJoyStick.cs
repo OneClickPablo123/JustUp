@@ -1,80 +1,70 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class MobileJoyStick : MonoBehaviour
 {
+    GameObject joyStick;
+    public Image joystickBackground;
+    public Image joystickHandle;
 
-        GameObject joyStick;
-        public Image joystickBackground;
-        public Image joystickHandle;
+    private Vector2 joystickCenter;
+    private bool isJoystickActive = false;
+    private float joystickInput;
 
-        private Vector2 joystickCenter;
-        private bool isJoystickActive = false;
-        private Vector2 joystickInput;
-
-
-        private void Start()
+    private void Start()
+    {
+        if (Application.isMobilePlatform)
         {
             joystickCenter = joystickBackground.rectTransform.position;
             joyStick = GameObject.Find("VirtualJoyStick");
         }
+    }
 
-        private void Update()
+
+    private void Update()
+    {
+        if (Input.touchCount > 0)
         {
-            if (Input.touchCount > 0)
-            {
-                Touch touch = Input.GetTouch(0);
+            Touch touch = Input.GetTouch(0);
 
-                switch (touch.phase)
-                {
-                    case TouchPhase.Began:
-                        if (RectTransformUtility.RectangleContainsScreenPoint(joystickBackground.rectTransform, touch.position))
-                        {
-                            isJoystickActive = true;
-                        }
-                        break;
-
-                    case TouchPhase.Moved:
-                        if (isJoystickActive)
-                        {
-                            joystickInput = (touch.position - joystickCenter) / (joystickBackground.rectTransform.sizeDelta.x * 0.5f);
-                            joystickInput = Vector2.ClampMagnitude(joystickInput, 1f);
-                            joystickHandle.rectTransform.anchoredPosition = joystickInput * (joystickBackground.rectTransform.sizeDelta.x * 0.5f);
-                        }
-                        break;
-
-                    case TouchPhase.Ended:
-                    case TouchPhase.Canceled:
-                        isJoystickActive = false;
-                        joystickInput = Vector2.zero;
-                        joystickHandle.rectTransform.anchoredPosition = Vector2.zero;
-                        break;
-                }
-            }
-            else
+            switch (touch.phase)
             {
-                isJoystickActive = false;
-                joystickInput = Vector2.zero;
-                joystickHandle.rectTransform.anchoredPosition = Vector2.zero;
-            }
+                case TouchPhase.Began:
+                    if (RectTransformUtility.RectangleContainsScreenPoint(joystickBackground.rectTransform, touch.position))
+                    {
+                        isJoystickActive = true;
+                    }
+                    break;
 
-            if (Application.isMobilePlatform)
-            {
-            joyStick.SetActive(true);
-            } else
-            {
-            joyStick.SetActive(false);
+                case TouchPhase.Moved:
+                    if (isJoystickActive)
+                    {
+                        float rawX = (touch.position.x - joystickCenter.x) / (joystickBackground.rectTransform.sizeDelta.x * 0.5f);
+                        joystickInput = Mathf.Clamp(rawX, -1f, 1f);
+                        joystickHandle.rectTransform.anchoredPosition = new Vector2(joystickInput * (joystickBackground.rectTransform.sizeDelta.x * 0.5f), 0f);
+                    }
+                    break;
+
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    isJoystickActive = false;
+                    joystickInput = 0f;
+                    joystickHandle.rectTransform.anchoredPosition = Vector2.zero;
+                    break;
             }
         }
-
-        public Vector2 GetJoystickInput()
+        else
         {
-            return joystickInput;
+            isJoystickActive = false;
+            joystickInput = 0f;
+            joystickHandle.rectTransform.anchoredPosition = Vector2.zero;
         }
+    }
 
-    
-    
+    public float GetMappedJoystickInput()
+    {
+        // Map the joystickInput to the range 0.1 - 1
+        float mappedInput = Mathf.Lerp(-1, 1f, (joystickInput + 1f) / 2f);
+        return mappedInput;
+    }
 }

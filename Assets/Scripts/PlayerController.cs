@@ -680,17 +680,16 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJoyStickInput()
     {
-        
-        moveX = virtualJoystick.GetMappedJoystickInput();   
-        float screenHeight = Screen.height * 0.75f;
+        float screenHeight = Screen.height * 0.80f;
 
         if (Input.touchCount > 0)
         {
+            moveX = virtualJoystick.GetMappedJoystickInput();
             Touch touch = Input.GetTouch(0);
 
-            if (touch.position.y >= screenHeight * 0.75f)
+            if (touch.position.y > screenHeight)
             {
-                // Dieser Bereich ist für Aktionen reserviert (oberen 75% des Bildschirms)
+    
                 if (touch.phase == TouchPhase.Began)
                 {
                     if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
@@ -726,8 +725,10 @@ public class PlayerController : MonoBehaviour
                     Touch touch1 = Input.GetTouch(0);
                     Touch touch2 = Input.GetTouch(1);
 
-                    if (touch.position.y >= screenHeight && touch2.position.y > screenHeight)
+                    if (touch1.position.y > screenHeight && touch2.position.y < screenHeight)
                     {
+                        moveX = virtualJoystick.GetMappedJoystickInput();
+
                         if (touch1.phase == TouchPhase.Began)
                         {
                             if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)

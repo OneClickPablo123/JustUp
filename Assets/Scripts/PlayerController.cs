@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
-
-
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -38,10 +37,18 @@ public class PlayerController : MonoBehaviour
     private float moveY;
 
     [Header("Touch Settings")]
-    MobileJoyStick virtualJoystick;
-    GameObject virtualJoyStickCanvas;
     public float landTimer;
     public float landTime;
+
+    [Header("JoyStick Settings")]
+    GameObject joyStick;
+    RectTransform joystickBackground;
+    RectTransform joystickHandle;
+    public RectTransform touchArea;
+    private Vector2 joystickInput = Vector2.zero;
+    private Vector2 originalHandlePosition;
+
+
 
     //Surfaces
     internal bool isWood;
@@ -56,6 +63,7 @@ public class PlayerController : MonoBehaviour
 
     private float originalGravity;
     internal bool usedItem;
+    Camera mainCam;
 
     // ==========================
     //     Components
@@ -96,23 +104,33 @@ public class PlayerController : MonoBehaviour
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        virtualJoystick = managerscript.GetComponent<MobileJoyStick>();
-        virtualJoyStickCanvas = GameObject.Find("VirtualJoyStick");
-        
+        joyStick = GameObject.Find("VirtualJoyStick");
+        mainCam = Camera.main;
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
-        
+
         //Start Conditions
-        if (Application.isMobilePlatform)
-        {
-            virtualJoyStickCanvas.SetActive(true);
+
+        //DEBUG JOYSTICK
+        joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
+        joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
+        originalHandlePosition = joystickHandle.anchoredPosition;
+
+        //Mobile-JoyStick
+        /*if (Application.isMobilePlatform)
+        {         
+            joyStick.SetActive(true);       
+            joystickCenter = joystickBackground.rectTransform.position;
+            joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<Image>();
+            joystickHandle = joyStick.transform.Find("JoyStickHandler").GetComponent<Image>();
+
         }
         else
         {
-            virtualJoyStickCanvas.SetActive(false);
-        }
+            joyStick.SetActive(false);
+        }*/
 
     }
 
@@ -129,6 +147,9 @@ public class PlayerController : MonoBehaviour
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
+        } else
+        {
+            moveX = GetJoystickInput().x;
         }
 
 
@@ -315,6 +336,7 @@ public class PlayerController : MonoBehaviour
         else if ((Vector2)transform.position == pullPos)
         {
             isHang = false;
+            isPullUp = false;
         }
 
     }
@@ -675,96 +697,90 @@ public class PlayerController : MonoBehaviour
 
         }
 
-    } 
+    }
 
 
     private void HandleJoyStickInput()
     {
-        float screenHeight = Screen.height * 0.80f;
+        Debug.Log(joystickInput);
 
         if (Input.touchCount > 0)
         {
-            moveX = virtualJoystick.GetMappedJoystickInput();
-            Touch touch = Input.GetTouch(0);
-
-            if (touch.position.y > screenHeight)
+            foreach (Touch touch in Input.touches)
             {
-    
-                if (touch.phase == TouchPhase.Began)
-                {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                    {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                    }
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }
-                }
-                else if (isHang)
-                {
-                    if (touch.phase == TouchPhase.Stationary)
-                    {
-                        PullUp();
-                    }
-                    else
-                    {
-                        isPullUp = false;
-                    }
-                }
-                else if (touch.phase == TouchPhase.Ended)
-                {
-                    if (rb.velocity.y > 0.1)
-                    {
-                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                        coyoteCounter = 0;
-                    }
-                }
-                if (Input.touchCount >= 2)
-                {
-                    Touch touch1 = Input.GetTouch(0);
-                    Touch touch2 = Input.GetTouch(1);
+                Vector2 touchPosition = touch.position;
 
-                    if (touch1.position.y > screenHeight && touch2.position.y < screenHeight)
-                    {
-                        moveX = virtualJoystick.GetMappedJoystickInput();
+                // Überprüfe, ob die Berührung innerhalb des begrenzten Bereichs liegt
+                if (RectTransformUtility.RectangleContainsScreenPoint(touchArea, touchPosition))
+                {
+                    Vector2 localTouchPosition;
+                    RectTransformUtility.ScreenPointToLocalPointInRectangle(joystickBackground, touchPosition, null, out localTouchPosition);
 
-                        if (touch1.phase == TouchPhase.Began)
+                    float backgroundWidth = joystickBackground.sizeDelta.x;
+
+                    if (localTouchPosition.x <= backgroundWidth * 0.5f && touch.phase == TouchPhase.Moved)
+                    {
+                        float sensitivity = 2.5f;
+                        float rawX = localTouchPosition.x / (backgroundWidth * 0.5f);
+                        joystickInput = new Vector2(Mathf.Clamp(rawX * sensitivity, -1f, 1f), 0f);
+                        joystickHandle.anchoredPosition = new Vector2(joystickInput.x * (backgroundWidth * 0.5f), 0f);
+                    }                   
+                }            
+            }
+        } else
+        {
+            joystickHandle.anchoredPosition = originalHandlePosition;
+            joystickInput = Vector2.zero;
+        }
+        
+
+        if (Input.touchCount > 0)
+        {
+            foreach (Touch touch in Input.touches)
+            {
+                Vector2 touchPosition = touch.position;
+
+                if (touchPosition.y > Screen.height * 0.15f)
+                {
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
                         {
-                            if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                            {
-                                rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                            }
-
-                            else if (!IsGrounded() && !isHang && !isPullUp)
-                            {
-                                SnapToEdge();
-                            }
+                            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
                         }
-                        else if (isHang)
+
+                        else if (!IsGrounded() && !isHang && !isPullUp)
                         {
-                            if (touch1.phase == TouchPhase.Stationary)
-                            {
-                                PullUp();
-                            }
-                            else
-                            {
-                                isPullUp = false;
-                            }
+                            SnapToEdge();
                         }
-                        else if (touch1.phase == TouchPhase.Ended)
+                    }
+                    else if (isHang)
+                    {
+                        if (touch.phase == TouchPhase.Stationary)
                         {
-                            if (rb.velocity.y > 0.1)
-                            {
-                                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                                coyoteCounter = 0;
-                            }
+                            PullUp();
+                        }
+                        else
+                        {
+                            isPullUp = false;
+                        }
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        if (rb.velocity.y > 0.1)
+                        {
+                            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                            coyoteCounter = 0;
                         }
                     }
                 }
             }
-        }           
-    }                  
+        }       
+    }
+    public Vector2 GetJoystickInput()
+    {
+        return new Vector2(Mathf.Round(joystickInput.x), 0);
+    }
     IEnumerator JumpItemPower()
     {
 

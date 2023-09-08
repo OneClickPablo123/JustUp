@@ -3,7 +3,8 @@ using UnityEngine;
 public class SaveGame : MonoBehaviour
 {
 
-    private PlayerStats playerStats;
+    PlayerStats playerStats;
+    MenuStats menuStats;
 
 
     public void CreatePlayerStats()
@@ -11,7 +12,7 @@ public class SaveGame : MonoBehaviour
         playerStats = new PlayerStats("", 0f , 0,0);
     }
 
-    public void SaveStats()
+    public void SavePlayerStats()
     {
         PlayerPrefs.SetString("name", playerStats.name);
         PlayerPrefs.SetFloat("highscore", playerStats.highscore);
@@ -19,9 +20,24 @@ public class SaveGame : MonoBehaviour
         PlayerPrefs.SetFloat("hasItem", playerStats.hasItem);
     }
 
-    public void LoadStats()
+    public void LoadPlayerStats()
     {
         playerStats = new PlayerStats(PlayerPrefs.GetString("name"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"));
+    }
+
+    public void CreateMenuStats()
+    {
+        menuStats = new MenuStats(0);
+    }
+
+    public void SaveMenuStats()
+    {
+        PlayerPrefs.SetInt("inputSystem", menuStats.inputSystem);
+    }
+
+    public void LoadMenuStats()
+    {
+        menuStats = new MenuStats(PlayerPrefs.GetInt("inputSystem"));
     }
 
 }

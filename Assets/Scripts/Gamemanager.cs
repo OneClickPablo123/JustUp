@@ -27,6 +27,7 @@ public class Gamemanager : MonoBehaviour
     public bool gameCompleted;
     SaveGame saveGame;
     public PlayerStats playerStats;
+    public MenuStats menuStats;
     public AudioSource audioSource;
 
     //Sounds
@@ -55,7 +56,8 @@ public class Gamemanager : MonoBehaviour
 
         //Load SaveGame 
         saveGame = GetComponent<SaveGame>();
-        saveGame.LoadStats();
+        saveGame.LoadPlayerStats();
+        saveGame.LoadMenuStats();
 
         //Audio Handler
         audioSource.clip = null;
@@ -94,7 +96,7 @@ public class Gamemanager : MonoBehaviour
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
         {
             bestTimef = actualTime;
-            saveGame.SaveStats();
+            saveGame.SavePlayerStats();
             Debug.Log("bestTime Set");
         }
     }
@@ -124,7 +126,7 @@ public class Gamemanager : MonoBehaviour
         
         {
             playerStats.highscore = highScoreHeight;
-            saveGame.SaveStats();
+            saveGame.SavePlayerStats();
             newHighScore = false;
         }
 
@@ -159,7 +161,7 @@ public class Gamemanager : MonoBehaviour
 
     public void ExitGame()
     {
-        saveGame.SaveStats();
+        saveGame.SavePlayerStats();
         Application.Quit();       
     }
 

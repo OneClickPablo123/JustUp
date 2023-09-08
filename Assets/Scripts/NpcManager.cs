@@ -111,7 +111,7 @@ public class NpcManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Return))
         {
             gamemanager.playerStats.name = enteredText;
-            saveGame.SaveStats();
+            saveGame.SavePlayerStats();
             inputBox.SetActive(false);
             Debug.Log("Eingegebener Text: " + enteredText);
         }

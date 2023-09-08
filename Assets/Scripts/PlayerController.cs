@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 public class PlayerController : MonoBehaviour
 {
@@ -47,6 +48,7 @@ public class PlayerController : MonoBehaviour
     public RectTransform touchArea;
     private Vector2 joystickInput = Vector2.zero;
     private Vector2 originalHandlePosition;
+    private int inputSystem;
 
 
 
@@ -112,6 +114,7 @@ public class PlayerController : MonoBehaviour
         originalGravity = rb.gravityScale;
 
         //Start Conditions
+        inputSystem = PlayerPrefs.GetInt("inputSystem");
 
         //DEBUG JOYSTICK
         joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
@@ -142,15 +145,27 @@ public class PlayerController : MonoBehaviour
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-
+        Debug.Log(inputSystem);
         if (Input.touchCount == 0)
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
-        } else
+        } else if (inputSystem == 1)
         {
-            moveX = GetJoystickInput().x;
+           moveX = GetJoystickInput().x;
+           HandleJoyStickInput();
         }
+        else if (inputSystem == 2)
+        {
+            HandleTouchInputs();
+        }
+        else if (inputSystem == 3)
+        {
+            HandleTouchInput2();
+        }
+
+
+
 
 
         // ==========================
@@ -160,8 +175,6 @@ public class PlayerController : MonoBehaviour
         Jump();
         LadderMove();
         Animation();
-        //HandleTouchInputs();
-        HandleJoyStickInput();
         ItemUsage();
         HandleHang();
 
@@ -699,7 +712,6 @@ public class PlayerController : MonoBehaviour
 
     }
 
-
     private void HandleJoyStickInput()
     {
         Debug.Log(joystickInput);
@@ -777,10 +789,94 @@ public class PlayerController : MonoBehaviour
             }
         }       
     }
+
+    private void HandleTouchInput2()
+    {
+        if (Input.touchCount > 0)
+        {
+            foreach (Touch touch in Input.touches)
+            {
+                // Holen Sie sich die x-Position der Berührung
+                float touchX = touch.position.x;
+
+                // Holen Sie sich die Breite des Bildschirms
+                float screenWidth = Screen.width;
+
+                // Teilen Sie die linke Seite des Bildschirms in zwei Hälften
+                float leftHalf = screenWidth / 4; // 25% von links
+                float rightHalf = screenWidth / 2; // 50% von links
+
+                // Überprüfen Sie, in welchem Bereich die Berührung stattgefunden hat
+                if (touchX < leftHalf)
+                {
+                    Debug.Log("Linke Seite des Bildschirms, linker Bereich wurde berührt");
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        moveX = -1;
+                    } else if (touch.phase == TouchPhase.Ended)
+                    {
+                        moveX = 0;
+                    }
+                   
+                }
+                else if (touchX < rightHalf)
+                {
+                    Debug.Log("Linke Seite des Bildschirms, rechter Bereich wurde berührt");
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        moveX = 1;
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        moveX = 0;
+                    }
+                }
+                else
+                {
+                    if (touch.phase == TouchPhase.Began)
+                    {
+                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                        {
+                            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                        }
+
+                        else if (!IsGrounded() && !isHang && !isPullUp)
+                        {
+                            SnapToEdge();
+                        }
+                    }
+                    else if (isHang)
+                    {
+                        if (touch.phase == TouchPhase.Stationary)
+                        {
+                            PullUp();
+                        }
+                        else
+                        {
+                            isPullUp = false;
+                        }
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        if (rb.velocity.y > 0.1)
+                        {
+                            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                            coyoteCounter = 0;
+                        }
+                    }
+                    Debug.Log("Rechte Seite des Bildschirms wurde berührt");
+                }
+            }
+            
+        }
+
+    }
+
     public Vector2 GetJoystickInput()
     {
         return new Vector2(Mathf.Round(joystickInput.x), 0);
     }
+
     IEnumerator JumpItemPower()
     {
 

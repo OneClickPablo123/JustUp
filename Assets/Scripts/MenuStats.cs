@@ -1,11 +1,10 @@
 [System.Serializable]
 public class MenuStats
 {
-    public int inputSystem;
-
-    public MenuStats(int inputSystem)
+    public int touchControls;
+    public MenuStats(int touchControls)
     {
-        this.inputSystem = inputSystem;
+        this.touchControls = touchControls;
     }
 }
 

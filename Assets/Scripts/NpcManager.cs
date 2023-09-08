@@ -1,8 +1,6 @@
-using System.Xml;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
+
 
 public class NpcManager : MonoBehaviour
 {
@@ -41,7 +39,7 @@ public class NpcManager : MonoBehaviour
     void Update()
     {
         playerHighscore = gamemanager.playerStats.highscore;
-        playerName = gamemanager.playerStats.name;
+        playerName = saveGame.playerStats.name;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -110,7 +108,7 @@ public class NpcManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            gamemanager.playerStats.name = enteredText;
+            saveGame.playerStats.name = enteredText;
             saveGame.SavePlayerStats();
             inputBox.SetActive(false);
             Debug.Log("Eingegebener Text: " + enteredText);

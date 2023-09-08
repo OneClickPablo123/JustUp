@@ -1,10 +1,11 @@
+using System;
 using UnityEngine;
 
 public class SaveGame : MonoBehaviour
 {
 
-    PlayerStats playerStats;
-    MenuStats menuStats;
+    [SerializeField] internal PlayerStats playerStats;
+    [SerializeField] internal MenuStats menuStats;
 
 
     public void CreatePlayerStats()
@@ -17,7 +18,8 @@ public class SaveGame : MonoBehaviour
         PlayerPrefs.SetString("name", playerStats.name);
         PlayerPrefs.SetFloat("highscore", playerStats.highscore);
         PlayerPrefs.SetFloat("bestTime", playerStats.bestTime);
-        PlayerPrefs.SetFloat("hasItem", playerStats.hasItem);
+        PlayerPrefs.SetInt("hasItem", playerStats.hasItem);
+        PlayerPrefs.Save();
     }
 
     public void LoadPlayerStats()
@@ -27,17 +29,26 @@ public class SaveGame : MonoBehaviour
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(0);
+        menuStats = new MenuStats(1);
     }
 
     public void SaveMenuStats()
     {
-        PlayerPrefs.SetInt("inputSystem", menuStats.inputSystem);
+        try
+        {
+            PlayerPrefs.SetInt("touchControls", menuStats.touchControls);
+            PlayerPrefs.Save(); // Speichern der PlayerPrefs
+            Debug.Log("MenuStats Saved!");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Fehler beim Speichern der Menüstatistiken: " + e.Message);
+        }
     }
 
     public void LoadMenuStats()
     {
-        menuStats = new MenuStats(PlayerPrefs.GetInt("inputSystem"));
+        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"));
     }
 
 }

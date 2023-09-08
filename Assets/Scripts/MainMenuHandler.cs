@@ -7,42 +7,26 @@ public class MainMenuHandler : MonoBehaviour
 
     //Save
     SaveGame saveGame;
-    public MenuStats menuStats;
 
     //Main Menu
     GameObject menuPanel;
-    GameObject startButton;
-    GameObject exitButton;
-    GameObject optionButton;
-
     //Options
     GameObject optionMenu;
     GameObject inputPanel;
-    GameObject inputSystem1;
-    GameObject inputSystem2;
-    GameObject inputSystem3;
 
     // Start is called before the first frame update
     void Start()
     {
         saveGame = GetComponent<SaveGame>();
         saveGame.LoadMenuStats();
-        menuPanel = GameObject.Find("MainMenuPanel");
-        startButton = GameObject.Find("StartButton");
-        exitButton = GameObject.Find("ExitButton");
-        optionButton = GameObject.Find("OptionButton");
+        saveGame.LoadPlayerStats();
+        menuPanel = GameObject.Find("MainMenuPanel");      
         
 
         //Options
         optionMenu = GameObject.Find("OptionPanel");
-        inputPanel = optionMenu.transform.Find("InputPanel").gameObject;
-        inputSystem1 = inputPanel.transform.Find("JoyStickInput").gameObject;
-        inputSystem2 = inputPanel.transform.Find("SideInput").gameObject;
-        inputSystem3 = inputPanel.transform.Find("TwoSidedInput").gameObject;
-        
         optionMenu.SetActive(false);
         menuPanel.SetActive(true);
-
     }
 
     // Update is called once per frame
@@ -92,11 +76,14 @@ public class MainMenuHandler : MonoBehaviour
 
     public void QuitGame()
     {
+        saveGame.SaveMenuStats();
+        saveGame.SavePlayerStats();
         Application.Quit();
     }
 
     public void StartGame()
     {
+        Debug.Log(PlayerPrefs.GetInt("touchControls"));
         SceneManager.LoadScene(1);
     }
 
@@ -109,27 +96,29 @@ public class MainMenuHandler : MonoBehaviour
     //JoyStick
     public void Control1()
     {
-       menuStats.inputSystem = 1;
-
+        saveGame.menuStats.touchControls = 1;
     }
 
     //Left Right Side
     public void Control2()
     {
-        menuStats.inputSystem = 2;
+        saveGame.menuStats.touchControls = 2;
     }
 
     // Left Side Walk, Right Side Jump
     public void Control3()
     {
-        menuStats.inputSystem = 3;
+        saveGame.menuStats.touchControls = 3;
     }
 
     public void OptionBackButton()
     {
+        saveGame.SaveMenuStats();
+        Debug.Log("Start: " + saveGame.menuStats.touchControls);
+        Debug.Log(PlayerPrefs.GetInt("touchControls"));
         menuPanel.SetActive(true);
         optionMenu.SetActive(false);
-        saveGame.SaveMenuStats();
+       
     }
 
     private bool IsTouchOverButton(Vector2 touchPosition, GameObject button)

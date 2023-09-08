@@ -1,7 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -114,26 +113,19 @@ public class PlayerController : MonoBehaviour
         originalGravity = rb.gravityScale;
 
         //Start Conditions
-        inputSystem = PlayerPrefs.GetInt("inputSystem");
-
-        //DEBUG JOYSTICK
-        joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
-        joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
-        originalHandlePosition = joystickHandle.anchoredPosition;
-
+             
         //Mobile-JoyStick
-        /*if (Application.isMobilePlatform)
+        if (Application.isMobilePlatform && managerscript.saveGame.menuStats.touchControls == 1)
         {         
-            joyStick.SetActive(true);       
-            joystickCenter = joystickBackground.rectTransform.position;
-            joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<Image>();
-            joystickHandle = joyStick.transform.Find("JoyStickHandler").GetComponent<Image>();
-
+            joyStick.SetActive(true);
+            joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
+            joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
+            originalHandlePosition = joystickHandle.anchoredPosition;
         }
         else
         {
             joyStick.SetActive(false);
-        }*/
+        }
 
     }
 
@@ -145,21 +137,20 @@ public class PlayerController : MonoBehaviour
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-        Debug.Log(inputSystem);
         if (Input.touchCount == 0)
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
-        } else if (inputSystem == 1)
+        } else if (managerscript.saveGame.menuStats.touchControls == 1)
         {
            moveX = GetJoystickInput().x;
            HandleJoyStickInput();
         }
-        else if (inputSystem == 2)
+        else if (managerscript.saveGame.menuStats.touchControls == 2)
         {
-            HandleTouchInputs();
+            HandleTouchInput1();
         }
-        else if (inputSystem == 3)
+        else if (managerscript.saveGame.menuStats.touchControls == 3)
         {
             HandleTouchInput2();
         }
@@ -387,26 +378,26 @@ public class PlayerController : MonoBehaviour
         // Item Usage
         // =================================
 
-        if (managerscript.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
+        if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
         {
             StartCoroutine(JumpItemPower());
-            managerscript.playerStats.hasItem = 0;
+            managerscript.saveGame.playerStats.hasItem = 0;
         }
 
-        if (managerscript.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
+        if (managerscript.saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
         {
             Time.timeScale = 0.7f;
             if (Input.GetKeyUp(KeyCode.LeftAlt))
             {
                 Time.timeScale = 1f;
-                managerscript.playerStats.hasItem = 0;
+                managerscript.saveGame.playerStats.hasItem = 0;
             }
         }
 
-        if (managerscript.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
+        if (managerscript.saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
         {
             StartCoroutine(GravityItemPower());
-            managerscript.playerStats.hasItem = 0;
+            managerscript.saveGame.playerStats.hasItem = 0;
         }
 
     }
@@ -531,188 +522,84 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    private void HandleTouchInputs()
+    private void HandleTouchInput1()
     {
 
         //Run OR Jump with One Touch Input
         if (Input.touchCount > 0)
         {
-            Touch touch = Input.GetTouch(0);
-            float middleThirdStart = Screen.width * 0.25f;
-            float middleThirdEnd =   Screen.height * 0.75f;
+            float middleThirdStart = Screen.width * 0.10f;
+            float middleThirdEnd = Screen.width * 0.80f;
 
-            if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd) // Mitte des Bildschirms
+
+            foreach (Touch touch in Input.touches)
             {
-                if (touch.phase == TouchPhase.Began)
+                // Holen Sie sich die x-Position der Berührung
+                float touchX = touch.position.x;
+               
+                if (touchX < middleThirdStart)
                 {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                   
+                    if (touch.phase == TouchPhase.Began)
                     {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                        moveX = -1;
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        moveX = 0;
                     }
 
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }                  
                 }
-                else if (isHang)
+                else if (touchX > middleThirdEnd)
                 {
-                    if (touch.phase == TouchPhase.Stationary)
+                    if (touch.phase == TouchPhase.Began)
                     {
-                        PullUp();
-                    } else
+                        moveX = 1;
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
                     {
-                        isPullUp = false;
+                        moveX = 0;
                     }
                 }
-                else if (touch.phase == TouchPhase.Ended)
+                else
                 {
-                    if (rb.velocity.y > 0.1)
+                    if (touch.phase == TouchPhase.Began)
                     {
-                        rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                        coyoteCounter = 0;
+                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                        {
+                            rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
+                        }
+
+                        else if (!IsGrounded() && !isHang && !isPullUp)
+                        {
+                            SnapToEdge();
+                        }
+                    }
+                    else if (isHang)
+                    {
+                        if (touch.phase == TouchPhase.Stationary)
+                        {
+                            PullUp();
+                        }
+                        else
+                        {
+                            isPullUp = false;
+                        }
+                    }
+                    else if (touch.phase == TouchPhase.Ended)
+                    {
+                        if (rb.velocity.y > 0.1)
+                        {
+                            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
+                            coyoteCounter = 0;
+                        }
                     }
                 }
-                
-            }
-            // Set MoveX depend on Input
-            if (touch.position.x < middleThirdStart) // Left Screen Side
-            {
-                if (Input.touchCount <= 1)
-                {
-                    isHang = false;
-                    isPullUp = false;
-                }
-                if (!isPullUp)
-                {
-                    moveX = -1;
-                }
-           
-            }
-            else if (touch.position.x > middleThirdEnd) // Right Screen Side
-            {
-                if (Input.touchCount <= 1)
-                {
-                    isHang = false;
-                    isPullUp = false;
-                }
-                if (!isPullUp)
-                {
-                    moveX = 1;
-                }
-            }
-            else
-            {
-                // No Touch Input = 0
-                moveX = 0;
             }
         }
-
-        //Run & Jump with two Touch Inputs 
-        if (Input.touchCount >= 2)
-        {
-            Touch touch1 = Input.GetTouch(0);
-            Touch touch2 = Input.GetTouch(1);
-
-            float middleThirdStart = Screen.height * 0.25f;
-            float middleThirdEnd = Screen.width * 0.75f;
-
-            //First run, second Jump
-            if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
-            {
-                moveX = -1;
-
-                if (touch2.phase == TouchPhase.Began)
-                {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                    {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                    }
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }
-
-                }
-                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
-                {
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                    coyoteCounter = 0;
-                }
-            }
-            else if (touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
-            {
-                moveX = 1;
-                if (touch2.phase == TouchPhase.Began)
-                {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                    {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                    }
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }
-
-                }
-                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
-                {
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                    coyoteCounter = 0;
-                }
-            }
-
-            //First Jump, second Run
-            else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x < middleThirdStart)
-            {
-                moveX = -1;
-
-                if (touch1.phase == TouchPhase.Began)
-                {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                    {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                    }
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }
-
-                }
-                else if (touch1.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
-                {
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                    coyoteCounter = 0;
-                }
-            }
-            else if (touch1.position.x >= middleThirdStart && touch1.position.x <= middleThirdEnd && touch2.position.x > middleThirdEnd)
-            {
-                moveX = 1;
-                
-                if (touch2.phase == TouchPhase.Began)
-                {
-                    if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
-                    {
-                        rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
-                    }
-                    else if (!IsGrounded() && !isHang && !isPullUp)
-                    {
-                        SnapToEdge();
-                    }
-
-                }
-                else if (touch2.phase == TouchPhase.Ended && rb.velocity.y > 0.1)
-                {
-                    rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2f);
-                    coyoteCounter = 0;
-                }
-            }
-
-        }
-
     }
 
-    private void HandleJoyStickInput()
+        private void HandleJoyStickInput()
     {
         Debug.Log(joystickInput);
 

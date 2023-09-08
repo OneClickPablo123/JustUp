@@ -21,13 +21,13 @@ public class Gamemanager : MonoBehaviour
 
     //Pause Panel
     public GameObject pausePanel;
+    public GameObject pause;
     public bool isPanelActive;
 
     //Others
     public bool gameCompleted;
-    SaveGame saveGame;
+    internal SaveGame saveGame;
     public PlayerStats playerStats;
-    public MenuStats menuStats;
     public AudioSource audioSource;
 
     //Sounds
@@ -35,30 +35,34 @@ public class Gamemanager : MonoBehaviour
     public AudioClip level2Sound;
     public AudioClip level3Sound;
 
+    //MenuStats
+   [SerializeField] internal int touchControls;
+
     public float spawnMusicThreshold = 30f;
     public float level2Threshold = 50f;
     public float level3Threshold = 80f; 
     public float volumeChangeSpeed = 0.15f;
 
-
+    private void Awake()
+    {
+        //Load SaveGame     
+        saveGame = GetComponent<SaveGame>();
+        saveGame.LoadMenuStats();
+        saveGame.LoadPlayerStats();
+    }
     void Start()
     {
         //Pause Panel
         isPanelActive = false;
         pausePanel.SetActive(false);
-        
+
         //High Score
-        highScoreHeight = playerStats.highscore;
+        highScoreHeight = saveGame.playerStats.highscore;
         highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
         //Best Time
         bestTimef = playerStats.bestTime;
         gameCompleted = false;
-
-        //Load SaveGame 
-        saveGame = GetComponent<SaveGame>();
-        saveGame.LoadPlayerStats();
-        saveGame.LoadMenuStats();
-
+               
         //Audio Handler
         audioSource.clip = null;
     }
@@ -96,6 +100,7 @@ public class Gamemanager : MonoBehaviour
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
         {
             bestTimef = actualTime;
+            saveGame.playerStats.bestTime = bestTimef;
             saveGame.SavePlayerStats();
             Debug.Log("bestTime Set");
         }
@@ -125,7 +130,7 @@ public class Gamemanager : MonoBehaviour
         } else if (actualHeight < highScoreHeight && newHighScore) 
         
         {
-            playerStats.highscore = highScoreHeight;
+            saveGame.playerStats.highscore = highScoreHeight;
             saveGame.SavePlayerStats();
             newHighScore = false;
         }
@@ -151,6 +156,22 @@ public class Gamemanager : MonoBehaviour
         }
     }
 
+    public void TouchPause()
+    {
+        if (isPanelActive)
+        {
+            pausePanel.SetActive(false);
+            Time.timeScale = 1;
+            isPanelActive = false;
+        }
+        else
+        {
+            pausePanel.SetActive(true);
+            Time.timeScale = 0;
+            isPanelActive = true;
+        }
+    }
+
    public void Restart()
     {
         Time.timeScale = 1f;
@@ -161,6 +182,7 @@ public class Gamemanager : MonoBehaviour
 
     public void ExitGame()
     {
+        saveGame.SaveMenuStats();
         saveGame.SavePlayerStats();
         Application.Quit();       
     }
@@ -170,6 +192,13 @@ public class Gamemanager : MonoBehaviour
         pausePanel.SetActive(false);
         Time.timeScale = 1f;
         isPanelActive = false;
+    }
+
+    public void BackToMenu()
+    {
+        saveGame.SaveMenuStats();
+        saveGame.SavePlayerStats();
+        SceneManager.LoadScene(0);
     }
 
     public string FormatTimeSpan(TimeSpan timeSpan)

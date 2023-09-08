@@ -1,7 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class ItemPickUp : MonoBehaviour
@@ -29,6 +26,7 @@ public class ItemPickUp : MonoBehaviour
     {
         gamemanager = GameObject.Find("gamemanager");
         managerScript = gamemanager.GetComponent<Gamemanager>();
+        saveGame = gamemanager.GetComponent<SaveGame>();    
         spriteRenderer = GetComponent<SpriteRenderer>();
         canvas = GetComponentInChildren<Canvas>();
         canvas.enabled = false;
@@ -59,27 +57,31 @@ public class ItemPickUp : MonoBehaviour
     public void Update()
     
     {
-        if (managerScript.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
+        if (managerScript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
         {
             if (jumpItem == true)
             {
-                managerScript.playerStats.hasItem = 2;
+                managerScript.saveGame.playerStats.hasItem = 2;
+                saveGame.SavePlayerStats();
                 Destroy(this.gameObject);
-                Debug.Log("Jump Item Collected Item ID = " + managerScript.playerStats.hasItem);
+                Debug.Log("Jump Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
+                Debug.Log(PlayerPrefs.GetInt("hasItem"));
             }
 
             if (runItem == true)
             {
-                managerScript.playerStats.hasItem = 3;
+                managerScript.saveGame.playerStats.hasItem = 3;
+                saveGame.SavePlayerStats();
                 Destroy(this.gameObject);
-                Debug.Log("Run Item Collected Item ID = " + managerScript.playerStats.hasItem);
+                Debug.Log("Run Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
             }
 
             if (gravityItem == true)
             {
-                managerScript.playerStats.hasItem = 4;
+                managerScript.saveGame.playerStats.hasItem = 4;
+                saveGame.SavePlayerStats();
                 Destroy(this.gameObject);
-                Debug.Log("Gravity Item Collected, Item ID = " + managerScript.playerStats.hasItem);
+                Debug.Log("Gravity Item Collected, Item ID = " + managerScript.saveGame.playerStats.hasItem);
             }
 
         }

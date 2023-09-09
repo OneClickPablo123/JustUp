@@ -14,13 +14,14 @@ public class NpcManager : MonoBehaviour
     public TextMeshProUGUI dialogBoxText;
     Gamemanager gamemanager;
     GameObject gameManagerO;
+    PlayerController playerController;
+    GameObject player;
     SaveGame saveGame;
     public TMP_InputField inputfield;
     float playerHighscore;
     string playerName;
-    public Canvas canvas;
     RectTransform canvasRectTransform;
-    RectTransform textRectTransform;
+    TouchScreenKeyboard keyboard;
 
 
 
@@ -32,14 +33,23 @@ public class NpcManager : MonoBehaviour
         gamemanager = gameManagerO.GetComponent<Gamemanager>();
         saveGame = gamemanager.GetComponent<SaveGame>();
         inputBox.SetActive(false);
-        canvasRectTransform = canvas.GetComponent<RectTransform>();
-        textRectTransform = dialogBoxText.GetComponent<RectTransform>();
+        canvasRectTransform = dialogBox.GetComponent<RectTransform>();
+        player = GameObject.Find("Player");
+        playerController = player.GetComponent<PlayerController>();
+
+       if (Application.isMobilePlatform)
+        {
+            dialogBox.transform.localPosition = new Vector2(0, 500);
+        }
+           
+        
     }
 
     void Update()
     {
-        playerHighscore = gamemanager.playerStats.highscore;
+        playerHighscore = saveGame.playerStats.highscore;
         playerName = saveGame.playerStats.name;
+       
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -49,20 +59,15 @@ public class NpcManager : MonoBehaviour
         {
             dialogBox.SetActive(true);
 
-            if (playerName == "" && transform.position.y < 25)
-            {
-                dialogBoxText.text = "Greetings, fellow traveler. \n My name is Renaldo, son of my father. \n For generations, we've been trying to escape from this place. \nThe only way is upwards...\n Please, it would be an honor \n to know your name, sir.";
-                inputBox.SetActive(true);
-                inputfield.onEndEdit.AddListener(ConfirmInput);
-            }
-            else if (playerHighscore > 25 && transform.position.y > 25)
-            {
-                dialogBoxText.text = "Ahhh Sir " + playerName + ",\nI have decided to face the challenge.\nThe time has finally come.\nI hope to see you at the top!\nMay the best-trained legs win.";
+            
+            if (playerHighscore > 30 && transform.position.y > 30)
+            {              
+                dialogBoxText.text = "Ooh " + playerName + ",\n We made some progress so far... \n You should check the beds here, \n They got some nice bounce! \n Until we meet again!";
                 UpdateTextCanvas();
             }
             else if (playerHighscore > 150 && transform.position.y > 150)
             {
-                dialogBoxText.text = "Ooh " + playerName + ",\n We made some progress so far... \n You should check the beds here, \n They got some nice bounce! \n Until we meet again!";
+                dialogBoxText.text = "Ahhh Sir " + playerName + ",\nI have decided to face the challenge.\nThe time has finally come.\nI hope to see you at the top!\nMay the best-trained legs win.";
                 UpdateTextCanvas();
             }
             else if (playerHighscore > 450 && transform.position.y > 450)
@@ -96,7 +101,36 @@ public class NpcManager : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player")) 
         {
-            if (playerName != "" && playerHighscore < 25 && transform.position.y < 25)
+            if (playerName == "" && transform.position.y < 25 && playerController.IsGrounded())
+            {
+                if (Application.isMobilePlatform)
+                {
+                    dialogBoxText.text = "Greetings, fellow traveler. My name is Renaldo, son of my father. \n For generations, we've been trying to escape from this place. \nThe only way is upwards... Please, it would be an honor to\n know your name, sir.";
+                    inputBox.SetActive(true);
+                    Time.timeScale = 0f;
+                    keyboard = TouchScreenKeyboard.Open("PLAYER", TouchScreenKeyboardType.Default);
+                    if (keyboard != null && keyboard.active && keyboard.status == TouchScreenKeyboard.Status.Done)
+                    {
+
+                        string enteredText = keyboard.text;
+                        saveGame.playerStats.name = enteredText;
+                        saveGame.SavePlayerStats();
+                        inputBox.SetActive(false);
+                        Time.timeScale = 1;
+                        keyboard = null;
+                    }
+                }
+                else
+                {
+                    dialogBoxText.text = "Greetings, fellow traveler. My name is Renaldo, son of my father. \n For generations, we've been trying to escape from this place. \nThe only way is upwards... Please, it would be an honor to\n know your name, sir.";
+                    inputBox.SetActive(true);
+                    Time.timeScale = 0f;
+                    inputfield.onEndEdit.AddListener(ConfirmInput);
+                }
+
+            }
+
+            if (playerName != "" && transform.position.y < 25)
             {                
                 dialogBoxText.text = "Great Mr. " + playerName + "\nA pleasure to meet you. \n My father always used to say: \n 'Son, Never Skip Leg Day!'";
                 UpdateTextCanvas();
@@ -111,6 +145,7 @@ public class NpcManager : MonoBehaviour
             saveGame.playerStats.name = enteredText;
             saveGame.SavePlayerStats();
             inputBox.SetActive(false);
+            Time.timeScale = 1;
             Debug.Log("Eingegebener Text: " + enteredText);
         }
     }
@@ -119,6 +154,7 @@ public class NpcManager : MonoBehaviour
     {         
         float newTextWidth = dialogBoxText.preferredWidth;
         float newTextHeight = dialogBoxText.preferredHeight;
-        canvasRectTransform.sizeDelta = new Vector2(newTextWidth + 0.5f, newTextHeight + 0.4f);
+        canvasRectTransform.sizeDelta = new Vector2(newTextWidth + 150f, newTextHeight + 30f);
+        dialogBoxText.transform.localPosition = new Vector2(3, 0);
     }
 }

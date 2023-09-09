@@ -198,6 +198,7 @@ public class Gamemanager : MonoBehaviour
     {
         saveGame.SaveMenuStats();
         saveGame.SavePlayerStats();
+        Time.timeScale = 1;
         SceneManager.LoadScene(0);
     }
 

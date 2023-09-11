@@ -10,12 +10,12 @@ public class SaveGame : MonoBehaviour
 
     public void CreatePlayerStats()
     {
-        playerStats = new PlayerStats("", 0f , 0,0);
+        playerStats = new PlayerStats(0, 0f , 0,0);
     }
 
     public void SavePlayerStats()
     {
-        PlayerPrefs.SetString("name", playerStats.name);
+        PlayerPrefs.SetInt("firstPlayed", playerStats.firstPlayed);
         PlayerPrefs.SetFloat("highscore", playerStats.highscore);
         PlayerPrefs.SetFloat("bestTime", playerStats.bestTime);
         PlayerPrefs.SetInt("hasItem", playerStats.hasItem);
@@ -24,12 +24,12 @@ public class SaveGame : MonoBehaviour
 
     public void LoadPlayerStats()
     {
-        playerStats = new PlayerStats(PlayerPrefs.GetString("name"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"));
+        playerStats = new PlayerStats(PlayerPrefs.GetInt("firstPlayed"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"));
     }
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(1);
+        menuStats = new MenuStats(2);
     }
 
     public void SaveMenuStats()
@@ -37,7 +37,7 @@ public class SaveGame : MonoBehaviour
         try
         {
             PlayerPrefs.SetInt("touchControls", menuStats.touchControls);
-            PlayerPrefs.Save(); // Speichern der PlayerPrefs
+            PlayerPrefs.Save();
             Debug.Log("MenuStats Saved!");
         }
         catch (Exception e)

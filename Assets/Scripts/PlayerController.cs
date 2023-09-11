@@ -279,7 +279,7 @@ public class PlayerController : MonoBehaviour
     public void HandleHang()
     {
 
-        if (Input.GetKey(KeyCode.G))
+        if (Input.GetKey(KeyCode.LeftControl))
         {
 
             if (!IsGrounded() && canHang() && !isPullUp)
@@ -288,7 +288,7 @@ public class PlayerController : MonoBehaviour
             }
        
         }
-        else if (Input.GetKeyUp(KeyCode.G))
+        else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             rb.gravityScale = originalGravity;
             isHang = false;

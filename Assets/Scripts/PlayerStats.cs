@@ -3,15 +3,15 @@ public class PlayerStats
 {
     
     //Player Stats Saves
-    public string name;
+    public int firstPlayed;
     public float highscore;
     public float bestTime;
     public int hasItem;
 
 
-    public PlayerStats (string name, float highscore, float bestTime, int hasItem)
+    public PlayerStats (int firstPlayed, float highscore, float bestTime, int hasItem)
     {
-        this.name = name;
+        this.firstPlayed = firstPlayed;
         this.highscore = highscore;
         this.bestTime = bestTime;
         this.hasItem = hasItem;

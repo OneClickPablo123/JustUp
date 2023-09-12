@@ -3894,7 +3894,7 @@ Transform:
   m_GameObject: {fileID: 271626344}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.92, y: 0.13, z: 0}
+  m_LocalPosition: {x: -1.46, y: 6.18, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3933,6 +3933,7 @@ MonoBehaviour:
   landTimer: 0
   landTime: 0.15
   touchArea: {fileID: 1324971863}
+  checkPointPrefab: {fileID: 8966193110262350945, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
   platformHandler: {fileID: 0}
   groundMask:
     serializedVersion: 2
@@ -19225,6 +19226,7 @@ MonoBehaviour:
     hasItem: 0
   menuStats:
     touchControls: 0
+    easyMode: 0
 --- !u!82 &1865470707
 AudioSource:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class MainMenuHandler : MonoBehaviour
 {
@@ -14,13 +15,21 @@ public class MainMenuHandler : MonoBehaviour
     GameObject optionMenu;
     GameObject inputPanel;
 
+    //EasyMode - Options
+    public GameObject easyModeCheckBox;
+    Image buttonImage;
+    public Sprite easyModeChecked;
+    public Sprite easyModeUnchecked;
+    private bool easyMode;
+
     // Start is called before the first frame update
     void Start()
     {
         saveGame = GetComponent<SaveGame>();
         saveGame.LoadMenuStats();
         saveGame.LoadPlayerStats();
-        menuPanel = GameObject.Find("MainMenuPanel");      
+        menuPanel = GameObject.Find("MainMenuPanel");  
+        buttonImage = easyModeCheckBox.GetComponent<Image>();
         
 
         //Options
@@ -114,11 +123,25 @@ public class MainMenuHandler : MonoBehaviour
     public void OptionBackButton()
     {
         saveGame.SaveMenuStats();
-        Debug.Log("Start: " + saveGame.menuStats.touchControls);
-        Debug.Log(PlayerPrefs.GetInt("touchControls"));
         menuPanel.SetActive(true);
         optionMenu.SetActive(false);
        
+    }
+
+    public void EasyMode()
+    {
+        if (easyMode)
+        {
+            easyMode = false;
+            buttonImage.sprite = easyModeUnchecked;
+            saveGame.menuStats.easyMode = 0;
+        }
+        else
+        {
+            easyMode = true;
+            buttonImage.sprite = easyModeChecked;
+            saveGame.menuStats.easyMode = 1;
+        }
     }
 
     private bool IsTouchOverButton(Vector2 touchPosition, GameObject button)

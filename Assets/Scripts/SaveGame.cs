@@ -29,7 +29,7 @@ public class SaveGame : MonoBehaviour
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(2);
+        menuStats = new MenuStats(2, 0);
     }
 
     public void SaveMenuStats()
@@ -37,6 +37,7 @@ public class SaveGame : MonoBehaviour
         try
         {
             PlayerPrefs.SetInt("touchControls", menuStats.touchControls);
+            PlayerPrefs.SetInt("easyMode", menuStats.easyMode);
             PlayerPrefs.Save();
             Debug.Log("MenuStats Saved!");
         }
@@ -48,7 +49,7 @@ public class SaveGame : MonoBehaviour
 
     public void LoadMenuStats()
     {
-        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"));
+        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"));
     }
 
 }

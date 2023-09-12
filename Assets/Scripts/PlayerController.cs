@@ -49,6 +49,11 @@ public class PlayerController : MonoBehaviour
     private Vector2 originalHandlePosition;
     private int inputSystem;
 
+    [Header("CheckPoint Settings")]
+    private bool checkPointActive;
+    public GameObject checkPointPrefab;
+    private GameObject activeCheckPoint;
+
 
 
     //Surfaces
@@ -107,6 +112,7 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         joyStick = GameObject.Find("VirtualJoyStick");
         mainCam = Camera.main;
+        activeCheckPoint = checkPointPrefab;
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
@@ -168,6 +174,7 @@ public class PlayerController : MonoBehaviour
         Animation();
         ItemUsage();
         HandleHang();
+        EasyMode();
 
 
         // ==========================
@@ -522,6 +529,43 @@ public class PlayerController : MonoBehaviour
 
     }
 
+    public void EasyMode()
+    {
+        if (Application.isMobilePlatform)
+        {
+            if (managerscript.saveGame.menuStats.easyMode == 1)
+            {
+
+            }
+            else
+            {
+
+            }
+        } else
+        {
+            if (managerscript.saveGame.menuStats.easyMode == 1)
+            {
+                if (Input.GetKeyDown(KeyCode.R) && IsGrounded())
+                {
+                    if (!checkPointActive)
+                    {
+                        activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                        checkPointActive = true;
+                    } else
+                    {
+                        this.transform.position = activeCheckPoint.transform.position;
+                    }                      
+                } 
+                
+            }
+            else
+            {
+                Debug.Log("No Easy Mode");
+            }
+        }
+       
+    }
+
     private void HandleTouchInput1()
     {
 
@@ -599,7 +643,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-        private void HandleJoyStickInput()
+    private void HandleJoyStickInput()
     {
         Debug.Log(joystickInput);
 

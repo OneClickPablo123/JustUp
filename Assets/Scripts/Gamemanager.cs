@@ -240,9 +240,9 @@ public class Gamemanager : MonoBehaviour
             audioSource.Play();
        }
      }
-     else if (audioSource.volume < 0.05f)
+     else if (audioSource.volume < 0.1f)
     {
-        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.05f, volumeChangeSpeed * Time.deltaTime);
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.1f, volumeChangeSpeed * Time.deltaTime);
     }
     else if (audioSource.volume > 0)
     {

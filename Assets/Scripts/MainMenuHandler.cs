@@ -4,8 +4,6 @@ using UnityEngine.UI;
 
 public class MainMenuHandler : MonoBehaviour
 {
-
-
     //Save
     SaveGame saveGame;
 
@@ -31,6 +29,16 @@ public class MainMenuHandler : MonoBehaviour
         menuPanel = GameObject.Find("MainMenuPanel");  
         buttonImage = easyModeCheckBox.GetComponent<Image>();
         
+        if(saveGame.menuStats.easyMode == 1)
+        {
+            easyMode = true;
+            buttonImage.sprite = easyModeChecked;
+        } 
+        else if (saveGame.menuStats.easyMode == 0)
+        {
+            easyMode = false;
+            buttonImage.sprite = easyModeUnchecked;
+        }
 
         //Options
         optionMenu = GameObject.Find("OptionPanel");

@@ -5,14 +5,19 @@ public class AudioManager : MonoBehaviour
 
     //Audio 
     AudioSource audioSource;
+    float originalVolume;
     public AudioSource jumpAudioSource;
     public AudioSource jumpVoiceManager;
+
+    GameObject gameManager;
+    Gamemanager managerScript;
 
     //Steps
     public AudioClip[] stoneSounds;
     public AudioClip[] grasSounds;
     public AudioClip[] woodSounds;
     public AudioClip[] snowSounds;
+    
     private int currentStepStoneIndex = 0;
     private int currentStepGrasIndex = 0;
     private int currentStepWoodIndex = 0;
@@ -32,12 +37,22 @@ public class AudioManager : MonoBehaviour
     private float moveX;
     private bool isGrounded;
     private float rbvelocityX;
-   
+
+    //Pull
+    public AudioClip pullSound;
+    private bool hasGeneratedRandomValue = false;
+    private float randomValue;
+
+
+
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         playerController = GetComponent<PlayerController>();
+        originalVolume = audioSource.volume;
+        gameManager = GameObject.Find("gamemanager");
+        managerScript = gameManager.GetComponent<Gamemanager>();  
     }
 
     
@@ -60,7 +75,7 @@ public class AudioManager : MonoBehaviour
         //WalkSound
         if (moveX != 0 && isGrounded && rbvelocityX > 3.9 || moveX != 0 && isGrounded && rbvelocityX < -3.9)
         {
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && playerController.IsGrounded())
             {
                 audioSource.pitch = 1;
             } else
@@ -126,64 +141,120 @@ public class AudioManager : MonoBehaviour
         {
             
         }
+
+        //PullSound
+        float normalizedTime = playerController.anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
+        if (playerController.isPullUp && normalizedTime >= 0.6f && playerController.anim.GetCurrentAnimatorStateInfo(0).IsName("player_pull"))
+        {
+            if (!hasGeneratedRandomValue)
+            {
+                randomValue = Random.Range(0, 10);
+                Debug.Log(randomValue);
+                hasGeneratedRandomValue = true;
+            }
+
+            if (randomValue >= 7)
+            {
+                jumpVoiceManager.clip = pullSound;
+                jumpVoiceManager.Play();              
+            }           
+        } else
+        {
+            hasGeneratedRandomValue = false;
+        } 
+
     }
 
     public void HandleTouchSounds()
     {
-        float middleThirdStart = Screen.width * 0.25f;
-        float middleThirdEnd = Screen.width * 0.75f;
-
-        
-
-        if (Input.touchCount > 0)
+        foreach (Touch touch in Input.touches)
         {
-            Touch touch = Input.GetTouch(0);
-            
-            if (touch.position.x >= middleThirdStart && touch.position.x <= middleThirdEnd && isGrounded)
+            Vector2 touchPosition = touch.position;
+
+            if (managerScript.saveGame.menuStats.touchControls == 1)
             {
-
-                if (touch.phase == TouchPhase.Began && isGrounded)
+                if (touchPosition.y > Screen.height * 0.15f)
                 {
-                    jumpAudioSource.clip = jumpAudio[currentJumpIndex];
-                    jumpAudioSource.Play();
-                    randomVoice = Random.Range(0, 100);
-                    
-                }
-                currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
+                    if (touch.phase == TouchPhase.Began && isGrounded)
+                    {
+                        jumpAudioSource.clip = jumpAudio[currentJumpIndex];
+                        jumpAudioSource.Play();
+                        randomVoice = Random.Range(0, 100);
+                    }
 
-                if (randomVoice == 42 || randomVoice == 69)
-                {
-                    jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
-                    jumpVoiceManager.Play();                    
+                    if (randomVoice == 42 || randomVoice == 69)
+                    {
+                        jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
+                        jumpVoiceManager.Play();
+
+                        currentVoiceIndex = (currentVoiceIndex + 1) % jumpVoice.Length;
+                    }
+
+                    currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
                 }
-                currentVoiceIndex = (currentVoiceIndex + 1) % jumpVoice.Length;
             }
-        }
 
-        if (Input.touchCount >= 2)
-        {
-            Touch touch1 = Input.GetTouch(0);
-            Touch touch2 = Input.GetTouch(1);
 
-            
-            if (touch1.position.x < middleThirdStart && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd || touch1.position.x > middleThirdEnd && touch2.position.x >= middleThirdStart && touch2.position.x <= middleThirdEnd)
+            if (managerScript.saveGame.menuStats.touchControls == 2)
             {
-                if (touch2.phase == TouchPhase.Began && isGrounded)
-                {
-                    jumpAudioSource.clip = jumpAudio[currentJumpIndex];
-                    jumpAudioSource.Play();
-                    randomVoice = Random.Range(0, 100);                  
-                }
-                currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
+                float middleThirdStart = Screen.width * 0.10f;
+                float middleThirdEnd = Screen.width * 0.80f;
 
-                if (randomVoice == 42 || randomVoice == 69)
+                if (touchPosition.x >= middleThirdStart && touchPosition.x <= middleThirdEnd)
                 {
-                    jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
-                    jumpVoiceManager.Play();                  
+                    if (touch.phase == TouchPhase.Began && isGrounded)
+                    {
+                        jumpAudioSource.clip = jumpAudio[currentJumpIndex];
+                        jumpAudioSource.Play();
+                        randomVoice = Random.Range(0, 100);
+                    }
+
+                    if (randomVoice == 42 || randomVoice == 69)
+                    {
+                        jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
+                        jumpVoiceManager.Play();
+
+                        currentVoiceIndex = (currentVoiceIndex + 1) % jumpVoice.Length;
+                    }
+
+                    currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
                 }
-                currentVoiceIndex = (currentVoiceIndex + 1) % jumpVoice.Length;
             }
-        }
 
+            if (managerScript.saveGame.menuStats.touchControls == 3)
+            {
+                float leftHalf = Screen.width / 4; // 25% von links
+                float rightHalf = Screen.width / 2; // 50% von links
+
+                // Überprüfen Sie, in welchem Bereich die Berührung stattgefunden hat
+                if (touchPosition.x < leftHalf)
+                {
+
+                }
+                else if (touchPosition.x < rightHalf)
+                {
+
+                }
+                else
+                {
+                    if (touch.phase == TouchPhase.Began && isGrounded)
+                    {
+                        jumpAudioSource.clip = jumpAudio[currentJumpIndex];
+                        jumpAudioSource.Play();
+                        randomVoice = Random.Range(0, 100);
+                    }
+
+                    if (randomVoice == 42 || randomVoice == 69)
+                    {
+                        jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
+                        jumpVoiceManager.Play();
+
+                        currentVoiceIndex = (currentVoiceIndex + 1) % jumpVoice.Length;
+                    }
+
+                    currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
+                }
+            }
+        }              
     }
 }

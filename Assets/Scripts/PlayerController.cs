@@ -25,6 +25,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] BoxCollider2D hangCollider;
     Vector2 facePosition;
     public bool isHang;
+    public bool canHang;
     Vector2 lgrabPos;
     Vector2 rgrabPos;
     public bool isPullUp;
@@ -97,8 +98,8 @@ public class PlayerController : MonoBehaviour
     const string PLAYER_JUMP = ("player_jump");
     const string PLAYER_FALL = ("player_fall");
     const string PLAYER_HANG = ("player_hang");
-    const string PLAYER_PULL = ("player_pull");
-    private Animator anim;
+    internal const string PLAYER_PULL = ("player_pull");
+    internal Animator anim;
 
     void Start()
     {
@@ -119,17 +120,25 @@ public class PlayerController : MonoBehaviour
         originalGravity = rb.gravityScale;
 
         //Start Conditions
-             
-        //Mobile-JoyStick
-        if (Application.isMobilePlatform && managerscript.saveGame.menuStats.touchControls == 1)
-        {         
-            joyStick.SetActive(true);
-            joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
-            joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
-            originalHandlePosition = joystickHandle.anchoredPosition;
-        }
+   
+
+        //Mobile
+        if (Application.isMobilePlatform)
+        {
+            mainCam.orthographicSize = 8.5f;
+
+            //JoyStickSettings
+            if (managerscript.saveGame.menuStats.touchControls == 1)
+            {
+                joyStick.SetActive(true);
+                joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
+                joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
+                originalHandlePosition = joystickHandle.anchoredPosition;
+            }
+        } 
         else
         {
+            mainCam.orthographicSize = 8f;
             joyStick.SetActive(false);
         }
 
@@ -175,7 +184,6 @@ public class PlayerController : MonoBehaviour
         ItemUsage();
         HandleHang();
         EasyMode();
-
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -276,20 +284,13 @@ public class PlayerController : MonoBehaviour
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.3f, groundMask);
 
     }
-
-    public bool canHang()
-    {
-        Debug.DrawRay(hangCollider.bounds.center, facePosition * 5f, Color.blue);
-        return Physics2D.Raycast(hangCollider.bounds.center, facePosition, 2.5f, grabMask);
-    }
-
     public void HandleHang()
     {
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
 
-            if (!IsGrounded() && canHang() && !isPullUp)
+            if (!IsGrounded() && canHang && !isPullUp)
             {
                 SnapToEdge();
             }
@@ -314,15 +315,16 @@ public class PlayerController : MonoBehaviour
 
     public void SnapToEdge()
     {
-        if (lgrabPos != Vector2.zero && transform.position.x < lgrabPos.x && transform.position.x < rgrabPos.x && facePosition.x == 1 && !isHang && canHang())
+        if (lgrabPos != Vector2.zero && facePosition.x == 1 && transform.position.x < lgrabPos.x && !isHang && canHang)
         {
+            
             isHang = true;
             this.transform.position = lgrabPos;
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
         } 
 
-        if (rgrabPos != Vector2.zero && transform.position.x > rgrabPos.x && transform.position.x > lgrabPos.x && facePosition.x == -1 && !isHang && canHang())
+        if (rgrabPos != Vector2.zero && facePosition.x == -1 && transform.position.x > rgrabPos.x &&!isHang && canHang)
         {
             isHang = true;
             this.transform.position = rgrabPos;
@@ -896,13 +898,16 @@ public class PlayerController : MonoBehaviour
 
         if (collision.CompareTag("leftGrab"))
         {
-            lgrabPos = collision.gameObject.transform.position;     
+            canHang = true;
+            lgrabPos = collision.gameObject.transform.position;         
         }
+        
 
         if (collision.CompareTag("rightGrab"))
         {
-            rgrabPos = collision.gameObject.transform.position;
-        }
+            canHang = true;
+            rgrabPos = collision.gameObject.transform.position;          
+        } 
     }
 
     private void OnTriggerExit2D(Collider2D collision)
@@ -915,9 +920,18 @@ public class PlayerController : MonoBehaviour
         }
         if (collision.CompareTag("Platform"))
         {
-            lgrabPos = Vector2.zero;
+            
+        }
+        if (collision.CompareTag("rightGrab"))
+        {
+            canHang = false;
             rgrabPos = Vector2.zero;
         }
+        if (collision.CompareTag("leftGrab"))
+        {
+            canHang = false;
+            lgrabPos = Vector2.zero;
+        }
     }
-    
+
 }

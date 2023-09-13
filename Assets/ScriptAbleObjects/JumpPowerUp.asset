@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: JumpPowerUp
   m_EditorClassIdentifier: 
   powerUpName: Jump PowerUp
-  description: Fly High like the sky.
+  description: Turn On Your Red Shoes And Reach Unbelievable Heights.
   powerUpSprite: {fileID: 21300000, guid: 281a3b836e494ef47a0559e87974555d, type: 3}

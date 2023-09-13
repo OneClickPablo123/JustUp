@@ -22,7 +22,6 @@ public class PlayerController : MonoBehaviour
     public float coyoteCounter;
 
     [Header("Hang Settings")]
-    [SerializeField] BoxCollider2D hangCollider;
     Vector2 facePosition;
     public bool isHang;
     public bool canHang;
@@ -54,6 +53,7 @@ public class PlayerController : MonoBehaviour
     private bool checkPointActive;
     public GameObject checkPointPrefab;
     private GameObject activeCheckPoint;
+    private GameObject checkPointButton;
 
 
 
@@ -106,7 +106,6 @@ public class PlayerController : MonoBehaviour
         //Get Components / Objects
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
-        hangCollider = GameObject.Find("Hangcollider").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
         gamemanager = GameObject.Find("gamemanager");
         managerscript = gamemanager.GetComponent<Gamemanager>();
@@ -118,14 +117,22 @@ public class PlayerController : MonoBehaviour
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
+        checkPointButton = GameObject.Find("CheckPointButton");
 
         //Start Conditions
    
 
         //Mobile
         if (Application.isMobilePlatform)
-        {
-            mainCam.orthographicSize = 8.5f;
+        {     
+            if (managerscript.saveGame.menuStats.easyMode == 1)
+            {
+                checkPointButton.SetActive(true);
+            }
+            else
+            {
+                checkPointButton.SetActive(false);
+            }
 
             //JoyStickSettings
             if (managerscript.saveGame.menuStats.touchControls == 1)
@@ -134,12 +141,16 @@ public class PlayerController : MonoBehaviour
                 joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
                 joystickHandle = joystickBackground.transform.Find("JoyStickHandler").GetComponent<RectTransform>();
                 originalHandlePosition = joystickHandle.anchoredPosition;
+            } else
+            {
+                joyStick.SetActive(false);
             }
         } 
         else
         {
             mainCam.orthographicSize = 8f;
             joyStick.SetActive(false);
+            checkPointButton.SetActive(false);
         }
 
     }
@@ -170,6 +181,17 @@ public class PlayerController : MonoBehaviour
             HandleTouchInput2();
         }
 
+        //Set Camera depend on Screen Roatation.
+
+        if (Screen.orientation == ScreenOrientation.Portrait)
+        {
+            mainCam.orthographicSize = 8.5f;
+        }
+
+        if (Screen.orientation == ScreenOrientation.LandscapeLeft)
+        {
+            mainCam.orthographicSize = 5f;
+        }
 
 
 
@@ -322,8 +344,8 @@ public class PlayerController : MonoBehaviour
             this.transform.position = lgrabPos;
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
-        } 
-
+        }
+       
         if (rgrabPos != Vector2.zero && facePosition.x == -1 && transform.position.x > rgrabPos.x &&!isHang && canHang)
         {
             isHang = true;
@@ -343,15 +365,14 @@ public class PlayerController : MonoBehaviour
 
         if (normalizedTime >= 0.7f && anim.GetCurrentAnimatorStateInfo(0).IsName(PLAYER_PULL) && (Vector2)transform.position != pullPos)
         {
-            // rb.MovePosition(pullPos * Time.deltaTime);
             this.transform.position = pullPos;
-        } 
-        else if ((Vector2)transform.position == pullPos)
-        {
             isHang = false;
+        } 
+
+        if ((Vector2)transform.position == pullPos)
+        {
             isPullUp = false;
         }
-
     }
             
 
@@ -386,27 +407,40 @@ public class PlayerController : MonoBehaviour
         // =================================
         // Item Usage
         // =================================
-
-        if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt))
+        if (Application.isMobilePlatform)
         {
-            StartCoroutine(JumpItemPower());
-            managerscript.saveGame.playerStats.hasItem = 0;
-        }
-
-        if (managerscript.saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            Time.timeScale = 0.7f;
-            if (Input.GetKeyUp(KeyCode.LeftAlt))
+            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
             {
-                Time.timeScale = 1f;
-                managerscript.saveGame.playerStats.hasItem = 0;
+                StartCoroutine(JumpItemPower());
             }
-        }
 
-        if (managerscript.saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt))
+            if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem)
+            {
+                StartCoroutine(TimeItemPower());
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem)
+            {
+                StartCoroutine(GravityItemPower());
+            }
+        } 
+        else
         {
-            StartCoroutine(GravityItemPower());
-            managerscript.saveGame.playerStats.hasItem = 0;
+            if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            {
+                StartCoroutine(JumpItemPower());
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            {
+                StartCoroutine(TimeItemPower());
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            {
+                StartCoroutine(GravityItemPower());
+            }
+
         }
 
     }
@@ -533,39 +567,46 @@ public class PlayerController : MonoBehaviour
 
     public void EasyMode()
     {
-        if (Application.isMobilePlatform)
+        if (managerscript.saveGame.menuStats.easyMode == 1)
         {
-            if (managerscript.saveGame.menuStats.easyMode == 1)
+            if (Input.GetKeyDown(KeyCode.R) && IsGrounded())
             {
-
-            }
-            else
-            {
-
-            }
-        } else
-        {
-            if (managerscript.saveGame.menuStats.easyMode == 1)
-            {
-                if (Input.GetKeyDown(KeyCode.R) && IsGrounded())
+                if (!checkPointActive)
                 {
-                    if (!checkPointActive)
-                    {
-                        activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
-                        checkPointActive = true;
-                    } else
-                    {
-                        this.transform.position = activeCheckPoint.transform.position;
-                    }                      
-                } 
-                
+                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                    checkPointActive = true;
+                }
+                else
+                {
+                    this.transform.position = activeCheckPoint.transform.position;
+                    Destroy(activeCheckPoint);
+                    checkPointActive = false;
+                }
             }
-            else
-            {
-                Debug.Log("No Easy Mode");
-            }
+
         }
-       
+    }
+
+    public void MobileEasyMode()
+    {
+        if (managerscript.saveGame.menuStats.easyMode == 1)
+        {
+            if (IsGrounded())
+            {
+                if (!checkPointActive)
+                {
+                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                    checkPointActive = true;
+                }
+                else
+                {
+                    this.transform.position = activeCheckPoint.transform.position;
+                    Destroy(activeCheckPoint);
+                    checkPointActive = false;
+                }
+            }
+
+        }
     }
 
     private void HandleTouchInput1()
@@ -611,7 +652,7 @@ public class PlayerController : MonoBehaviour
                 {
                     if (touch.phase == TouchPhase.Began)
                     {
-                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                        if (rb.velocity.y < 0.1f && coyoteCounter > 0)
                         {
                             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
                         }
@@ -647,7 +688,6 @@ public class PlayerController : MonoBehaviour
 
     private void HandleJoyStickInput()
     {
-        Debug.Log(joystickInput);
 
         if (Input.touchCount > 0)
         {
@@ -689,7 +729,7 @@ public class PlayerController : MonoBehaviour
                 {
                     if (touch.phase == TouchPhase.Began)
                     {
-                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                        if (rb.velocity.y < 0.1f && coyoteCounter > 0)
                         {
                             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
                         }
@@ -742,7 +782,7 @@ public class PlayerController : MonoBehaviour
                 // Überprüfen Sie, in welchem Bereich die Berührung stattgefunden hat
                 if (touchX < leftHalf)
                 {
-                    Debug.Log("Linke Seite des Bildschirms, linker Bereich wurde berührt");
+                    
                     if (touch.phase == TouchPhase.Began)
                     {
                         moveX = -1;
@@ -754,7 +794,7 @@ public class PlayerController : MonoBehaviour
                 }
                 else if (touchX < rightHalf)
                 {
-                    Debug.Log("Linke Seite des Bildschirms, rechter Bereich wurde berührt");
+                  
                     if (touch.phase == TouchPhase.Began)
                     {
                         moveX = 1;
@@ -768,7 +808,8 @@ public class PlayerController : MonoBehaviour
                 {
                     if (touch.phase == TouchPhase.Began)
                     {
-                        if (IsGrounded() && rb.velocity.y < 0.1f && coyoteCounter > 0)
+                        
+                        if (rb.velocity.y < 0.1f && coyoteCounter > 0)
                         {
                             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
                         }
@@ -797,7 +838,7 @@ public class PlayerController : MonoBehaviour
                             coyoteCounter = 0;
                         }
                     }
-                    Debug.Log("Rechte Seite des Bildschirms wurde berührt");
+                 
                 }
             }
             
@@ -815,8 +856,9 @@ public class PlayerController : MonoBehaviour
 
         float originalJumpForce = jumpForce;
         jumpForce += 75f;
-        usedItem = true;
+        usedItem = true;   
         yield return new WaitForSeconds(5f);
+        managerscript.saveGame.playerStats.hasItem = 0;
         jumpForce = originalJumpForce;
         usedItem = false;
     }
@@ -826,8 +868,20 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = 2;
         usedItem = true;
         yield return new WaitForSeconds(5f);
+        managerscript.saveGame.playerStats.hasItem = 0;
         rb.gravityScale = originalGravity;
         usedItem = false;
+    }
+
+    IEnumerator TimeItemPower()
+    {
+        Time.timeScale = 0.7f;
+        usedItem = true;
+        yield return new WaitForSeconds(5f);
+        managerscript.saveGame.playerStats.hasItem = 0;
+        Time.timeScale = 1f;
+        usedItem = false;
+
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

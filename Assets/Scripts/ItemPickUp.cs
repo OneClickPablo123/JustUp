@@ -8,7 +8,7 @@ public class ItemPickUp : MonoBehaviour
     SaveGame saveGame;
     SpriteRenderer spriteRenderer;
     public PowerUps jumpPowerUp;
-    public PowerUps runPowerUp;
+    public PowerUps timePowerUp;
     public PowerUps gravityPowerUp;
     Canvas canvas;
     public TextMeshProUGUI itemName;
@@ -17,7 +17,7 @@ public class ItemPickUp : MonoBehaviour
     //Item2
     public bool jumpItem;
     //Item3
-    public bool runItem;
+    public bool timeItem;
     //Item4
     public bool gravityItem;
     private bool canPickUp;
@@ -39,11 +39,11 @@ public class ItemPickUp : MonoBehaviour
 
         }
 
-        if (runItem == true)
+        if (timeItem == true)
         {
-            spriteRenderer.sprite = runPowerUp.powerUpSprite;
-            itemName.text = runPowerUp.powerUpName;
-            itemDescription.text = runPowerUp.description;
+            spriteRenderer.sprite = timePowerUp.powerUpSprite;
+            itemName.text = timePowerUp.powerUpName;
+            itemDescription.text = timePowerUp.description;
         }
 
         if (gravityItem == true)
@@ -68,12 +68,12 @@ public class ItemPickUp : MonoBehaviour
                 Debug.Log(PlayerPrefs.GetInt("hasItem"));
             }
 
-            if (runItem == true)
+            if (timeItem == true)
             {
                 managerScript.saveGame.playerStats.hasItem = 3;
                 saveGame.SavePlayerStats();
                 Destroy(this.gameObject);
-                Debug.Log("Run Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
+                Debug.Log("Time Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
             }
 
             if (gravityItem == true)

@@ -1,7 +1,9 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class Gamemanager : MonoBehaviour
 {
@@ -34,14 +36,22 @@ public class Gamemanager : MonoBehaviour
     public AudioClip spawnMusic;
     public AudioClip level2Sound;
     public AudioClip level3Sound;
-
-    //MenuStats
-   [SerializeField] internal int touchControls;
-
     public float spawnMusicThreshold = 30f;
     public float level2Threshold = 50f;
-    public float level3Threshold = 80f; 
+    public float level3Threshold = 80f;
     public float volumeChangeSpeed = 0.15f;
+
+    //MenuStats
+    [SerializeField] internal int touchControls;
+
+    //Items
+    GameObject itemButton;
+    GameObject placeHolder;
+    internal Image itemImage;
+    public Sprite jumpItem;
+    public Sprite timeItem;
+    public Sprite gravityItem;
+
 
     private void Awake()
     {
@@ -65,6 +75,12 @@ public class Gamemanager : MonoBehaviour
                
         //Audio Handler
         audioSource.clip = null;
+
+        //ItemButton
+        itemButton = GameObject.Find("ItemButton");
+        placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
+        itemImage = placeHolder.GetComponent<Image>();
+
     }
 
     // Update is called once per frame
@@ -74,6 +90,7 @@ public class Gamemanager : MonoBehaviour
         HeightCounter();
         PausePanel();
         AudioHandler();
+        ItemButton();
     }
 
     public void Timer()
@@ -200,6 +217,39 @@ public class Gamemanager : MonoBehaviour
         saveGame.SavePlayerStats();
         Time.timeScale = 1;
         SceneManager.LoadScene(0);
+    }
+
+    public void ItemButton()
+    {
+        Color color = Color.white;
+
+        if (saveGame.playerStats.hasItem == 2)
+        {
+            itemImage.sprite = jumpItem;
+            color.a = 1f;
+            itemImage.color = color;
+            itemButton.SetActive(true);
+        }
+        else if (saveGame.playerStats.hasItem == 3)
+        {
+            itemImage.sprite = timeItem;
+            color.a = 1f;
+            itemImage.color = color;
+            itemButton.SetActive(true);
+        } 
+        else if (saveGame.playerStats.hasItem == 4)
+        {
+            itemImage.sprite = gravityItem;
+            color.a = 1f;
+            itemImage.color = color;
+            itemButton.SetActive(true);
+        }
+        else if (saveGame.playerStats.hasItem == 0)
+        {
+            itemImage.sprite = null;
+            color.a = 0f;
+            itemImage.color = color;       
+        }
     }
 
     public string FormatTimeSpan(TimeSpan timeSpan)

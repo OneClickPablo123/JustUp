@@ -149,7 +149,6 @@ public class AudioManager : MonoBehaviour
             if (!hasGeneratedRandomValue)
             {
                 randomValue = Random.Range(0, 10);
-                Debug.Log(randomValue);
                 hasGeneratedRandomValue = true;
             }
 

@@ -52,7 +52,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -136,7 +136,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -220,7 +220,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -265,7 +265,6 @@ GameObject:
   - component: {fileID: 7931960508526294676}
   - component: {fileID: 5829166629720868302}
   - component: {fileID: 6834880125564507800}
-  - component: {fileID: 2790186331829071363}
   m_Layer: 0
   m_Name: Platform
   m_TagString: Untagged
@@ -308,7 +307,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -457,22 +456,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.8543835, y: 0.21801138}
   m_EdgeRadius: 0
---- !u!114 &2790186331829071363
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 796464614721710445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: de569c3b7ae353446ab4b30bfa1c9b25, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  waypoints:
-  - {fileID: 6150875271322062548}
-  - {fileID: 1740319784957881828}
-  speed: 3
 --- !u!1 &796464614996848182
 GameObject:
   m_ObjectHideFlags: 0
@@ -528,6 +511,15 @@ MonoBehaviour:
   isStone: 0
   isGras: 0
   isSnow: 0
+  canMove: 0
+  canDisappear: 0
+  removePlatform: 0
+  canGrab: 1
+  waypoints: []
+  speed: 0
+  disappearTime: 3
+  appearTime: 1
+  pullPos: {fileID: 0}
 --- !u!1 &796464615045801945
 GameObject:
   m_ObjectHideFlags: 0
@@ -580,7 +572,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

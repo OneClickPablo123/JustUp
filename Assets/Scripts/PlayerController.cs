@@ -54,6 +54,9 @@ public class PlayerController : MonoBehaviour
     public GameObject checkPointPrefab;
     private GameObject activeCheckPoint;
     private GameObject checkPointButton;
+    public bool isButtonPressed = false;
+    private float pressTime = 1f;
+    private float pressCounter;
 
 
 
@@ -120,7 +123,7 @@ public class PlayerController : MonoBehaviour
         checkPointButton = GameObject.Find("CheckPointButton");
 
         //Start Conditions
-   
+
 
         //Mobile
         if (Application.isMobilePlatform)
@@ -131,7 +134,7 @@ public class PlayerController : MonoBehaviour
             }
             else
             {
-                checkPointButton.SetActive(false);
+               checkPointButton.SetActive(false);
             }
 
             //JoyStickSettings
@@ -163,20 +166,20 @@ public class PlayerController : MonoBehaviour
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-        if (Input.touchCount == 0)
+        if (Input.touchCount == 0 && !isButtonPressed)
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
-        } else if (managerscript.saveGame.menuStats.touchControls == 1)
+        } else if (managerscript.saveGame.menuStats.touchControls == 1 && !isButtonPressed)
         {
            moveX = GetJoystickInput().x;
            HandleJoyStickInput();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 2)
+        else if (managerscript.saveGame.menuStats.touchControls == 2 && !isButtonPressed)
         {
             HandleTouchInput1();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 3)
+        else if (managerscript.saveGame.menuStats.touchControls == 3 && !isButtonPressed)
         {
             HandleTouchInput2();
         }
@@ -206,6 +209,7 @@ public class PlayerController : MonoBehaviour
         ItemUsage();
         HandleHang();
         EasyMode();
+        EasyModeMobile();
 
         // ==========================
         //    Dauerhafte Abfragen
@@ -567,46 +571,101 @@ public class PlayerController : MonoBehaviour
 
     public void EasyMode()
     {
-        if (managerscript.saveGame.menuStats.easyMode == 1)
+
+        if (!Application.isMobilePlatform)
         {
-            if (Input.GetKeyDown(KeyCode.R) && IsGrounded())
+            if (Input.GetKey(KeyCode.R) && IsGrounded())
             {
-                if (!checkPointActive)
-                {
-                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
-                    checkPointActive = true;
-                }
-                else
+                pressCounter += Time.deltaTime;
+                if (checkPointActive && pressCounter >= pressTime && pressCounter != 0)
                 {
                     this.transform.position = activeCheckPoint.transform.position;
-                    Destroy(activeCheckPoint);
-                    checkPointActive = false;
+                    pressCounter = 0;
                 }
             }
 
+            if (Input.GetKeyUp(KeyCode.R) && IsGrounded())
+            {
+                if (!checkPointActive && pressCounter < pressTime && pressCounter != 0)
+                {
+                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                    checkPointActive = true;
+                    pressCounter = 0;
+                }
+                else if (checkPointActive && pressCounter < pressTime && pressCounter != 0)
+                {
+                    Destroy(activeCheckPoint);
+                    checkPointActive = false;
+                    pressCounter = 0;
+                }
+                /*else if (checkPointActive && pressCounter >= pressTime && pressCounter != 0)
+                {
+                    this.transform.position = activeCheckPoint.transform.position;
+                    pressCounter = 0;
+                }*/
+            }
         }
+        
     }
 
-    public void MobileEasyMode()
+    public void EasyModeMobile()
     {
-        if (managerscript.saveGame.menuStats.easyMode == 1)
+        //CheckPoint Button Logic
+        if (Application.isMobilePlatform)
         {
-            if (IsGrounded())
+            if (managerscript.saveGame.menuStats.easyMode == 1)
             {
-                if (!checkPointActive)
+
+                if (isButtonPressed)
                 {
-                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
-                    checkPointActive = true;
+                    pressCounter += Time.deltaTime;
                 }
-                else
+
+                //SHORT
+                if (!isButtonPressed && pressCounter < pressTime && pressCounter != 0)
                 {
-                    this.transform.position = activeCheckPoint.transform.position;
-                    Destroy(activeCheckPoint);
-                    checkPointActive = false;
+                    if (checkPointActive)
+                    {
+                        Destroy(activeCheckPoint);
+                        checkPointActive = false;
+                        pressCounter = 0f;
+                    }
+                    else
+                    {
+                        if (IsGrounded())
+                        {
+                            activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                            checkPointActive = true;
+                            pressCounter = 0f;
+                        }
+                    }
+
+                    //LONG
+                }
+                else if (isButtonPressed && pressCounter >= pressTime && pressCounter != 0)
+                {
+                    if (checkPointActive)
+                    {
+                        if (IsGrounded())
+                        {
+                            this.transform.position = activeCheckPoint.transform.position;
+                            pressCounter = 0f;
+                        }
+                    }
                 }
             }
-
         }
+       
+    }
+
+    public void CheckPointPressDown()
+    {
+        isButtonPressed = true;
+    }
+
+    public void CheckPointPressUp()
+    {
+        isButtonPressed = false;
     }
 
     private void HandleTouchInput1()

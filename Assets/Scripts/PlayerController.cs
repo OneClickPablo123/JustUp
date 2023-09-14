@@ -12,14 +12,13 @@ public class PlayerController : MonoBehaviour
     public float maxSpeedRun;
     private float originalMaxSpeed;
     private float originalMaxSpeedRun;
-    public float airDrag;
-
 
     [Header("Jump Settings")]
     public float jumpForce;
     public float fallSpeed;
     public float coyoteTime;
     public float coyoteCounter;
+    public float airDrag;
 
     [Header("Hang Settings")]
     Vector2 facePosition;
@@ -36,10 +35,6 @@ public class PlayerController : MonoBehaviour
     public float ladderSpeed;
     private float moveY;
 
-    [Header("Touch Settings")]
-    public float landTimer;
-    public float landTime;
-
     [Header("JoyStick Settings")]
     GameObject joyStick;
     RectTransform joystickBackground;
@@ -47,17 +42,22 @@ public class PlayerController : MonoBehaviour
     public RectTransform touchArea;
     private Vector2 joystickInput = Vector2.zero;
     private Vector2 originalHandlePosition;
-    private int inputSystem;
 
     [Header("CheckPoint Settings")]
     private bool checkPointActive;
     public GameObject checkPointPrefab;
     private GameObject activeCheckPoint;
     private GameObject checkPointButton;
-    public bool isButtonPressed = false;
+    private bool isButtonPressed = false;
     private float pressTime = 1f;
     private float pressCounter;
 
+    [Header("Item Settings")]
+    internal bool canPickUp;
+    private bool isJumpItem;
+    private bool isGravityItem;
+    private bool isTimeItem;
+    private GameObject itemGameObjekt;
 
 
     //Surfaces
@@ -149,6 +149,7 @@ public class PlayerController : MonoBehaviour
                 joyStick.SetActive(false);
             }
         } 
+        //Not Mobile
         else
         {
             mainCam.orthographicSize = 8f;
@@ -159,6 +160,23 @@ public class PlayerController : MonoBehaviour
     }
 
     void Update()
+    {       
+        // ==========================
+        //     Methoden Aufrufe
+        // ==========================
+        Movement();
+        IsGroundedLogic();
+        Jump();
+        LadderMove();
+        Animation();
+        ItemUsage();
+        HandleHang();
+        EasyMode();
+        EasyModeMobile();
+        HandleScreenRotation();
+    }
+
+    public void Movement()
     {
 
         // ==========================
@@ -170,10 +188,11 @@ public class PlayerController : MonoBehaviour
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
-        } else if (managerscript.saveGame.menuStats.touchControls == 1 && !isButtonPressed)
+        }
+        else if (managerscript.saveGame.menuStats.touchControls == 1 && !isButtonPressed)
         {
-           moveX = GetJoystickInput().x;
-           HandleJoyStickInput();
+            moveX = GetJoystickInput().x;
+            HandleJoyStickInput();
         }
         else if (managerscript.saveGame.menuStats.touchControls == 2 && !isButtonPressed)
         {
@@ -183,74 +202,6 @@ public class PlayerController : MonoBehaviour
         {
             HandleTouchInput2();
         }
-
-        //Set Camera depend on Screen Roatation.
-
-        if (Screen.orientation == ScreenOrientation.Portrait)
-        {
-            mainCam.orthographicSize = 8.5f;
-        }
-
-        if (Screen.orientation == ScreenOrientation.LandscapeLeft)
-        {
-            mainCam.orthographicSize = 5f;
-        }
-
-
-
-
-        // ==========================
-        //     Methoden Aufrufe
-        // ==========================
-        Movement();
-        Jump();
-        LadderMove();
-        Animation();
-        ItemUsage();
-        HandleHang();
-        EasyMode();
-        EasyModeMobile();
-
-        // ==========================
-        //    Dauerhafte Abfragen
-        // ==========================
-
-        if (IsGrounded())
-        {
-            if (!usedItem)
-            {
-                rb.gravityScale = originalGravity;
-                maxSpeed = originalMaxSpeed;
-                maxSpeedRun = originalMaxSpeedRun;
-            }
-            landTimer -= Time.deltaTime;
-            coyoteCounter = coyoteTime;
-        }
-        else
-        {
-            landTimer = landTime;
-            coyoteCounter -= Time.deltaTime;
-
-            if (!isClimbing && !usedItem && !isHang && !isPullUp)
-            {
-                rb.gravityScale = 8f;
-            }
-
-            //Reduce Velocity.y -0.01, maximum till fallspeed
-            if (!isHang && !isPullUp)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.01f, -fallSpeed));
-            }
-            //Get some airDrag at velocity.x to reduce acceleration while jumping
-            rb.velocity = new Vector2(rb.velocity.x * (1f - airDrag), rb.velocity.y);
-        }
-
-        //Get Face Position of Player
-        facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
-    }
-
-    public void Movement()
-    {
 
         // =================================
         // Abfrage Move +X / -X && Facing 
@@ -303,12 +254,46 @@ public class PlayerController : MonoBehaviour
 
         }
     }
-
     public bool IsGrounded()
     {
         //BoxCast if LayerMask == Groundmask
         return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.3f, groundMask);
 
+    }
+    public void IsGroundedLogic()
+    {
+        if (IsGrounded())
+        {
+            if (!usedItem)
+            {
+                rb.gravityScale = originalGravity;
+                maxSpeed = originalMaxSpeed;
+                maxSpeedRun = originalMaxSpeedRun;
+            }
+
+            coyoteCounter = coyoteTime;
+        }
+        else
+        {
+
+            coyoteCounter -= Time.deltaTime;
+
+            if (!isClimbing && !usedItem && !isHang && !isPullUp)
+            {
+                rb.gravityScale = 8f;
+            }
+
+            //Reduce Velocity.y -0.01, maximum till fallspeed
+            if (!isHang && !isPullUp)
+            {
+                rb.velocity = new Vector2(rb.velocity.x, Mathf.Max(rb.velocity.y - 0.01f, -fallSpeed));
+            }
+            //Get some airDrag at velocity.x to reduce acceleration while jumping
+            rb.velocity = new Vector2(rb.velocity.x * (1f - airDrag), rb.velocity.y);
+        }
+
+        //Get Face Position of Player
+        facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
     }
     public void HandleHang()
     {
@@ -338,7 +323,6 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
     public void SnapToEdge()
     {
         if (lgrabPos != Vector2.zero && facePosition.x == 1 && transform.position.x < lgrabPos.x && !isHang && canHang)
@@ -359,7 +343,6 @@ public class PlayerController : MonoBehaviour
         }
        
     }
-
     public void PullUp()
     {
         isPullUp = true;
@@ -377,9 +360,7 @@ public class PlayerController : MonoBehaviour
         {
             isPullUp = false;
         }
-    }
-            
-
+    }          
     public void Jump()
     {
 
@@ -404,7 +385,6 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(new Vector2(rb.velocity.x, jumpForce), ForceMode2D.Impulse);
         }
     }
-
     public void ItemUsage()
 
     {
@@ -413,8 +393,35 @@ public class PlayerController : MonoBehaviour
         // =================================
         if (Application.isMobilePlatform)
         {
-            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
+            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp)
             {
+                if (isJumpItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 2;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isTimeItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 3;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isGravityItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 4;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
+            {                
                 StartCoroutine(JumpItemPower());
             }
 
@@ -430,9 +437,36 @@ public class PlayerController : MonoBehaviour
         } 
         else
         {
-            if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
             {
-                StartCoroutine(JumpItemPower());
+                if (isJumpItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 2;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isTimeItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 3;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isGravityItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 4;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            {                           
+                StartCoroutine(JumpItemPower());                
             }
 
             if (managerscript.saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
@@ -443,12 +477,10 @@ public class PlayerController : MonoBehaviour
             if (managerscript.saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
             {
                 StartCoroutine(GravityItemPower());
-            }
-
+            }           
         }
 
     }
-
     private void Animation()
     {
 
@@ -506,7 +538,6 @@ public class PlayerController : MonoBehaviour
 
 
     }
-
     void ChangeAnimationState(string newState)
     {
         // ====================================
@@ -516,7 +547,6 @@ public class PlayerController : MonoBehaviour
         anim.Play(newState);
         currentState = newState;
     }
-
     public void LadderMove()
     {
         if (isLadder)
@@ -568,7 +598,6 @@ public class PlayerController : MonoBehaviour
 
 
     }
-
     public void EasyMode()
     {
 
@@ -607,7 +636,6 @@ public class PlayerController : MonoBehaviour
         }
         
     }
-
     public void EasyModeMobile()
     {
         //CheckPoint Button Logic
@@ -657,17 +685,14 @@ public class PlayerController : MonoBehaviour
         }
        
     }
-
     public void CheckPointPressDown()
     {
         isButtonPressed = true;
     }
-
     public void CheckPointPressUp()
     {
         isButtonPressed = false;
     }
-
     private void HandleTouchInput1()
     {
 
@@ -744,7 +769,6 @@ public class PlayerController : MonoBehaviour
             }
         }
     }
-
     private void HandleJoyStickInput()
     {
 
@@ -821,7 +845,6 @@ public class PlayerController : MonoBehaviour
             }
         }       
     }
-
     private void HandleTouchInput2()
     {
         if (Input.touchCount > 0)
@@ -904,12 +927,26 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
     public Vector2 GetJoystickInput()
     {
         return new Vector2(Mathf.Round(joystickInput.x), 0);
-    }
+    } 
+    public void HandleScreenRotation()
+    {
+        //Set Camera depend on Screen Roatation.
+        if (Application.isMobilePlatform)
+        {
+            if (Screen.orientation == ScreenOrientation.Portrait)
+            {
+                mainCam.orthographicSize = 8.5f;
+            }
 
+            if (Screen.orientation == ScreenOrientation.LandscapeLeft)
+            {
+                mainCam.orthographicSize = 5f;
+            }
+        }    
+    }
     IEnumerator JumpItemPower()
     {
 
@@ -918,31 +955,30 @@ public class PlayerController : MonoBehaviour
         usedItem = true;   
         yield return new WaitForSeconds(5f);
         managerscript.saveGame.playerStats.hasItem = 0;
+        managerscript.saveGame.SavePlayerStats();
         jumpForce = originalJumpForce;
         usedItem = false;
     }
-
     IEnumerator GravityItemPower()
     {
         rb.gravityScale = 2;
         usedItem = true;
         yield return new WaitForSeconds(5f);
         managerscript.saveGame.playerStats.hasItem = 0;
+        managerscript.saveGame.SavePlayerStats();
         rb.gravityScale = originalGravity;
         usedItem = false;
     }
-
     IEnumerator TimeItemPower()
     {
-        Time.timeScale = 0.7f;
+        Time.timeScale = 0.5f;
         usedItem = true;
         yield return new WaitForSeconds(5f);
         managerscript.saveGame.playerStats.hasItem = 0;
+        managerscript.saveGame.SavePlayerStats();
         Time.timeScale = 1f;
         usedItem = false;
-
     }
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
 
@@ -957,6 +993,26 @@ public class PlayerController : MonoBehaviour
                 //Add Force to y axis, MathAbs for positiv Numbers only
                 rb.AddForce(new Vector2(rb.velocity.x, Mathf.Abs(bounceforce)), ForceMode2D.Impulse);
                 //BounceBed Sound
+            }
+        }
+
+        if (collision.CompareTag("Item"))
+        {
+            canPickUp = true;         
+            ItemPickUp itemPickUp = collision.gameObject.GetComponent<ItemPickUp>();
+            itemGameObjekt = collision.gameObject;
+
+            if (itemPickUp.jumpItem == true)
+            {
+                isJumpItem = true;
+            } 
+            if (itemPickUp.gravityItem == true)
+            {
+                isGravityItem = true;
+            }
+            if (itemPickUp.timeItem == true)
+            {
+                isTimeItem = true;
             }
         }
 
@@ -1022,7 +1078,6 @@ public class PlayerController : MonoBehaviour
             rgrabPos = collision.gameObject.transform.position;          
         } 
     }
-
     private void OnTriggerExit2D(Collider2D collision)
     {
         //Check if Player leave ladder
@@ -1031,10 +1086,7 @@ public class PlayerController : MonoBehaviour
             isLadder = false;
             isClimbing = false;
         }
-        if (collision.CompareTag("Platform"))
-        {
-            
-        }
+       
         if (collision.CompareTag("rightGrab"))
         {
             canHang = false;
@@ -1044,6 +1096,14 @@ public class PlayerController : MonoBehaviour
         {
             canHang = false;
             lgrabPos = Vector2.zero;
+        }
+
+        if (collision.CompareTag("Item"))
+        {
+            canPickUp = false;
+            isJumpItem = false;
+            isGravityItem = false;
+            isTimeItem = false;
         }
     }
 

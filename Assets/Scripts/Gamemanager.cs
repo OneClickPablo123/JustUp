@@ -1,6 +1,5 @@
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -8,30 +7,37 @@ using UnityEngine.UI;
 public class Gamemanager : MonoBehaviour
 {
 
-    public GameObject player;
+    
 
+    [Header("HEIGHT")]
     //Height Text
     public TextMeshProUGUI heightText;
     public TextMeshProUGUI highScore;
     public float highScoreHeight;
     private bool newHighScore;
-    
+
+    [Header("TIMER")]
     //Timer
     public TextMeshProUGUI timer;
     public TextMeshProUGUI bestTime;
     public float bestTimef;
 
+    [Header("PAUSE PANEL")]
     //Pause Panel
     public GameObject pausePanel;
     public GameObject pause;
     public bool isPanelActive;
 
+    [Header("OTHERS")]
     //Others
     public bool gameCompleted;
     internal SaveGame saveGame;
     public PlayerStats playerStats;
     public AudioSource audioSource;
+    private GameObject player;
+    private PlayerController playerController;
 
+    [Header("SOUNDS")]
     //Sounds
     public AudioClip spawnMusic;
     public AudioClip level2Sound;
@@ -44,13 +50,14 @@ public class Gamemanager : MonoBehaviour
     //MenuStats
     [SerializeField] internal int touchControls;
 
-    //Items
-    GameObject itemButton;
-    GameObject placeHolder;
+    [Header ("ITEMS")]
+    private GameObject itemButton;
+    private GameObject placeHolder;
     internal Image itemImage;
     public Sprite jumpItem;
     public Sprite timeItem;
     public Sprite gravityItem;
+    public Sprite pickUpItem;
 
 
     private void Awake()
@@ -62,6 +69,10 @@ public class Gamemanager : MonoBehaviour
     }
     void Start()
     {
+        //Player
+        player = GameObject.Find("Player");
+        playerController = player.GetComponent<PlayerController>();
+
         //Pause Panel
         isPanelActive = false;
         pausePanel.SetActive(false);
@@ -69,6 +80,7 @@ public class Gamemanager : MonoBehaviour
         //High Score
         highScoreHeight = saveGame.playerStats.highscore;
         highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
+        
         //Best Time
         bestTimef = playerStats.bestTime;
         gameCompleted = false;
@@ -78,8 +90,11 @@ public class Gamemanager : MonoBehaviour
 
         //ItemButton
         itemButton = GameObject.Find("ItemButton");
+        itemButton.SetActive(true);
         placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
         itemImage = placeHolder.GetComponent<Image>();
+
+
 
     }
 
@@ -223,33 +238,42 @@ public class Gamemanager : MonoBehaviour
     {
         Color color = Color.white;
 
-        if (saveGame.playerStats.hasItem == 2)
+        if (saveGame.playerStats.hasItem == 0)
+        {
+            if (playerController.canPickUp)
+            {
+                itemImage.sprite = pickUpItem;
+                color.a = 1f;
+                itemImage.color = color;
+            }
+            else
+            {
+                itemImage.sprite = null;
+                color.a = 0f;
+                itemImage.color = color;
+            }
+
+        }
+        else if (saveGame.playerStats.hasItem == 2)
         {
             itemImage.sprite = jumpItem;
             color.a = 1f;
             itemImage.color = color;
-            itemButton.SetActive(true);
         }
         else if (saveGame.playerStats.hasItem == 3)
         {
             itemImage.sprite = timeItem;
             color.a = 1f;
             itemImage.color = color;
-            itemButton.SetActive(true);
         } 
         else if (saveGame.playerStats.hasItem == 4)
         {
             itemImage.sprite = gravityItem;
             color.a = 1f;
             itemImage.color = color;
-            itemButton.SetActive(true);
         }
-        else if (saveGame.playerStats.hasItem == 0)
-        {
-            itemImage.sprite = null;
-            color.a = 0f;
-            itemImage.color = color;       
-        }
+
+        
     }
 
     public string FormatTimeSpan(TimeSpan timeSpan)

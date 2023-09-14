@@ -10,7 +10,8 @@ public class ItemPickUp : MonoBehaviour
     public PowerUps jumpPowerUp;
     public PowerUps timePowerUp;
     public PowerUps gravityPowerUp;
-    Canvas canvas;
+    public GameObject canvas;
+    RectTransform canvasRectTransform;
     public TextMeshProUGUI itemName;
     public TextMeshProUGUI itemDescription;
 
@@ -20,7 +21,7 @@ public class ItemPickUp : MonoBehaviour
     public bool timeItem;
     //Item4
     public bool gravityItem;
-    private bool canPickUp;
+    
 
     public void Start()
     {
@@ -28,15 +29,13 @@ public class ItemPickUp : MonoBehaviour
         managerScript = gamemanager.GetComponent<Gamemanager>();
         saveGame = gamemanager.GetComponent<SaveGame>();    
         spriteRenderer = GetComponent<SpriteRenderer>();
-        canvas = GetComponentInChildren<Canvas>();
-        canvas.enabled = false;
+        canvasRectTransform = canvas.GetComponent<RectTransform>();
 
         if (jumpItem == true)
         {
             spriteRenderer.sprite = jumpPowerUp.powerUpSprite;
             itemName.text = jumpPowerUp.powerUpName;
-            itemDescription.text = jumpPowerUp.description;
-
+            itemDescription.text = jumpPowerUp.description;      
         }
 
         if (timeItem == true)
@@ -57,42 +56,16 @@ public class ItemPickUp : MonoBehaviour
     public void Update()
     
     {
-        if (managerScript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
-        {
-            if (jumpItem == true)
-            {
-                managerScript.saveGame.playerStats.hasItem = 2;
-                saveGame.SavePlayerStats();
-                Destroy(this.gameObject);
-                Debug.Log("Jump Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
-                Debug.Log(PlayerPrefs.GetInt("hasItem"));
-            }
-
-            if (timeItem == true)
-            {
-                managerScript.saveGame.playerStats.hasItem = 3;
-                saveGame.SavePlayerStats();
-                Destroy(this.gameObject);
-                Debug.Log("Time Item Collected Item ID = " + managerScript.saveGame.playerStats.hasItem);
-            }
-
-            if (gravityItem == true)
-            {
-                managerScript.saveGame.playerStats.hasItem = 4;
-                saveGame.SavePlayerStats();
-                Destroy(this.gameObject);
-                Debug.Log("Gravity Item Collected, Item ID = " + managerScript.saveGame.playerStats.hasItem);
-            }
-
-        }
+       
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-           canPickUp = true;
-           canvas.enabled = true;
+           canvas.SetActive(true);
+           UpdateTextCanvas();
+
         }
     }
 
@@ -100,9 +73,15 @@ public class ItemPickUp : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Player"))
         {
-            canPickUp = false;
-            canvas.enabled = false;
+            canvas.SetActive(false);
         }
+    }
+
+    private void UpdateTextCanvas()
+    {
+        float newTextWidth = itemDescription.preferredWidth;
+        float newTextHeight = itemDescription.preferredHeight;
+        canvasRectTransform.sizeDelta = new Vector2(newTextWidth / 3, newTextHeight * 2);
     }
 
 

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TimePowerUp
   m_EditorClassIdentifier: 
   powerUpName: Time Control
-  description: You will become a powerful wizard with the ability to control space
-    and time
-  powerUpSprite: {fileID: 21300000, guid: b89ac8e07cc93ef4daf27e253760d5da, type: 3}
+  description: An incredible aura surrounds this ancient relic. According to the
+    books, this sphere has the ability to influence time within its vicinity.
+  powerUpSprite: {fileID: 1379715356, guid: 3a6244eecf7185e4fb18c2ae1109b16a, type: 3}

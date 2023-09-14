@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: JumpPowerUp
   m_EditorClassIdentifier: 
   powerUpName: Jump PowerUp
-  description: Turn On Your Red Shoes And Reach Unbelievable Heights.
-  powerUpSprite: {fileID: 21300000, guid: 281a3b836e494ef47a0559e87974555d, type: 3}
+  description: Mysterious boots with a stylish look. Legend has it that the wearer
+    of these boots reaches infinite heights.
+  powerUpSprite: {fileID: 2116955686, guid: 3a6244eecf7185e4fb18c2ae1109b16a, type: 3}

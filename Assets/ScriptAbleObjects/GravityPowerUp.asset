@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4ff67fa39f75dce4092432856c0b0c1a, type: 3}
   m_Name: GravityPowerUp
   m_EditorClassIdentifier: 
-  powerUpName: Gravity PowerUp
-  description: lower gravity allows smoother jumps
-  powerUpSprite: {fileID: 21300000, guid: 3bb0063e9cc57c747844a5dc9b95d81a, type: 3}
+  powerUpName: Gravity Ring
+  description: A centuries-old ring, forged from pure gold. It is said that the wearer
+    is able to influence gravity.
+  powerUpSprite: {fileID: -560574174, guid: 3a6244eecf7185e4fb18c2ae1109b16a, type: 3}

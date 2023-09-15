@@ -391,52 +391,9 @@ public class PlayerController : MonoBehaviour
         // =================================
         // Item Usage
         // =================================
-        if (Application.isMobilePlatform)
-        {
-            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp)
-            {
-                if (isJumpItem == true)
-                {
-                    managerscript.saveGame.playerStats.hasItem = 2;
-                    managerscript.saveGame.SavePlayerStats();
-                    Destroy(itemGameObjekt);
-                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
-                }
-
-                if (isTimeItem == true)
-                {
-                    managerscript.saveGame.playerStats.hasItem = 3;
-                    managerscript.saveGame.SavePlayerStats();
-                    Destroy(itemGameObjekt);
-                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
-                }
-
-                if (isGravityItem == true)
-                {
-                    managerscript.saveGame.playerStats.hasItem = 4;
-                    managerscript.saveGame.SavePlayerStats();
-                    Destroy(itemGameObjekt);
-                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
-                }
-            }
-
-            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
-            {                
-                StartCoroutine(JumpItemPower());
-            }
-
-            if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem)
-            {
-                StartCoroutine(TimeItemPower());
-            }
-
-            if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem)
-            {
-                StartCoroutine(GravityItemPower());
-            }
-        } 
-        else
-        {
+       
+       
+        
             if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
             {
                 if (isJumpItem == true)
@@ -478,8 +435,55 @@ public class PlayerController : MonoBehaviour
             {
                 StartCoroutine(GravityItemPower());
             }           
-        }
+        
 
+    }
+    public void ItemUsageMobile()
+    {
+        if (Application.isMobilePlatform)
+        {
+            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp)
+            {
+                if (isJumpItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 2;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isTimeItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 3;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+
+                if (isGravityItem == true)
+                {
+                    managerscript.saveGame.playerStats.hasItem = 4;
+                    managerscript.saveGame.SavePlayerStats();
+                    Destroy(itemGameObjekt);
+                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                }
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
+            {
+                StartCoroutine(JumpItemPower());
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem)
+            {
+                StartCoroutine(TimeItemPower());
+            }
+
+            if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem)
+            {
+                StartCoroutine(GravityItemPower());
+            }
+        }
     }
     private void Animation()
     {

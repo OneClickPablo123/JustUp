@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-
+using UnityEngine.VFX;
 
 public class PlayerController : MonoBehaviour
 {
@@ -44,13 +44,16 @@ public class PlayerController : MonoBehaviour
     private Vector2 originalHandlePosition;
 
     [Header("CheckPoint Settings")]
-    private bool checkPointActive;
+    public bool checkPointActive;
     public GameObject checkPointPrefab;
     private GameObject activeCheckPoint;
     private GameObject checkPointButton;
+    CheckPointAnimation checkPointAnimation;
     private bool isButtonPressed = false;
     private float pressTime = 1f;
     private float pressCounter;
+    public bool canDestroy;
+
 
     [Header("Item Settings")]
     internal bool canPickUp;
@@ -158,24 +161,7 @@ public class PlayerController : MonoBehaviour
         }
 
     }
-
     void Update()
-    {       
-        // ==========================
-        //     Methoden Aufrufe
-        // ==========================
-        Movement();
-        IsGroundedLogic();
-        Jump();
-        LadderMove();
-        Animation();
-        ItemUsage();
-        HandleHang();
-        EasyMode();
-        EasyModeMobile();
-        HandleScreenRotation();
-    }
-
     public void Movement()
     {
 
@@ -613,6 +599,7 @@ public class PlayerController : MonoBehaviour
                 if (checkPointActive && pressCounter >= pressTime && pressCounter != 0)
                 {
                     this.transform.position = activeCheckPoint.transform.position;
+                    Destroy(activeCheckPoint);
                     pressCounter = 0;
                 }
             }
@@ -621,7 +608,7 @@ public class PlayerController : MonoBehaviour
             {
                 if (!checkPointActive && pressCounter < pressTime && pressCounter != 0)
                 {
-                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));
+                    activeCheckPoint = Instantiate(checkPointPrefab, this.transform.position, Quaternion.Euler(0, 0, 0));                    
                     checkPointActive = true;
                     pressCounter = 0;
                 }
@@ -630,12 +617,7 @@ public class PlayerController : MonoBehaviour
                     Destroy(activeCheckPoint);
                     checkPointActive = false;
                     pressCounter = 0;
-                }
-                /*else if (checkPointActive && pressCounter >= pressTime && pressCounter != 0)
-                {
-                    this.transform.position = activeCheckPoint.transform.position;
-                    pressCounter = 0;
-                }*/
+                }                
             }
         }
         

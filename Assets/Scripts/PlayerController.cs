@@ -1,6 +1,5 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.VFX;
 
 public class PlayerController : MonoBehaviour
 {
@@ -48,8 +47,7 @@ public class PlayerController : MonoBehaviour
     public GameObject checkPointPrefab;
     private GameObject activeCheckPoint;
     private GameObject checkPointButton;
-    CheckPointAnimation checkPointAnimation;
-    private bool isButtonPressed = false;
+    private bool cpButtonPressed = false;
     private float pressTime = 1f;
     private float pressCounter;
     public bool canDestroy;
@@ -61,6 +59,7 @@ public class PlayerController : MonoBehaviour
     private bool isGravityItem;
     private bool isTimeItem;
     private GameObject itemGameObjekt;
+    private bool itemButtonPressed;
 
 
     //Surfaces
@@ -77,6 +76,7 @@ public class PlayerController : MonoBehaviour
     private float originalGravity;
     internal bool usedItem;
     Camera mainCam;
+    private bool menuButtonPressed;
 
     // ==========================
     //     Components
@@ -162,6 +162,21 @@ public class PlayerController : MonoBehaviour
 
     }
     void Update()
+    {       
+        // ==========================
+        //     Methoden Aufrufe
+        // ==========================
+        Movement();
+        IsGroundedLogic();
+        Jump();
+        LadderMove();
+        Animation();
+        ItemUsage();
+        HandleHang();
+        EasyMode();
+        EasyModeMobile();
+        HandleScreenRotation();
+    }
     public void Movement()
     {
 
@@ -170,21 +185,21 @@ public class PlayerController : MonoBehaviour
         // ==========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
-        if (Input.touchCount == 0 && !isButtonPressed)
+        if (Input.touchCount == 0 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 1 && !isButtonPressed)
+        else if (managerscript.saveGame.menuStats.touchControls == 1 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             moveX = GetJoystickInput().x;
             HandleJoyStickInput();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 2 && !isButtonPressed)
+        else if (managerscript.saveGame.menuStats.touchControls == 2 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             HandleTouchInput1();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 3 && !isButtonPressed)
+        else if (managerscript.saveGame.menuStats.touchControls == 3 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             HandleTouchInput2();
         }
@@ -376,10 +391,7 @@ public class PlayerController : MonoBehaviour
     {
         // =================================
         // Item Usage
-        // =================================
-       
-       
-        
+        // =================================        
             if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
             {
                 if (isJumpItem == true)
@@ -455,17 +467,17 @@ public class PlayerController : MonoBehaviour
                 }
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem)
+            else if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem && !canPickUp)
             {
                 StartCoroutine(JumpItemPower());
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem)
+            else if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem && !canPickUp)
             {
                 StartCoroutine(TimeItemPower());
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem)
+            else if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem && !canPickUp)
             {
                 StartCoroutine(GravityItemPower());
             }
@@ -629,14 +641,12 @@ public class PlayerController : MonoBehaviour
         {
             if (managerscript.saveGame.menuStats.easyMode == 1)
             {
-
-                if (isButtonPressed)
+                if (cpButtonPressed)
                 {
                     pressCounter += Time.deltaTime;
                 }
-
                 //SHORT
-                if (!isButtonPressed && pressCounter < pressTime && pressCounter != 0)
+                if (!cpButtonPressed && pressCounter < pressTime && pressCounter != 0)
                 {
                     if (checkPointActive)
                     {
@@ -656,7 +666,7 @@ public class PlayerController : MonoBehaviour
 
                     //LONG
                 }
-                else if (isButtonPressed && pressCounter >= pressTime && pressCounter != 0)
+                else if (cpButtonPressed && pressCounter >= pressTime && pressCounter != 0)
                 {
                     if (checkPointActive)
                     {
@@ -673,11 +683,27 @@ public class PlayerController : MonoBehaviour
     }
     public void CheckPointPressDown()
     {
-        isButtonPressed = true;
+        cpButtonPressed = true;
     }
     public void CheckPointPressUp()
     {
-        isButtonPressed = false;
+        cpButtonPressed = false;
+    }
+    public void ItemButtonPressUp()
+    {
+        itemButtonPressed = false;
+    }
+    public void ItemButtonPressDown()
+    {
+        itemButtonPressed = true;
+    }
+    public void MenuButtonPressDown()
+    {
+        menuButtonPressed = true;
+    }
+    public void MenuButtonPressUp()
+    {
+        menuButtonPressed = false;
     }
     private void HandleTouchInput1()
     {

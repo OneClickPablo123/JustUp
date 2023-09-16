@@ -1,5 +1,6 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class ItemPickUp : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class ItemPickUp : MonoBehaviour
         saveGame = gamemanager.GetComponent<SaveGame>();    
         spriteRenderer = GetComponent<SpriteRenderer>();
         canvasRectTransform = canvas.GetComponent<RectTransform>();
+       
 
         if (jumpItem == true)
         {

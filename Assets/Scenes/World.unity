@@ -939,7 +939,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -195.3981, y: -61.399902}
+  m_AnchoredPosition: {x: -195.39844, y: -61.399902}
   m_SizeDelta: {x: 348.556, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &64651774
@@ -2080,7 +2080,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -195.4, y: -151.4}
+  m_AnchoredPosition: {x: -195.40039, y: -151.3999}
   m_SizeDelta: {x: 348.56, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &158286113
@@ -4009,7 +4009,7 @@ Transform:
   m_GameObject: {fileID: 271626344}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 2.45, y: 5.85, z: 0}
+  m_LocalPosition: {x: -0.94, y: 0.15, z: 0}
   m_LocalScale: {x: 0.85748005, y: 1.0088, z: 1.0088}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -4047,7 +4047,9 @@ MonoBehaviour:
   isClimbing: 0
   ladderSpeed: 5
   touchArea: {fileID: 1324971863}
+  checkPointActive: 0
   checkPointPrefab: {fileID: 8966193110262350945, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
+  canDestroy: 0
   platformHandler: {fileID: 0}
   groundMask:
     serializedVersion: 2
@@ -6196,7 +6198,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 271626349}
           m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-          m_MethodName: CheckPointPressDown
+          m_MethodName: ItemButtonPressDown
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -6212,7 +6214,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 271626349}
           m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-          m_MethodName: CheckPointPressUp
+          m_MethodName: ItemButtonPressUp
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -14542,79 +14544,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb67ae3035abce24aa87122c96acac22, type: 3}
---- !u!1001 &1269923964
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 644135106526880916, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_Intensity
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 10.83
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 13.33
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0.28993583
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302476, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7207590895990302478, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: m_Name
-      value: PowerItem
-      objectReference: {fileID: 0}
-    - target: {fileID: 8292202844408821382, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: jumpItem
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8292202844408821382, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: timeItem
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8292202844408821382, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
-      propertyPath: gravityItem
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 7bca4f506222d7a4a91e64629c3e98c2, type: 3}
 --- !u!1001 &1272760304
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -16702,7 +16631,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 271626349}
           m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-          m_MethodName: CheckPointPressDown
+          m_MethodName: MenuButtonPressDown
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -16718,7 +16647,7 @@ MonoBehaviour:
         m_Calls:
         - m_Target: {fileID: 271626349}
           m_TargetAssemblyTypeName: PlayerController, Assembly-CSharp
-          m_MethodName: CheckPointPressUp
+          m_MethodName: MenuButtonPressUp
           m_Mode: 1
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
@@ -24799,63 +24728,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1eefc3615c977104493da1941f420da7, type: 3}
---- !u!1001 &1280486137389824574
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.85
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 5.93
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7878594192141749633, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8966193110262350945, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
-      propertyPath: m_Name
-      value: CheckPoint
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 05cb6a8808a09184abbd88a98ef5aced, type: 3}
 --- !u!1001 &2170456817776803844
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -25013,5 +24885,3 @@ SceneRoots:
   - {fileID: 1865470705}
   - {fileID: 814781524}
   - {fileID: 1446503490}
-  - {fileID: 1269923964}
-  - {fileID: 1280486137389824574}

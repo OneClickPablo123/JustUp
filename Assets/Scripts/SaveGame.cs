@@ -7,10 +7,9 @@ public class SaveGame : MonoBehaviour
     [SerializeField] internal PlayerStats playerStats;
     [SerializeField] internal MenuStats menuStats;
 
-
     public void CreatePlayerStats()
     {
-        playerStats = new PlayerStats(0, 0f , 0,0);
+        playerStats = new PlayerStats(0, 0f, 0f, 0);
     }
 
     public void SavePlayerStats()
@@ -29,7 +28,7 @@ public class SaveGame : MonoBehaviour
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(2, 0);
+        menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f);
     }
 
     public void SaveMenuStats()
@@ -38,6 +37,9 @@ public class SaveGame : MonoBehaviour
         {
             PlayerPrefs.SetInt("touchControls", menuStats.touchControls);
             PlayerPrefs.SetInt("easyMode", menuStats.easyMode);
+            PlayerPrefs.SetFloat("masterVolume", menuStats.masterVolume);
+            PlayerPrefs.SetFloat("musicVolume", menuStats.musicVolume);
+            PlayerPrefs.SetFloat("effectVolume", menuStats.effectVolume);
             PlayerPrefs.Save();
             Debug.Log("MenuStats Saved!");
         }
@@ -49,7 +51,7 @@ public class SaveGame : MonoBehaviour
 
     public void LoadMenuStats()
     {
-        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"));
+        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"), PlayerPrefs.GetFloat("effectVolume"));
     }
 
 }

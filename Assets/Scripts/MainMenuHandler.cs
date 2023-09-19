@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -9,86 +10,119 @@ public class MainMenuHandler : MonoBehaviour
 
     //Main Menu
     GameObject menuPanel;
-    //Options
-    GameObject optionMenu;
-    GameObject inputPanel;
+    AudioSource audioSource;
+    public TextMeshProUGUI startButtonText;
+    
+    //Option Panel
+    public GameObject optionMenu;
+    public GameObject inputPanel;
 
     //EasyMode - Options
     public GameObject easyModeCheckBox;
     Image buttonImage;
-    public Sprite easyModeChecked;
-    public Sprite easyModeUnchecked;
+    public Sprite checkBoxChecked;
+    public Sprite checkBoxUnchecked;
     private bool easyMode;
 
-    // Start is called before the first frame update
+    //NewGame - Options
+    public GameObject warningPanel;
+
+    //Settings Tab
+    public GameObject generalPanel;
+    public GameObject soundPanel;
+
+
+    //TouchControl Options
+    public GameObject joyStickCheckBox;
+    Image joyStickImage;
+    public GameObject alternativeCheckBox;
+    Image alternativeImage;
+    public GameObject standardCheckBox;
+    Image standardImage;
+
+    //Sound Options
+    public Slider masterVolumeSlider;
+    public Slider musicVolumeSlider;
+    public Slider effectVolumeSlider;
+
+    
+    private void Awake()
+    {
+        saveGame = GameObject.Find("SaveGame").GetComponent<SaveGame>();   
+    }
+
     void Start()
     {
-        saveGame = GetComponent<SaveGame>();
-        saveGame.LoadMenuStats();
-        saveGame.LoadPlayerStats();
+        //Menu
         menuPanel = GameObject.Find("MainMenuPanel");  
         buttonImage = easyModeCheckBox.GetComponent<Image>();
-        
+        audioSource = GetComponent<AudioSource>();
+
+        //Check if the Player Already Played the Game. HAS TO BE PLAYERPREFS!!!
+       if (PlayerPrefs.GetInt("firstPlayed") == 0)
+        {
+            Debug.Log("Create");
+            saveGame.CreateMenuStats();
+            saveGame.CreatePlayerStats();
+            saveGame.playerStats.firstPlayed = 1;
+        } 
+        else
+        {
+            saveGame.LoadMenuStats();
+            saveGame.LoadPlayerStats();
+        }
+
+        //Start Button Text
+        if (saveGame.playerStats.firstPlayed == 1)
+        {
+            startButtonText.text = "New Game";
+        } 
+        else if (saveGame.playerStats.firstPlayed == 2)
+        {
+            startButtonText.text = "Resume Game";
+        }
+
+
+        //Options
+        optionMenu.SetActive(false);
+        menuPanel.SetActive(true);
+        generalPanel.SetActive(true);
+        soundPanel.SetActive(false);
+        warningPanel.SetActive(false);
+
+        //TouchControls
+        joyStickImage = joyStickCheckBox.GetComponent<Image>();
+        alternativeImage = alternativeCheckBox.GetComponent<Image>();
+        standardImage = standardCheckBox.GetComponent<Image>();
+
+        joyStickCheckBox.SetActive(false);
+        alternativeCheckBox.SetActive(false);
+        standardCheckBox.SetActive(false);
+
         if(saveGame.menuStats.easyMode == 1)
         {
             easyMode = true;
-            buttonImage.sprite = easyModeChecked;
+            buttonImage.sprite = checkBoxChecked;
         } 
         else if (saveGame.menuStats.easyMode == 0)
         {
             easyMode = false;
-            buttonImage.sprite = easyModeUnchecked;
+            buttonImage.sprite = checkBoxUnchecked;
         }
 
-        //Options
-        optionMenu = GameObject.Find("OptionPanel");
-        optionMenu.SetActive(false);
-        menuPanel.SetActive(true);
+        
+
+        //Sound
+        masterVolumeSlider.value = saveGame.menuStats.masterVolume;
+        musicVolumeSlider.value = saveGame.menuStats.musicVolume;
+        effectVolumeSlider.value = saveGame.menuStats.effectVolume;
     }
 
     // Update is called once per frame
     void Update()
     {
-        /* Überprüfe, ob es mindestens einen Touch-Input auf dem Bildschirm gibt.
-        if (Input.touchCount > 0)
-        {
-            // Schleife durch alle aktiven Touch-Inputs.
-            foreach (Touch touch in Input.touches)
-            {
-                // Überprüfe, ob der Touch-Input über einem Button liegt.
-                if (IsTouchOverButton(touch.position, startButton))
-                {
-                    SceneManager.LoadScene(1);
-                    Debug.Log("Game Started");
-                }
-                if (IsTouchOverButton(touch.position, exitButton))
-                {
-                    Application.Quit(); 
-                    Debug.Log("Quit Touched");
-                }
-                if (IsTouchOverButton(touch.position, optionButton))
-                {
-                    menuPanel.SetActive(false);
-                    optionMenu.SetActive(true);
-                    Debug.Log("Option Touch");
-                }
-                else if (IsTouchOverButton(touch.position, inputSystem1))
-                {
-                    menuStats.inputSystem = 1;
-                    saveGame.SaveMenuStats();
-                }
-                else if (IsTouchOverButton(touch.position, inputSystem2))
-                {
-                    menuStats.inputSystem = 2;
-                    saveGame.SaveMenuStats();
-                }
-                else if (IsTouchOverButton(touch.position, inputSystem3))
-                {
-                    menuStats.inputSystem = 3;
-                    saveGame.SaveMenuStats();
-                }
-            }
-        } */
+        TouchControlBox();
+        MusicController();
     } 
 
     public void QuitGame()
@@ -100,7 +134,8 @@ public class MainMenuHandler : MonoBehaviour
 
     public void StartGame()
     {
-        Debug.Log(PlayerPrefs.GetInt("touchControls"));
+        saveGame.playerStats.firstPlayed = 2;
+        saveGame.SavePlayerStats();
         SceneManager.LoadScene(1);
     }
 
@@ -127,29 +162,94 @@ public class MainMenuHandler : MonoBehaviour
     {
         saveGame.menuStats.touchControls = 3;
     }
-
     public void OptionBackButton()
-    {
+    {    
         saveGame.SaveMenuStats();
         menuPanel.SetActive(true);
-        optionMenu.SetActive(false);
-       
+        optionMenu.SetActive(false);       
     }
-
     public void EasyMode()
     {
         if (easyMode)
         {
             easyMode = false;
-            buttonImage.sprite = easyModeUnchecked;
+            buttonImage.sprite = checkBoxUnchecked;
             saveGame.menuStats.easyMode = 0;
         }
         else
         {
             easyMode = true;
-            buttonImage.sprite = easyModeChecked;
+            buttonImage.sprite = checkBoxChecked;
             saveGame.menuStats.easyMode = 1;
         }
+    }
+    public void TouchControlBox()
+    {
+        //JoyStick
+        if (saveGame.menuStats.touchControls == 1)
+        {
+            joyStickCheckBox.SetActive(true);
+            joyStickImage.sprite = checkBoxChecked;
+
+        } else
+        {
+            joyStickCheckBox.SetActive(false);
+        }
+        //Alternative
+        if (saveGame.menuStats.touchControls == 2)
+        {
+            alternativeCheckBox.SetActive(true);
+            alternativeImage.sprite = checkBoxChecked;
+        } else
+        {
+            alternativeCheckBox.SetActive(false);
+        }
+        //Standard
+        if (saveGame.menuStats.touchControls == 3)
+        {
+            standardCheckBox.SetActive(true);
+            standardImage.sprite = checkBoxChecked;
+        } else
+        {
+            standardCheckBox.SetActive(false);
+        }
+    }
+    public void MusicController()
+    {
+        audioSource.volume = masterVolumeSlider.value * musicVolumeSlider.value;
+        saveGame.menuStats.masterVolume = masterVolumeSlider.value;
+        saveGame.menuStats.musicVolume = musicVolumeSlider.value;
+        saveGame.menuStats.effectVolume = effectVolumeSlider.value;
+    }
+
+    public void ShowWarningNewGame()
+    {
+        warningPanel.SetActive(true);
+    }
+
+    public void StartNewGame()
+    {
+        saveGame.CreatePlayerStats();
+        saveGame.SavePlayerStats();
+        warningPanel.SetActive(false);
+        SceneManager.LoadScene(0);
+    }
+
+    public void CloseWarning()
+    {
+        warningPanel.SetActive(false);
+    }
+
+    public void ShowSoundSetting()
+    {
+        generalPanel.SetActive(false);
+        soundPanel.SetActive(true);
+    }
+
+    public void ShowGeneralSettings()
+    {
+        generalPanel.SetActive(true);
+        soundPanel.SetActive(false);
     }
 
     private bool IsTouchOverButton(Vector2 touchPosition, GameObject button)

@@ -31,11 +31,12 @@ public class NpcManager : MonoBehaviour
         dialogBox.gameObject.SetActive(false);
         gameManagerO = GameObject.Find("gamemanager");
         gamemanager = gameManagerO.GetComponent<Gamemanager>();
-        saveGame = gamemanager.GetComponent<SaveGame>();
+        saveGame = GameObject.Find("SaveGame").GetComponent<SaveGame>();
         canvasRectTransform = dialogBox.GetComponent<RectTransform>();
         player = GameObject.Find("Player");
         playerController = player.GetComponent<PlayerController>();
         audioSource = GetComponent<AudioSource>();
+        audioSource.volume = saveGame.menuStats.masterVolume * saveGame.menuStats.effectVolume;
 
        if (Application.isMobilePlatform)
         {
@@ -142,7 +143,6 @@ public class NpcManager : MonoBehaviour
 
     public void PlayNpcVoice()
     {
-
         if (!audioSource.isPlaying && canStartDialog)
         {
             audioSource.clip = npcVoices[currentVoiceIndex];

@@ -4,8 +4,7 @@ public class AudioManager : MonoBehaviour
 {
 
     //Audio 
-    AudioSource audioSource;
-    float originalVolume;
+    AudioSource stepAudioHandler;
     public AudioSource jumpAudioSource;
     public AudioSource jumpVoiceManager;
 
@@ -48,9 +47,8 @@ public class AudioManager : MonoBehaviour
 
     void Start()
     {
-        audioSource = GetComponent<AudioSource>();
+        stepAudioHandler = GetComponent<AudioSource>();
         playerController = GetComponent<PlayerController>();
-        originalVolume = audioSource.volume;
         gameManager = GameObject.Find("gamemanager");
         managerScript = gameManager.GetComponent<Gamemanager>();  
     }
@@ -58,13 +56,18 @@ public class AudioManager : MonoBehaviour
     
     void Update()
     {
+        VolumeHandle();
+        HandleTouchSounds();      
+        HandlePcSound();
+    }
 
-        HandleTouchSounds();
-
+    public void HandlePcSound()
+    {
         if (playerController.IsGrounded() == true)
         {
             isGrounded = true;
-        } else
+        }
+        else
         {
             isGrounded = false;
         }
@@ -77,38 +80,39 @@ public class AudioManager : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.LeftShift) && playerController.IsGrounded())
             {
-                audioSource.pitch = 1;
-            } else
+                stepAudioHandler.pitch = 1;
+            }
+            else
             {
-                audioSource.pitch = 0.89f;
+                stepAudioHandler.pitch = 0.89f;
             }
 
-            if (!audioSource.isPlaying)
+            if (!stepAudioHandler.isPlaying)
             {
                 if (playerController.isStone)
                 {
-                    audioSource.clip = stoneSounds[currentStepStoneIndex];
-                    audioSource.Play();
+                    stepAudioHandler.clip = stoneSounds[currentStepStoneIndex];
+                    stepAudioHandler.Play();
                 }
 
                 if (playerController.isWood)
                 {
-                    audioSource.clip = woodSounds[currentStepWoodIndex];
-                    audioSource.Play();
+                    stepAudioHandler.clip = woodSounds[currentStepWoodIndex];
+                    stepAudioHandler.Play();
                 }
 
                 if (playerController.isSnow)
                 {
-                    audioSource.clip = snowSounds[currentStepSnowIndex];
-                    audioSource.Play();
+                    stepAudioHandler.clip = snowSounds[currentStepSnowIndex];
+                    stepAudioHandler.Play();
                 }
 
                 if (playerController.isGras)
                 {
-                    audioSource.clip = grasSounds[currentStepGrasIndex];
-                    audioSource.Play();
+                    stepAudioHandler.clip = grasSounds[currentStepGrasIndex];
+                    stepAudioHandler.Play();
                 }
-                
+
             }
             currentStepStoneIndex = (currentStepStoneIndex + 1) % stoneSounds.Length;
             currentStepWoodIndex = (currentStepWoodIndex + 1) % woodSounds.Length;
@@ -117,12 +121,12 @@ public class AudioManager : MonoBehaviour
 
         }
         //Jump Sound
-        
+
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
             randomVoice = Random.Range(0, 100);
 
-            if(randomVoice == 42 || randomVoice == 69)
+            if (randomVoice == 42 || randomVoice == 69)
             {
                 jumpVoiceManager.clip = jumpVoice[currentVoiceIndex];
                 jumpVoiceManager.Play();
@@ -132,14 +136,14 @@ public class AudioManager : MonoBehaviour
 
             jumpAudioSource.clip = jumpAudio[currentJumpIndex];
             jumpAudioSource.Play();
-            
+
             currentJumpIndex = (currentJumpIndex + 1) % jumpAudio.Length;
 
         }
         //Item Usage Sound
         if (Input.GetKeyDown(KeyCode.LeftAlt) /*&& managerscript.playerStats.hasItem != 0*/)
         {
-            
+
         }
 
         //PullSound
@@ -155,12 +159,13 @@ public class AudioManager : MonoBehaviour
             if (randomValue >= 7)
             {
                 jumpVoiceManager.clip = pullSound;
-                jumpVoiceManager.Play();              
-            }           
-        } else
+                jumpVoiceManager.Play();
+            }
+        }
+        else
         {
             hasGeneratedRandomValue = false;
-        } 
+        }
 
     }
 
@@ -255,5 +260,12 @@ public class AudioManager : MonoBehaviour
                 }
             }
         }              
+    }
+
+    public void VolumeHandle()
+    {
+        stepAudioHandler.volume = managerScript.saveGame.menuStats.masterVolume * managerScript.saveGame.menuStats.effectVolume;
+        jumpAudioSource.volume = managerScript.saveGame.menuStats.masterVolume * managerScript.saveGame.menuStats.effectVolume;
+        jumpVoiceManager.volume = managerScript.saveGame.menuStats.masterVolume * managerScript.saveGame.menuStats.effectVolume;
     }
 }

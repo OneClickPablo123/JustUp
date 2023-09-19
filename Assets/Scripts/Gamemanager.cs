@@ -32,16 +32,16 @@ public class Gamemanager : MonoBehaviour
     //Others
     public bool gameCompleted;
     internal SaveGame saveGame;
-    public PlayerStats playerStats;
-    public AudioSource audioSource;
     private GameObject player;
     private PlayerController playerController;
 
     [Header("SOUNDS")]
     //Sounds
+    public AudioSource audioSource;
     public AudioClip spawnMusic;
     public AudioClip level2Sound;
     public AudioClip level3Sound;
+    float musicVolume;
     public float spawnMusicThreshold = 30f;
     public float level2Threshold = 50f;
     public float level3Threshold = 80f;
@@ -63,7 +63,7 @@ public class Gamemanager : MonoBehaviour
     private void Awake()
     {
         //Load SaveGame     
-        saveGame = GetComponent<SaveGame>();
+        saveGame = GameObject.Find("SaveGame").GetComponent<SaveGame>();
         saveGame.LoadMenuStats();
         saveGame.LoadPlayerStats();
     }
@@ -82,20 +82,16 @@ public class Gamemanager : MonoBehaviour
         highScore.text = "Highscore: " + highScoreHeight.ToString() + "m";
         
         //Best Time
-        bestTimef = playerStats.bestTime;
+        bestTimef = saveGame.playerStats.bestTime;
         gameCompleted = false;
-               
+
         //Audio Handler
-        audioSource.clip = null;
 
         //ItemButton
         itemButton = GameObject.Find("ItemButton");
         itemButton.SetActive(true);
         placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
         itemImage = placeHolder.GetComponent<Image>();
-
-
-
     }
 
     // Update is called once per frame
@@ -304,8 +300,8 @@ public class Gamemanager : MonoBehaviour
     
     {
      if (audioSource.clip != clip) 
-     {
-       audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, volumeChangeSpeed * Time.deltaTime);
+     {         
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0, volumeChangeSpeed * Time.deltaTime);
 
        if (audioSource.volume == 0)
        {
@@ -314,9 +310,9 @@ public class Gamemanager : MonoBehaviour
             audioSource.Play();
        }
      }
-     else if (audioSource.volume < 0.1f)
+     else if (audioSource.volume < musicVolume)
     {
-        audioSource.volume = Mathf.MoveTowards(audioSource.volume, 0.1f, volumeChangeSpeed * Time.deltaTime);
+        audioSource.volume = Mathf.MoveTowards(audioSource.volume, musicVolume, volumeChangeSpeed * Time.deltaTime);
     }
     else if (audioSource.volume > 0)
     {
@@ -326,7 +322,9 @@ public class Gamemanager : MonoBehaviour
 
     public void AudioHandler() 
     {
-    float playerY = player.transform.position.y;
+        musicVolume = saveGame.menuStats.masterVolume * saveGame.menuStats.musicVolume;
+
+        float playerY = player.transform.position.y;
 
         if (playerY < spawnMusicThreshold)
         {

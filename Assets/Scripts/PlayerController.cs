@@ -86,6 +86,7 @@ public class PlayerController : MonoBehaviour
     Gamemanager managerscript;
     GameObject gamemanager;
     SpriteRenderer spriteRenderer;
+    SaveGame saveGame;
     [SerializeField] PlatformHandler platformHandler;
 
     // ==========================
@@ -110,6 +111,7 @@ public class PlayerController : MonoBehaviour
     void Start()
     {
         //Get Components / Objects
+        saveGame = GameObject.Find("SaveGame").GetComponent<SaveGame>();
         rb = GetComponent<Rigidbody2D>();
         coll = GameObject.Find("Groundcast").GetComponent<BoxCollider2D>();
         anim = GetComponent<Animator>();
@@ -119,6 +121,7 @@ public class PlayerController : MonoBehaviour
         joyStick = GameObject.Find("VirtualJoyStick");
         mainCam = Camera.main;
         activeCheckPoint = checkPointPrefab;
+        
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
@@ -131,7 +134,7 @@ public class PlayerController : MonoBehaviour
         //Mobile
         if (Application.isMobilePlatform)
         {     
-            if (managerscript.saveGame.menuStats.easyMode == 1)
+            if (saveGame.menuStats.easyMode == 1)
             {
                 checkPointButton.SetActive(true);
             }
@@ -141,7 +144,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //JoyStickSettings
-            if (managerscript.saveGame.menuStats.touchControls == 1)
+            if (saveGame.menuStats.touchControls == 1)
             {
                 joyStick.SetActive(true);
                 joystickBackground = joyStick.transform.Find("JoyStickBackground").GetComponent<RectTransform>();
@@ -190,16 +193,19 @@ public class PlayerController : MonoBehaviour
             moveX = Input.GetAxisRaw("Horizontal");
             moveY = Input.GetAxisRaw("Vertical");
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 1 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
+        //JoyStick
+        else if (saveGame.menuStats.touchControls == 1 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             moveX = GetJoystickInput().x;
             HandleJoyStickInput();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 2 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
+        //Alternative
+        else if (saveGame.menuStats.touchControls == 2 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             HandleTouchInput1();
         }
-        else if (managerscript.saveGame.menuStats.touchControls == 3 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
+        //Standard
+        else if (saveGame.menuStats.touchControls == 3 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
         {
             HandleTouchInput2();
         }
@@ -392,44 +398,44 @@ public class PlayerController : MonoBehaviour
         // =================================
         // Item Usage
         // =================================        
-            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
+            if (saveGame.playerStats.hasItem == 0 && canPickUp && Input.GetKeyDown(KeyCode.F))
             {
                 if (isJumpItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 2;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 2;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Jump Item Collected Item ID = " + saveGame.playerStats.hasItem);
                 }
 
                 if (isTimeItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 3;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 3;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Time Item Collected Item ID = " + saveGame.playerStats.hasItem);
                 }
 
                 if (isGravityItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 4;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 4;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Gravity Item Collected, Item ID = " + saveGame.playerStats.hasItem);
                 }
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            if (saveGame.playerStats.hasItem == 2 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
             {                           
                 StartCoroutine(JumpItemPower());                
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            if (saveGame.playerStats.hasItem == 3 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
             {
                 StartCoroutine(TimeItemPower());
             }
 
-            if (managerscript.saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
+            if (saveGame.playerStats.hasItem == 4 && Input.GetKeyDown(KeyCode.LeftAlt) && !usedItem)
             {
                 StartCoroutine(GravityItemPower());
             }           
@@ -440,44 +446,44 @@ public class PlayerController : MonoBehaviour
     {
         if (Application.isMobilePlatform)
         {
-            if (managerscript.saveGame.playerStats.hasItem == 0 && canPickUp)
+            if (saveGame.playerStats.hasItem == 0 && canPickUp)
             {
                 if (isJumpItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 2;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 2;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Jump Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Jump Item Collected Item ID = " + saveGame.playerStats.hasItem);
                 }
 
                 if (isTimeItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 3;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 3;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Time Item Collected Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Time Item Collected Item ID = " + saveGame.playerStats.hasItem);
                 }
 
                 if (isGravityItem == true)
                 {
-                    managerscript.saveGame.playerStats.hasItem = 4;
-                    managerscript.saveGame.SavePlayerStats();
+                    saveGame.playerStats.hasItem = 4;
+                    saveGame.SavePlayerStats();
                     Destroy(itemGameObjekt);
-                    Debug.Log("Gravity Item Collected, Item ID = " + managerscript.saveGame.playerStats.hasItem);
+                    Debug.Log("Gravity Item Collected, Item ID = " + saveGame.playerStats.hasItem);
                 }
             }
 
-            else if (managerscript.saveGame.playerStats.hasItem == 2 && !usedItem && !canPickUp)
+            else if (saveGame.playerStats.hasItem == 2 && !usedItem && !canPickUp)
             {
                 StartCoroutine(JumpItemPower());
             }
 
-            else if (managerscript.saveGame.playerStats.hasItem == 3 && !usedItem && !canPickUp)
+            else if (saveGame.playerStats.hasItem == 3 && !usedItem && !canPickUp)
             {
                 StartCoroutine(TimeItemPower());
             }
 
-            else if (managerscript.saveGame.playerStats.hasItem == 4 && !usedItem && !canPickUp)
+            else if (saveGame.playerStats.hasItem == 4 && !usedItem && !canPickUp)
             {
                 StartCoroutine(GravityItemPower());
             }
@@ -639,7 +645,7 @@ public class PlayerController : MonoBehaviour
         //CheckPoint Button Logic
         if (Application.isMobilePlatform)
         {
-            if (managerscript.saveGame.menuStats.easyMode == 1)
+            if (saveGame.menuStats.easyMode == 1)
             {
                 if (cpButtonPressed)
                 {
@@ -966,8 +972,8 @@ public class PlayerController : MonoBehaviour
         jumpForce += 75f;
         usedItem = true;   
         yield return new WaitForSeconds(5f);
-        managerscript.saveGame.playerStats.hasItem = 0;
-        managerscript.saveGame.SavePlayerStats();
+        saveGame.playerStats.hasItem = 0;
+        saveGame.SavePlayerStats();
         jumpForce = originalJumpForce;
         usedItem = false;
     }
@@ -976,8 +982,8 @@ public class PlayerController : MonoBehaviour
         rb.gravityScale = 2;
         usedItem = true;
         yield return new WaitForSeconds(5f);
-        managerscript.saveGame.playerStats.hasItem = 0;
-        managerscript.saveGame.SavePlayerStats();
+        saveGame.playerStats.hasItem = 0;
+        saveGame.SavePlayerStats();
         rb.gravityScale = originalGravity;
         usedItem = false;
     }
@@ -986,8 +992,8 @@ public class PlayerController : MonoBehaviour
         Time.timeScale = 0.5f;
         usedItem = true;
         yield return new WaitForSeconds(5f);
-        managerscript.saveGame.playerStats.hasItem = 0;
-        managerscript.saveGame.SavePlayerStats();
+        saveGame.playerStats.hasItem = 0;
+        saveGame.SavePlayerStats();
         Time.timeScale = 1f;
         usedItem = false;
     }

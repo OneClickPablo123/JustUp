@@ -26,6 +26,10 @@ public class PlayerController : MonoBehaviour
     Vector2 lgrabPos;
     Vector2 rgrabPos;
     public bool isPullUp;
+    
+    //TileMap
+    Vector2 cornerGrabPos;
+    Vector2 directionToPlayer;
     Vector2 pullPos;
 
     [Header("Ladder")]
@@ -348,7 +352,23 @@ public class PlayerController : MonoBehaviour
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
         }
-       
+
+        if (cornerGrabPos != Vector2.zero && directionToPlayer.x > 0 && facePosition.x > 0)
+        {
+            isHang = true;
+            this.transform.position = cornerGrabPos;
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0;
+        }
+
+        if (cornerGrabPos != Vector2.zero && directionToPlayer.x < 0 && facePosition.x < 0)
+        {
+            isHang = true;
+            this.transform.position = cornerGrabPos;
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 0;
+        }
+
     }
     public void PullUp()
     {
@@ -1095,6 +1115,13 @@ public class PlayerController : MonoBehaviour
             canHang = true;
             rgrabPos = collision.gameObject.transform.position;          
         } 
+
+        if (collision.CompareTag("cornergrab"))
+        {
+            canHang = true;
+            cornerGrabPos = collision.gameObject.transform.position; 
+            directionToPlayer = (this.transform.position - collision.gameObject.transform.position).normalized;
+        }
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
@@ -1122,6 +1149,11 @@ public class PlayerController : MonoBehaviour
             isJumpItem = false;
             isGravityItem = false;
             isTimeItem = false;
+        }
+
+        if (collision.CompareTag("cornergrab"))
+        {
+            cornerGrabPos = Vector2.zero;
         }
     }
 

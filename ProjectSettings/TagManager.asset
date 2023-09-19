@@ -10,6 +10,7 @@ TagManager:
   - leftGrab
   - rightGrab
   - Item
+  - cornergrab
   layers:
   - Default
   - TransparentFX

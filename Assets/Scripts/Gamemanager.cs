@@ -2,6 +2,7 @@ using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
 public class Gamemanager : MonoBehaviour
@@ -59,6 +60,11 @@ public class Gamemanager : MonoBehaviour
     public Sprite gravityItem;
     public Sprite pickUpItem;
 
+    [Header("TILEMAP")]
+    public Tilemap tilemap;
+    public GameObject CornerPrefab;
+    public GameObject pullPrefab;
+
 
     private void Awake()
     {
@@ -92,6 +98,8 @@ public class Gamemanager : MonoBehaviour
         itemButton.SetActive(true);
         placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
         itemImage = placeHolder.GetComponent<Image>();
+
+        CreateEdgeGrabs();
     }
 
     // Update is called once per frame
@@ -270,6 +278,47 @@ public class Gamemanager : MonoBehaviour
         }
 
         
+    }
+
+    public void CreateEdgeGrabs()
+    {
+        BoundsInt bounds = tilemap.cellBounds;
+
+        foreach (Vector3Int position in bounds.allPositionsWithin)
+        {
+            if (tilemap.HasTile(position))
+            {
+                TileBase tile = tilemap.GetTile(position);
+
+                // Überprüfe, ob sich links und rechts kein weiteres Tile befindet
+                bool noTileToLeft = !tilemap.HasTile(position + Vector3Int.left);
+                bool noTileToRight = !tilemap.HasTile(position + Vector3Int.right);
+                bool noTileAbove = !tilemap.HasTile(position + Vector3Int.up);
+
+                // Berechne die Weltposition des Tile-Centers
+                Vector3 tileCenterPosition = tilemap.GetCellCenterWorld(position);
+                Vector3 tileTopCenterPosition = tilemap.GetCellCenterWorld(position) + new Vector3(0f, tilemap.cellSize.y / 2f + 0.5f, 0f);
+
+                // Erstelle das linke Prefab, wenn sich links kein weiteres Tile befindet
+                if (noTileToLeft && noTileAbove)
+                {
+                    Vector3 tileTopLeftPosition = tilemap.GetCellCenterWorld(position) + new Vector3(-tilemap.cellSize.x / 2f, tilemap.cellSize.y / 2f, 0f);                    
+                    Instantiate(CornerPrefab, tileTopLeftPosition, Quaternion.identity);
+                }
+
+                // Erstelle das rechte Prefab, wenn sich rechts kein weiteres Tile befindet
+                if (noTileToRight && noTileAbove)
+                {
+                    Vector3 tileTopRightPosition = tilemap.GetCellCenterWorld(position) + new Vector3(tilemap.cellSize.x / 2f, tilemap.cellSize.y / 2f, 0f);
+                    Instantiate(CornerPrefab, tileTopRightPosition, Quaternion.identity);
+                    
+                }
+                if (noTileAbove && noTileToLeft || noTileAbove && noTileToRight)
+                {
+                    Instantiate(pullPrefab, tileTopCenterPosition, Quaternion.identity);
+                }
+            }
+        }
     }
 
     public string FormatTimeSpan(TimeSpan timeSpan)

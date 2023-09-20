@@ -1,6 +1,7 @@
 using System;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
@@ -65,6 +66,8 @@ public class Gamemanager : MonoBehaviour
     public GameObject CornerPrefab;
     public GameObject pullPrefab;
 
+    public PixelPerfectCamera mainCam;
+
 
     private void Awake()
     {
@@ -72,6 +75,7 @@ public class Gamemanager : MonoBehaviour
         saveGame = GameObject.Find("SaveGame").GetComponent<SaveGame>();
         saveGame.LoadMenuStats();
         saveGame.LoadPlayerStats();
+        CreateEdgeGrabs();
     }
     void Start()
     {
@@ -98,8 +102,6 @@ public class Gamemanager : MonoBehaviour
         itemButton.SetActive(true);
         placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
         itemImage = placeHolder.GetComponent<Image>();
-
-        CreateEdgeGrabs();
     }
 
     // Update is called once per frame
@@ -110,6 +112,7 @@ public class Gamemanager : MonoBehaviour
         PausePanel();
         AudioHandler();
         ItemButton();
+        HandleCameraSettings();
     }
 
     public void Timer()
@@ -296,26 +299,27 @@ public class Gamemanager : MonoBehaviour
                 bool noTileAbove = !tilemap.HasTile(position + Vector3Int.up);
 
                 // Berechne die Weltposition des Tile-Centers
-                Vector3 tileCenterPosition = tilemap.GetCellCenterWorld(position);
                 Vector3 tileTopCenterPosition = tilemap.GetCellCenterWorld(position) + new Vector3(0f, tilemap.cellSize.y / 2f + 0.5f, 0f);
+                Vector3 tileTopLeftPosition = tilemap.GetCellCenterWorld(position) + new Vector3(-tilemap.cellSize.x / 2f -0.3f, tilemap.cellSize.y / 2f -0.5f, 0f);
+                Vector3 tileTopRightPosition = tilemap.GetCellCenterWorld(position) + new Vector3(tilemap.cellSize.x / 2f + 0.3f, tilemap.cellSize.y / 2f -0.5f, 0f);
 
-                // Erstelle das linke Prefab, wenn sich links kein weiteres Tile befindet
-                if (noTileToLeft && noTileAbove)
+                if (noTileAbove)
                 {
-                    Vector3 tileTopLeftPosition = tilemap.GetCellCenterWorld(position) + new Vector3(-tilemap.cellSize.x / 2f, tilemap.cellSize.y / 2f, 0f);                    
-                    Instantiate(CornerPrefab, tileTopLeftPosition, Quaternion.identity);
-                }
+                    if (noTileToLeft)
+                    {                      
+                        Instantiate(CornerPrefab, tileTopLeftPosition, Quaternion.identity);
+                    }
 
-                // Erstelle das rechte Prefab, wenn sich rechts kein weiteres Tile befindet
-                if (noTileToRight && noTileAbove)
-                {
-                    Vector3 tileTopRightPosition = tilemap.GetCellCenterWorld(position) + new Vector3(tilemap.cellSize.x / 2f, tilemap.cellSize.y / 2f, 0f);
-                    Instantiate(CornerPrefab, tileTopRightPosition, Quaternion.identity);
-                    
-                }
-                if (noTileAbove && noTileToLeft || noTileAbove && noTileToRight)
-                {
-                    Instantiate(pullPrefab, tileTopCenterPosition, Quaternion.identity);
+                    if (noTileToRight)
+                    {
+                        Instantiate(CornerPrefab, tileTopRightPosition, Quaternion.identity);
+                    }
+
+                    if (noTileAbove && noTileToLeft || noTileAbove && noTileToRight)
+                    {
+                        Instantiate(pullPrefab, tileTopCenterPosition, Quaternion.identity);
+                    }
+
                 }
             }
         }
@@ -386,6 +390,30 @@ public class Gamemanager : MonoBehaviour
         else if (playerY < level3Threshold && playerY > level2Threshold)
         {
             HandleClip(level3Sound);
+        }
+    }
+
+    public void HandleCameraSettings()
+    {
+        //Set Camera Settings depend on Screen Roatation.
+        if (Application.isMobilePlatform)
+        {
+            if (Screen.orientation == ScreenOrientation.Portrait)
+            {
+                mainCam.assetsPPU = 100;
+                mainCam.refResolutionX = Screen.width;
+                mainCam.refResolutionY = Screen.height;
+            }
+
+            if (Screen.orientation == ScreenOrientation.LandscapeLeft)
+            {
+                mainCam.assetsPPU = 80;
+                mainCam.refResolutionX = Screen.width;
+                mainCam.refResolutionY = Screen.height;
+            }
+        } else
+        {
+            mainCam.assetsPPU = 80;
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 
@@ -26,11 +27,13 @@ public class PlayerController : MonoBehaviour
     Vector2 lgrabPos;
     Vector2 rgrabPos;
     public bool isPullUp;
-    
-    //TileMap
+    public bool snapped = false;
+
+    //TileMap HangSettings
     Vector2 cornerGrabPos;
     Vector2 directionToPlayer;
     Vector2 pullPos;
+    GameObject[] pullPrefabs;
 
     [Header("Ladder")]
     public bool isLadder;
@@ -98,7 +101,6 @@ public class PlayerController : MonoBehaviour
     // ==========================
     [Header("Layermask Settings")]
     [SerializeField] LayerMask groundMask;
-    [SerializeField] LayerMask grabMask;
 
     // ==========================
     //    Animation Strings
@@ -125,16 +127,17 @@ public class PlayerController : MonoBehaviour
         joyStick = GameObject.Find("VirtualJoyStick");
         mainCam = Camera.main;
         activeCheckPoint = checkPointPrefab;
-        
+
         //Start Variables
         originalMaxSpeed = maxSpeed;
         originalMaxSpeedRun = maxSpeedRun;
         originalGravity = rb.gravityScale;
         checkPointButton = GameObject.Find("CheckPointButton");
 
+        //Find PullPrefabs
+        pullPrefabs = GameObject.FindGameObjectsWithTag("PullPrefab");
+        
         //Start Conditions
-
-
         //Mobile
         if (Application.isMobilePlatform)
         {     
@@ -182,7 +185,7 @@ public class PlayerController : MonoBehaviour
         HandleHang();
         EasyMode();
         EasyModeMobile();
-        HandleScreenRotation();
+        Array.Sort(pullPrefabs, PullPositionCalc);
     }
     public void Movement()
     {
@@ -308,20 +311,22 @@ public class PlayerController : MonoBehaviour
     }
     public void HandleHang()
     {
+        Debug.Log(cornerGrabPos + "CornerGrabPos");
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
 
             if (!IsGrounded() && canHang && !isPullUp)
-            {
-                SnapToEdge();
-            }
-       
+            {                
+              SnapToEdge();
+            }    
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             rb.gravityScale = originalGravity;
             isHang = false;
+            snapped = false;
+            cornerGrabPos = Vector2.zero;
         }
 
         if (Input.GetKey(KeyCode.Space) && isHang)
@@ -345,7 +350,7 @@ public class PlayerController : MonoBehaviour
             rb.gravityScale = 0;
         }
        
-        if (rgrabPos != Vector2.zero && facePosition.x == -1 && transform.position.x > rgrabPos.x &&!isHang && canHang)
+        if (rgrabPos != Vector2.zero && facePosition.x == -1 && transform.position.x > rgrabPos.x && !isHang && canHang)
         {
             isHang = true;
             this.transform.position = rgrabPos;
@@ -353,26 +358,46 @@ public class PlayerController : MonoBehaviour
             rb.gravityScale = 0;
         }
 
-        if (cornerGrabPos != Vector2.zero && directionToPlayer.x > 0 && facePosition.x > 0)
+        if (cornerGrabPos != Vector2.zero && canHang && directionToPlayer.x > 0 && facePosition.x < 0 || cornerGrabPos != Vector2.zero && canHang && directionToPlayer.x < 0 && facePosition.x > 0)   
         {
-            isHang = true;
+            isHang = true;           
             this.transform.position = cornerGrabPos;
+            rb.Sleep();
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
         }
+    }
+    public int PullPositionCalc(GameObject obj1, GameObject obj2)
+    {
+        float distance1 = Vector3.Distance(obj1.transform.position, this.transform.position);
+        float distance2 = Vector3.Distance(obj2.transform.position, this.transform.position);
 
-        if (cornerGrabPos != Vector2.zero && directionToPlayer.x < 0 && facePosition.x < 0)
+        // Überprüfe, ob obj1 und obj2 über dem Spieler sind
+        bool isAbovePlayer1 = obj1.transform.position.y > this.transform.position.y;
+        bool isAbovePlayer2 = obj2.transform.position.y > this.transform.position.y;
+
+        // Wenn beide GameObjects über dem Spieler sind, vergleiche die Abstände
+        if (isAbovePlayer1 && isAbovePlayer2)
         {
-            isHang = true;
-            this.transform.position = cornerGrabPos;
-            rb.velocity = Vector2.zero;
-            rb.gravityScale = 0;
+            return distance1.CompareTo(distance2);
         }
-
+        // Andernfalls, wenn nur obj1 über dem Spieler ist, platziere es weiter vorne
+        else if (isAbovePlayer1)
+        {
+            return -1; // obj1 wird vor obj2 platziert
+        }
+        // Andernfalls, wenn nur obj2 über dem Spieler ist, platziere es weiter vorne
+        else if (isAbovePlayer2)
+        {
+            return 1; // obj2 wird vor obj1 platziert
+        }
+        // Wenn beide GameObjects unter dem Spieler sind, sind sie gleich
+        return 0;
     }
     public void PullUp()
     {
         isPullUp = true;
+        pullPos = pullPrefabs[0].transform.position;
         rb.gravityScale = 0;
         float normalizedTime = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
         //float climbspeed = 50f;
@@ -517,13 +542,15 @@ public class PlayerController : MonoBehaviour
         // =================================
 
         //If Player not Moving & isGrounded
-        if (moveX == 0 && IsGrounded())
+        
+       
+        if (moveX == 0 && IsGrounded() && !isHang && !isPullUp)
 
         {
             ChangeAnimationState(PLAYER_IDLE);
         }
 
-        if (IsGrounded())
+        if (IsGrounded() && !isHang && !isPullUp)
         {
             if (rb.velocity.x > 2.35 && moveX != 0 || rb.velocity.x < -2.35 && moveX != 0)
             {
@@ -552,7 +579,7 @@ public class PlayerController : MonoBehaviour
                 ChangeAnimationState(PLAYER_JUMP);
             }
 
-        }
+        } 
 
         //Change Animation speed depend on the Players Velocity
         if (rb.velocity.x < 7 || rb.velocity.x > -7f)
@@ -969,22 +996,7 @@ public class PlayerController : MonoBehaviour
     {
         return new Vector2(Mathf.Round(joystickInput.x), 0);
     } 
-    public void HandleScreenRotation()
-    {
-        //Set Camera depend on Screen Roatation.
-        if (Application.isMobilePlatform)
-        {
-            if (Screen.orientation == ScreenOrientation.Portrait)
-            {
-                mainCam.orthographicSize = 8.5f;
-            }
-
-            if (Screen.orientation == ScreenOrientation.LandscapeLeft)
-            {
-                mainCam.orthographicSize = 5f;
-            }
-        }    
-    }
+   
     IEnumerator JumpItemPower()
     {
 
@@ -1118,6 +1130,7 @@ public class PlayerController : MonoBehaviour
 
         if (collision.CompareTag("cornergrab"))
         {
+            Debug.Log("Enter Corner");
             canHang = true;
             cornerGrabPos = collision.gameObject.transform.position; 
             directionToPlayer = (this.transform.position - collision.gameObject.transform.position).normalized;
@@ -1153,7 +1166,9 @@ public class PlayerController : MonoBehaviour
 
         if (collision.CompareTag("cornergrab"))
         {
+            canHang = false;
             cornerGrabPos = Vector2.zero;
+            
         }
     }
 

@@ -400,7 +400,7 @@ public class Gamemanager : MonoBehaviour
         {
             if (Screen.orientation == ScreenOrientation.Portrait)
             {
-                mainCam.assetsPPU = 100;
+                mainCam.assetsPPU = 80;
                 mainCam.refResolutionX = Screen.width;
                 mainCam.refResolutionY = Screen.height;
             }

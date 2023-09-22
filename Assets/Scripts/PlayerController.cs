@@ -31,7 +31,7 @@ public class PlayerController : MonoBehaviour
 
     //TileMap HangSettings
     Vector2 cornerGrabPos;
-    Vector2 directionToPlayer;
+    Vector2 directionToCorner;
     Vector2 pullPos;
     GameObject[] pullPrefabs;
 
@@ -185,14 +185,22 @@ public class PlayerController : MonoBehaviour
         HandleHang();
         EasyMode();
         EasyModeMobile();
-        Array.Sort(pullPrefabs, PullPositionCalc);
+        if (isPullUp)
+        {
+            Array.Sort(pullPrefabs, PullPositionCalc);
+        }       
+
+        if (Input.GetKeyDown(KeyCode.H))
+        {
+            Debug.Log("Face: " + facePosition + " CornerGrabPos: " + cornerGrabPos.x + " PlayerPos: " + transform.position.x + "directionToCorner: " + directionToCorner);
+        }
     }
     public void Movement()
     {
 
         // ==========================
         //     Input Abfrage X
-        // ==========================
+        // =========================
 
         //Check if Player is Pressing Left or Right (-1 / 1)
         if (Input.touchCount == 0 && !cpButtonPressed && !itemButtonPressed && !menuButtonPressed)
@@ -307,26 +315,24 @@ public class PlayerController : MonoBehaviour
         }
 
         //Get Face Position of Player
+        
         facePosition = new Vector2(spriteRenderer.flipX ? -1f : 1f, 0);
     }
     public void HandleHang()
     {
-        Debug.Log(cornerGrabPos + "CornerGrabPos");
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
-
+            
             if (!IsGrounded() && canHang && !isPullUp)
             {                
               SnapToEdge();
-            }    
+            }         
         }
         else if (Input.GetKeyUp(KeyCode.LeftControl))
         {
             rb.gravityScale = originalGravity;
             isHang = false;
-            snapped = false;
-            cornerGrabPos = Vector2.zero;
         }
 
         if (Input.GetKey(KeyCode.Space) && isHang)
@@ -358,13 +364,16 @@ public class PlayerController : MonoBehaviour
             rb.gravityScale = 0;
         }
 
-        if (cornerGrabPos != Vector2.zero && canHang && directionToPlayer.x > 0 && facePosition.x < 0 || cornerGrabPos != Vector2.zero && canHang && directionToPlayer.x < 0 && facePosition.x > 0)   
+        if (cornerGrabPos.x != 0 && canHang)
         {
-            isHang = true;           
-            this.transform.position = cornerGrabPos;
-            rb.Sleep();
-            rb.velocity = Vector2.zero;
-            rb.gravityScale = 0;
+
+            if (directionToCorner.x < -0.1f && facePosition.x == -1 && directionToCorner.x != 0|| directionToCorner.x > 0.1f && facePosition.x == 1 && directionToCorner.x != 0)
+            {          
+                isHang = true;
+                this.transform.position = cornerGrabPos;
+                rb.velocity = Vector2.zero;
+                rb.gravityScale = 0;          
+            }
         }
     }
     public int PullPositionCalc(GameObject obj1, GameObject obj2)
@@ -400,7 +409,6 @@ public class PlayerController : MonoBehaviour
         pullPos = pullPrefabs[0].transform.position;
         rb.gravityScale = 0;
         float normalizedTime = anim.GetCurrentAnimatorStateInfo(0).normalizedTime;
-        //float climbspeed = 50f;
 
         if (normalizedTime >= 0.7f && anim.GetCurrentAnimatorStateInfo(0).IsName(PLAYER_PULL) && (Vector2)transform.position != pullPos)
         {
@@ -1128,13 +1136,7 @@ public class PlayerController : MonoBehaviour
             rgrabPos = collision.gameObject.transform.position;          
         } 
 
-        if (collision.CompareTag("cornergrab"))
-        {
-            Debug.Log("Enter Corner");
-            canHang = true;
-            cornerGrabPos = collision.gameObject.transform.position; 
-            directionToPlayer = (this.transform.position - collision.gameObject.transform.position).normalized;
-        }
+       
     }
     private void OnTriggerExit2D(Collider2D collision)
     {
@@ -1168,7 +1170,18 @@ public class PlayerController : MonoBehaviour
         {
             canHang = false;
             cornerGrabPos = Vector2.zero;
+            directionToCorner = Vector2.zero;
             
+        }
+    }
+
+    private void OnTriggerStay2D(Collider2D collision)
+    {
+        if (collision.CompareTag("cornergrab"))
+        {
+            canHang = true;
+            cornerGrabPos = collision.gameObject.transform.position;
+            directionToCorner.x = cornerGrabPos.x - transform.position.x;          
         }
     }
 

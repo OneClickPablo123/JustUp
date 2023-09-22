@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6309599118117444222}
   - component: {fileID: 6309599118117444193}
+  - component: {fileID: 8982921349377608346}
   - component: {fileID: 2543499740191203788}
   m_Layer: 0
   m_Name: PF Village Props - Campfire 01
@@ -88,6 +89,23 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &8982921349377608346
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6309599118117444192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e5e5bcd9b0b55554c82d361b68477892, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  minIntensity: 1
+  maxIntensity: 1.3
+  flickerSpeed: 2.3
+  minColor: {r: 1, g: 0.64705884, b: 0.37254903, a: 1}
+  maxColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
 --- !u!114 &2543499740191203788
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5004,7 +5022,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6313926156795901589
 Transform:
   m_ObjectHideFlags: 0
@@ -5014,7 +5032,7 @@ Transform:
   m_GameObject: {fileID: 6311499908509928827}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.06900787, y: 0.48, z: -0.0475}
+  m_LocalPosition: {x: -0.06900787, y: 0.48, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -9854,7 +9872,7 @@ Transform:
   m_GameObject: {fileID: 6802551647957549518}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0.33375052, z: -0.0049999803}
+  m_LocalPosition: {x: 0, y: 0.33375052, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

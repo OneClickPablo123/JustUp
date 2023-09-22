@@ -279,7 +279,8 @@ public class PlayerController : MonoBehaviour
     public bool IsGrounded()
     {
         //BoxCast if LayerMask == Groundmask
-        return Physics2D.BoxCast(coll.bounds.center, coll.bounds.size, 0, Vector2.down, 0.3f, groundMask);
+        return Physics2D.BoxCast(coll.bounds.
+            center, coll.bounds.size, 0, Vector2.down, 0.3f, groundMask);
 
     }
     public void IsGroundedLogic()
@@ -367,7 +368,7 @@ public class PlayerController : MonoBehaviour
         if (cornerGrabPos.x != 0 && canHang)
         {
 
-            if (directionToCorner.x < -0.1f && facePosition.x == -1 && directionToCorner.x != 0|| directionToCorner.x > 0.1f && facePosition.x == 1 && directionToCorner.x != 0)
+            if (directionToCorner.x <= -0.1f && facePosition.x == -1 && directionToCorner.x != 0|| directionToCorner.x >= 0.1f && facePosition.x == 1 && directionToCorner.x != 0)
             {          
                 isHang = true;
                 this.transform.position = cornerGrabPos;
@@ -431,9 +432,9 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyUp(KeyCode.Space) && rb.velocity.y > 0)
         {
-            if (!isHang || !isClimbing || !isPullUp)
+            if (!isHang || !isClimbing || !isPullUp && !IsGrounded())
             {
-                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 2.5f);
+                rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y / 1.6f);
                 //Set Counter to 0 to avoid Double Jump
                 coyoteCounter = 0;
             }
@@ -1004,7 +1005,6 @@ public class PlayerController : MonoBehaviour
     {
         return new Vector2(Mathf.Round(joystickInput.x), 0);
     } 
-   
     IEnumerator JumpItemPower()
     {
 
@@ -1174,7 +1174,6 @@ public class PlayerController : MonoBehaviour
             
         }
     }
-
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.CompareTag("cornergrab"))

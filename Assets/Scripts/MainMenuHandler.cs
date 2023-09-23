@@ -30,7 +30,10 @@ public class MainMenuHandler : MonoBehaviour
     //Settings Tab
     public GameObject generalPanel;
     public GameObject soundPanel;
+    public GameObject graphicPanel;
 
+    //Graphic Settings
+    public Image shadowCheckBox;
 
     //TouchControl Options
     public GameObject joyStickCheckBox;
@@ -44,6 +47,7 @@ public class MainMenuHandler : MonoBehaviour
     public Slider masterVolumeSlider;
     public Slider musicVolumeSlider;
     public Slider effectVolumeSlider;
+
 
     
     private void Awake()
@@ -83,6 +87,15 @@ public class MainMenuHandler : MonoBehaviour
         }
 
 
+        if (saveGame.menuStats.shadowsEnabled == 1)
+        {
+            shadowCheckBox.sprite = checkBoxChecked;
+        }
+        else
+        {
+            shadowCheckBox.sprite = checkBoxUnchecked;
+        }
+
         //Options
         optionMenu.SetActive(false);
         menuPanel.SetActive(true);
@@ -109,13 +122,13 @@ public class MainMenuHandler : MonoBehaviour
             easyMode = false;
             buttonImage.sprite = checkBoxUnchecked;
         }
-
-        
-
+      
         //Sound
         masterVolumeSlider.value = saveGame.menuStats.masterVolume;
         musicVolumeSlider.value = saveGame.menuStats.musicVolume;
         effectVolumeSlider.value = saveGame.menuStats.effectVolume;
+
+
     }
 
     // Update is called once per frame
@@ -135,7 +148,6 @@ public class MainMenuHandler : MonoBehaviour
     public void StartGame()
     {
         saveGame.playerStats.firstPlayed = 2;
-        saveGame.SavePlayerStats();
         SceneManager.LoadScene(1);
     }
 
@@ -162,6 +174,7 @@ public class MainMenuHandler : MonoBehaviour
     {
         saveGame.menuStats.touchControls = 3;
     }
+   
     public void OptionBackButton()
     {    
         saveGame.SaveMenuStats();
@@ -183,6 +196,7 @@ public class MainMenuHandler : MonoBehaviour
             saveGame.menuStats.easyMode = 1;
         }
     }
+    
     public void TouchControlBox()
     {
         //JoyStick
@@ -214,6 +228,7 @@ public class MainMenuHandler : MonoBehaviour
             standardCheckBox.SetActive(false);
         }
     }
+   
     public void MusicController()
     {
         audioSource.volume = masterVolumeSlider.value * musicVolumeSlider.value;
@@ -242,14 +257,37 @@ public class MainMenuHandler : MonoBehaviour
 
     public void ShowSoundSetting()
     {
+        graphicPanel.SetActive(false);
         generalPanel.SetActive(false);
         soundPanel.SetActive(true);
     }
 
+    public void ShowGraphicSettings()
+    {
+        graphicPanel.SetActive(true);
+        generalPanel.SetActive(false);
+        soundPanel.SetActive(false);
+    }
+   
     public void ShowGeneralSettings()
     {
         generalPanel.SetActive(true);
         soundPanel.SetActive(false);
+        graphicPanel.SetActive(false);
+    }
+
+    public void ShadowSettings()
+    {
+        if (saveGame.menuStats.shadowsEnabled == 1)
+        {
+            saveGame.menuStats.shadowsEnabled = 0;
+            shadowCheckBox.sprite = checkBoxUnchecked;
+        } 
+        else
+        {
+            saveGame.menuStats.shadowsEnabled = 1;
+            shadowCheckBox.sprite = checkBoxChecked;
+        }
     }
 
     private bool IsTouchOverButton(Vector2 touchPosition, GameObject button)

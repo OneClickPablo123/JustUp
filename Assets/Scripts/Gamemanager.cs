@@ -1,5 +1,6 @@
 using System;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -68,6 +69,11 @@ public class Gamemanager : MonoBehaviour
 
     public PixelPerfectCamera mainCam;
 
+    //Graphic Settings
+    GameObject mainPlatforms;
+    GameObject[] shadowCaster;
+    private int shadowCount;
+
 
     private void Awake()
     {
@@ -102,6 +108,17 @@ public class Gamemanager : MonoBehaviour
         itemButton.SetActive(true);
         placeHolder = itemButton.transform.Find("PlaceholderImage").gameObject;
         itemImage = placeHolder.GetComponent<Image>();
+
+        //Graphic Settings
+        mainPlatforms = GameObject.Find("MainPlatforms");
+        shadowCount = mainPlatforms.transform.childCount;
+        shadowCaster = new GameObject[shadowCount];
+
+        for (int i = 0; i < shadowCount; i++)
+        {
+            shadowCaster[i] = mainPlatforms.transform.GetChild(i).gameObject;
+        }
+        Debug.Log(shadowCaster.Length);
     }
 
     // Update is called once per frame
@@ -113,6 +130,7 @@ public class Gamemanager : MonoBehaviour
         AudioHandler();
         ItemButton();
         HandleCameraSettings();
+        HandleShadows();
     }
 
     public void Timer()
@@ -321,6 +339,24 @@ public class Gamemanager : MonoBehaviour
                     }
 
                 }
+            }
+        }
+    }
+
+    public void HandleShadows()
+    {
+        if (saveGame.menuStats.shadowsEnabled == 0)
+        {
+            foreach (GameObject shadowCast in shadowCaster)
+            {
+                shadowCast.SetActive(false);
+            }
+        }
+        else
+        {
+            foreach (GameObject shadowCast in shadowCaster)
+            {
+                shadowCast.SetActive(true);
             }
         }
     }

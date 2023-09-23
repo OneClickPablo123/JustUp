@@ -28,7 +28,7 @@ public class SaveGame : MonoBehaviour
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f);
+        menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f, 0);
     }
 
     public void SaveMenuStats()
@@ -40,6 +40,7 @@ public class SaveGame : MonoBehaviour
             PlayerPrefs.SetFloat("masterVolume", menuStats.masterVolume);
             PlayerPrefs.SetFloat("musicVolume", menuStats.musicVolume);
             PlayerPrefs.SetFloat("effectVolume", menuStats.effectVolume);
+            PlayerPrefs.SetInt("shadowsEnabled", menuStats.shadowsEnabled);
             PlayerPrefs.Save();
             Debug.Log("MenuStats Saved!");
         }
@@ -51,7 +52,7 @@ public class SaveGame : MonoBehaviour
 
     public void LoadMenuStats()
     {
-        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"), PlayerPrefs.GetFloat("effectVolume"));
+        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"), PlayerPrefs.GetFloat("effectVolume"), PlayerPrefs.GetInt("shadowsEnabled"));
     }
 
 }

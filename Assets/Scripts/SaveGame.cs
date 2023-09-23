@@ -9,7 +9,7 @@ public class SaveGame : MonoBehaviour
 
     public void CreatePlayerStats()
     {
-        playerStats = new PlayerStats(0, 0f, 0f, 0);
+        playerStats = new PlayerStats(0, 0f, 0f, 0, -2.24f, 0.6f, 0f);
     }
 
     public void SavePlayerStats()
@@ -18,17 +18,29 @@ public class SaveGame : MonoBehaviour
         PlayerPrefs.SetFloat("highscore", playerStats.highscore);
         PlayerPrefs.SetFloat("bestTime", playerStats.bestTime);
         PlayerPrefs.SetInt("hasItem", playerStats.hasItem);
+        PlayerPrefs.SetFloat("spawnPosX", playerStats.spawnPosX);
+        PlayerPrefs.SetFloat("spawnPosY", playerStats.spawnPosY);
+        PlayerPrefs.SetFloat("actualTime", playerStats.actualTime);
+
         PlayerPrefs.Save();
     }
 
     public void LoadPlayerStats()
     {
-        playerStats = new PlayerStats(PlayerPrefs.GetInt("firstPlayed"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"));
+        playerStats = new PlayerStats(PlayerPrefs.GetInt("firstPlayed"), PlayerPrefs.GetFloat("highscore"), PlayerPrefs.GetFloat("bestTime"), PlayerPrefs.GetInt("hasItem"), 
+                          PlayerPrefs.GetFloat("spawnPosX"), PlayerPrefs.GetFloat("spawnPosY"), PlayerPrefs.GetFloat("actualTime"));
     }
 
     public void CreateMenuStats()
     {
-        menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f, 0);
+        if (Application.isMobilePlatform)
+        {
+            //Disable ShadowMapping
+            menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f, 0);
+        } else
+        {
+            menuStats = new MenuStats(0, 0, 1, 0.2f, 0.2f, 1);
+        }
     }
 
     public void SaveMenuStats()
@@ -52,7 +64,8 @@ public class SaveGame : MonoBehaviour
 
     public void LoadMenuStats()
     {
-        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"), PlayerPrefs.GetFloat("effectVolume"), PlayerPrefs.GetInt("shadowsEnabled"));
+        menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"),
+                                  PlayerPrefs.GetFloat("effectVolume"), PlayerPrefs.GetInt("shadowsEnabled"));
     }
 
 }

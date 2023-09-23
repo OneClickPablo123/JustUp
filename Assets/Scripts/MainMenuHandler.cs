@@ -148,6 +148,7 @@ public class MainMenuHandler : MonoBehaviour
     public void StartGame()
     {
         saveGame.playerStats.firstPlayed = 2;
+        saveGame.SavePlayerStats();
         SceneManager.LoadScene(1);
     }
 

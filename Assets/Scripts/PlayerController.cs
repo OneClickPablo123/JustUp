@@ -136,8 +136,10 @@ public class PlayerController : MonoBehaviour
 
         //Find PullPrefabs
         pullPrefabs = GameObject.FindGameObjectsWithTag("PullPrefab");
-        
+
         //Start Conditions
+        this.transform.position = new Vector2(saveGame.playerStats.spawnPosX,saveGame.playerStats.spawnPosY);
+        
         //Mobile
         if (Application.isMobilePlatform)
         {     

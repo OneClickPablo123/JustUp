@@ -1,6 +1,5 @@
 using System;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering.Universal;
 using UnityEngine.SceneManagement;
@@ -24,6 +23,7 @@ public class Gamemanager : MonoBehaviour
     public TextMeshProUGUI timer;
     public TextMeshProUGUI bestTime;
     public float bestTimef;
+    public float actualTime;
 
     [Header("PAUSE PANEL")]
     //Pause Panel
@@ -74,6 +74,7 @@ public class Gamemanager : MonoBehaviour
     GameObject[] shadowCaster;
     private int shadowCount;
 
+    //SaveGame Settings
 
     private void Awake()
     {
@@ -87,7 +88,7 @@ public class Gamemanager : MonoBehaviour
     {
         //Player
         player = GameObject.Find("Player");
-        playerController = player.GetComponent<PlayerController>();
+        playerController = player.GetComponent<PlayerController>();       
 
         //Pause Panel
         isPanelActive = false;
@@ -100,6 +101,7 @@ public class Gamemanager : MonoBehaviour
         //Best Time
         bestTimef = saveGame.playerStats.bestTime;
         gameCompleted = false;
+        actualTime = saveGame.playerStats.actualTime;
 
         //Audio Handler
 
@@ -131,6 +133,7 @@ public class Gamemanager : MonoBehaviour
         ItemButton();
         HandleCameraSettings();
         HandleShadows();
+        RefreshPlayerPosition();
     }
 
     public void Timer()
@@ -151,7 +154,7 @@ public class Gamemanager : MonoBehaviour
             bestTime.text = "n/a";
         }
 
-        float actualTime = Time.time;
+        actualTime = Time.time;
         
 
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
@@ -230,7 +233,8 @@ public class Gamemanager : MonoBehaviour
     }
 
    public void Restart()
-    {
+    {      
+        actualTime = 0f;
         Time.timeScale = 1f;
         pausePanel.SetActive(false);
         isPanelActive = false;
@@ -238,7 +242,7 @@ public class Gamemanager : MonoBehaviour
     }
 
     public void ExitGame()
-    {
+    {        
         saveGame.SaveMenuStats();
         saveGame.SavePlayerStats();
         Application.Quit();       
@@ -451,5 +455,14 @@ public class Gamemanager : MonoBehaviour
         {
             mainCam.assetsPPU = 80;
         }
+    }
+
+    public void RefreshPlayerPosition()
+    {
+        if (playerController.IsGrounded())
+        {
+            saveGame.playerStats.spawnPosX = player.transform.position.x;
+            saveGame.playerStats.spawnPosY = player.transform.position.y;
+        }     
     }
 }

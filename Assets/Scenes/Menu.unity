@@ -8907,6 +8907,9 @@ MonoBehaviour:
     highscore: 0
     bestTime: 0
     hasItem: 0
+    spawnPosX: 0
+    spawnPosY: 0
+    actualTime: 0
   menuStats:
     touchControls: 0
     easyMode: 0

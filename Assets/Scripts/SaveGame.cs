@@ -36,10 +36,10 @@ public class SaveGame : MonoBehaviour
         if (Application.isMobilePlatform)
         {
             //Disable ShadowMapping
-            menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f, 0);
+            menuStats = new MenuStats(3, 0, 1, 0.2f, 0.2f, 0, 0);
         } else
         {
-            menuStats = new MenuStats(0, 0, 1, 0.2f, 0.2f, 1);
+            menuStats = new MenuStats(0, 0, 1, 0.2f, 0.2f, 1, 1);
         }
     }
 
@@ -53,6 +53,7 @@ public class SaveGame : MonoBehaviour
             PlayerPrefs.SetFloat("musicVolume", menuStats.musicVolume);
             PlayerPrefs.SetFloat("effectVolume", menuStats.effectVolume);
             PlayerPrefs.SetInt("shadowsEnabled", menuStats.shadowsEnabled);
+            PlayerPrefs.SetInt("particleEnabled", menuStats.particleEnabled);
             PlayerPrefs.Save();
             Debug.Log("MenuStats Saved!");
         }
@@ -65,7 +66,7 @@ public class SaveGame : MonoBehaviour
     public void LoadMenuStats()
     {
         menuStats = new MenuStats(PlayerPrefs.GetInt("touchControls"), PlayerPrefs.GetInt("easyMode"), PlayerPrefs.GetFloat("masterVolume"), PlayerPrefs.GetFloat("musicVolume"),
-                                  PlayerPrefs.GetFloat("effectVolume"), PlayerPrefs.GetInt("shadowsEnabled"));
+                                  PlayerPrefs.GetFloat("effectVolume"), PlayerPrefs.GetInt("shadowsEnabled"), PlayerPrefs.GetInt("particleEnabled"));
     }
 
 }

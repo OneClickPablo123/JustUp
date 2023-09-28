@@ -34,6 +34,7 @@ public class MainMenuHandler : MonoBehaviour
 
     //Graphic Settings
     public Image shadowCheckBox;
+    public Image particleCheckBox;
 
     //TouchControl Options
     public GameObject joyStickCheckBox;
@@ -69,6 +70,8 @@ public class MainMenuHandler : MonoBehaviour
             saveGame.CreateMenuStats();
             saveGame.CreatePlayerStats();
             saveGame.playerStats.firstPlayed = 1;
+            saveGame.SaveMenuStats();
+            saveGame.SavePlayerStats();
         } 
         else
         {
@@ -288,6 +291,20 @@ public class MainMenuHandler : MonoBehaviour
         {
             saveGame.menuStats.shadowsEnabled = 1;
             shadowCheckBox.sprite = checkBoxChecked;
+        }
+    }
+
+    public void ParticleSettings()
+    {
+        if (saveGame.menuStats.particleEnabled == 1)
+        {
+            saveGame.menuStats.particleEnabled = 0;
+            particleCheckBox.sprite = checkBoxUnchecked;
+        }
+        else
+        {
+            saveGame.menuStats.particleEnabled = 1;
+            particleCheckBox.sprite = checkBoxChecked;
         }
     }
 

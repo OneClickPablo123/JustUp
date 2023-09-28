@@ -1,5 +1,6 @@
 using System.Collections;
 using TMPro;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEngine;
 
 
@@ -20,11 +21,11 @@ public class NpcManager : MonoBehaviour
     Coroutine textCoroutine;
     public float letterDelay;
     bool isTextDisplayed = false;
-    bool canStartDialog;
+    bool canStartDialog = false;
     AudioSource audioSource;
     public AudioClip[] npcVoices;
     private int currentVoiceIndex = 0;
-
+    public TextMeshProUGUI dialogIndicator;
 
     void Start()
     {
@@ -37,13 +38,13 @@ public class NpcManager : MonoBehaviour
         playerController = player.GetComponent<PlayerController>();
         audioSource = GetComponent<AudioSource>();
         audioSource.volume = saveGame.menuStats.masterVolume * saveGame.menuStats.effectVolume;
+        dialogIndicator.text = "";
 
        if (Application.isMobilePlatform)
         {
-            dialogBox.transform.localPosition = new Vector2(0, 500);
+            dialogBox.transform.localPosition = new Vector2(0, 450);
         }
-           
-        
+    
     }
 
     void Update()
@@ -53,21 +54,27 @@ public class NpcManager : MonoBehaviour
 
     public void NpcDialog()
     {
+
+        if (Input.GetKeyDown(KeyCode.F) && canStartDialog)
+        {
+            ShowDialog();
+        }
+
         playerHighscore = saveGame.playerStats.highscore;
 
-        if (transform.position.y < 25 && !isTextDisplayed && canStartDialog)
+        if (transform.position.y < 25 && !isTextDisplayed && dialogBox.activeSelf == true)
         {
             PlayNpcVoice();
-            dialogBoxText.text = "Greetings, fellow traveler. My name is Renaldo, son of my father. \n For generations, we've been trying to escape from this place. \nThe only way is upwards... However, Get outta here or die trying";
+            dialogBoxText.text = "Oh God, bless me, a tourist! \n Mr. Cosplay, I need your help... \n A few days ago, I fell into this deep hole, \n and since then, I have never seen daylight again. \n Please guide me to the surface. I need to find my parents.";
             if (textCoroutine == null)
             {
                 textCoroutine = StartCoroutine(ShowText());
             }
         }
-        else if (playerHighscore > 30 && transform.position.y > 30 && !isTextDisplayed && canStartDialog)
+        else if (playerHighscore > 30 && transform.position.y > 30 && !isTextDisplayed && dialogBox.activeSelf == true)
         {
             PlayNpcVoice();
-            dialogBoxText.text = "Ooh Noble Sir,\n We made some progress so far... \n You should check the beds here, \n They got some nice bounce! \n Until we meet again.";
+            dialogBoxText.text = "Let's go, fellow traveler. \n Here, we will begin our journey. For too long, I was trapped down here. I found this mysterious object that seems like a teleportation machine or something similar. It takes two people to activate it. Let's try it.";
             UpdateTextCanvas();
 
             if (textCoroutine == null)
@@ -75,7 +82,7 @@ public class NpcManager : MonoBehaviour
                 textCoroutine = StartCoroutine(ShowText());
             }
         }
-        else if (playerHighscore > 150 && transform.position.y > 150 && !isTextDisplayed && canStartDialog)
+        else if (playerHighscore > 150 && transform.position.y > 150 && !isTextDisplayed && dialogBox.activeSelf == true)
         {
             PlayNpcVoice();
             dialogBoxText.text = "Ahhh Mr. Landlord,\nI have decided to face the challenge.\nThe time has finally come.\nI hope to see you at the top!\nMay the best-trained legs win.";
@@ -85,11 +92,11 @@ public class NpcManager : MonoBehaviour
                 textCoroutine = StartCoroutine(ShowText());
             }
         }
-        else if (playerHighscore > 450 && transform.position.y > 450 && !isTextDisplayed && canStartDialog)
+        else if (playerHighscore > 450 && transform.position.y > 450 && !isTextDisplayed && dialogBox.activeSelf == true)
         {
             if (Application.isMobilePlatform)
             {
-
+                //Folgt
             }
             else
             {
@@ -103,7 +110,7 @@ public class NpcManager : MonoBehaviour
             }
 
         }
-        else if (playerHighscore > 800 && transform.position.y > 800 && !isTextDisplayed && canStartDialog)
+        else if (playerHighscore > 800 && transform.position.y > 800 && !isTextDisplayed && dialogBox.activeSelf == true)
         {
             PlayNpcVoice();
             dialogBoxText.text = "";
@@ -155,28 +162,40 @@ public class NpcManager : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
-
         {
             canStartDialog = true;
-            dialogBox.SetActive(true);      
-        }
 
+            if (Application.isMobilePlatform)
+            {
+                dialogIndicator.text = "[Touch] - Talk";                
+            }
+            else
+            {
+                dialogIndicator.text = "[F] - Talk";
+            }
+        }
     }
+    
 
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player"))
 
-        {
+        {           
             dialogBox.SetActive(false);
             canStartDialog = false;
             isTextDisplayed = false;
+            dialogIndicator.text = "";
         }
     }
-    private void OnTriggerStay2D(Collider2D collision)
-    {
-    
-    }
 
+    public void ShowDialog()
+    {      
+        if (canStartDialog)
+        {       
+            dialogBox.SetActive(true);
+        }
+           
+    }
 
 }

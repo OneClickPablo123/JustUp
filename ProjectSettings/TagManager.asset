@@ -13,6 +13,7 @@ TagManager:
   - cornergrab
   - PullPrefab
   - shadowcaster
+  - ParticleRenderer
   layers:
   - Default
   - TransparentFX

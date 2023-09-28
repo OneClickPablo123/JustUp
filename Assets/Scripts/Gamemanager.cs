@@ -73,6 +73,8 @@ public class Gamemanager : MonoBehaviour
     GameObject mainPlatforms;
     GameObject[] shadowCaster;
     private int shadowCount;
+    GameObject[] particleRenderer;
+
 
     //SaveGame Settings
 
@@ -83,6 +85,7 @@ public class Gamemanager : MonoBehaviour
         saveGame.LoadMenuStats();
         saveGame.LoadPlayerStats();
         CreateEdgeGrabs();
+
     }
     void Start()
     {
@@ -115,12 +118,18 @@ public class Gamemanager : MonoBehaviour
         mainPlatforms = GameObject.Find("MainPlatforms");
         shadowCount = mainPlatforms.transform.childCount;
         shadowCaster = new GameObject[shadowCount];
-
+        particleRenderer = GameObject.FindGameObjectsWithTag("ParticleRenderer");
+        
+        Debug.Log(particleRenderer.Length);
         for (int i = 0; i < shadowCount; i++)
         {
             shadowCaster[i] = mainPlatforms.transform.GetChild(i).gameObject;
         }
-        Debug.Log(shadowCaster.Length);
+
+
+        HandleShadows();
+        HandleParticles();
+
     }
 
     // Update is called once per frame
@@ -132,14 +141,13 @@ public class Gamemanager : MonoBehaviour
         AudioHandler();
         ItemButton();
         HandleCameraSettings();
-        HandleShadows();
         RefreshPlayerPosition();
     }
 
     public void Timer()
     {
 
-        TimeSpan timeSpanActual = TimeSpan.FromSeconds(Time.time);
+        TimeSpan timeSpanActual = TimeSpan.FromSeconds(actualTime);
         string formattedActualTime = FormatTimeSpan(timeSpanActual);
         timer.text = formattedActualTime;      
         TimeSpan timeSpanbest = TimeSpan.FromSeconds(bestTimef);
@@ -154,7 +162,8 @@ public class Gamemanager : MonoBehaviour
             bestTime.text = "n/a";
         }
 
-        actualTime = Time.time;
+        actualTime += Time.deltaTime;
+        saveGame.playerStats.actualTime = actualTime;
         
 
         if (gameCompleted && actualTime < bestTimef || gameCompleted && bestTimef == 0)
@@ -162,7 +171,6 @@ public class Gamemanager : MonoBehaviour
             bestTimef = actualTime;
             saveGame.playerStats.bestTime = bestTimef;
             saveGame.SavePlayerStats();
-            Debug.Log("bestTime Set");
         }
     }
 
@@ -218,6 +226,7 @@ public class Gamemanager : MonoBehaviour
 
     public void TouchPause()
     {
+
         if (isPanelActive)
         {
             pausePanel.SetActive(false);
@@ -226,6 +235,7 @@ public class Gamemanager : MonoBehaviour
         }
         else
         {
+            Debug.Log("HIT");
             pausePanel.SetActive(true);
             Time.timeScale = 0;
             isPanelActive = true;
@@ -233,8 +243,7 @@ public class Gamemanager : MonoBehaviour
     }
 
    public void Restart()
-    {      
-        actualTime = 0f;
+    {              
         Time.timeScale = 1f;
         pausePanel.SetActive(false);
         isPanelActive = false;
@@ -328,13 +337,17 @@ public class Gamemanager : MonoBehaviour
                 if (noTileAbove)
                 {
                     if (noTileToLeft)
-                    {                      
-                        Instantiate(CornerPrefab, tileTopLeftPosition, Quaternion.identity);
+                    {
+                          
+                        GameObject leftgrab = Instantiate(CornerPrefab, tileTopLeftPosition, Quaternion.identity);
+                        leftgrab.tag = "leftGrab";
+
                     }
 
                     if (noTileToRight)
                     {
-                        Instantiate(CornerPrefab, tileTopRightPosition, Quaternion.identity);
+                        GameObject rightgrab = Instantiate(CornerPrefab, tileTopRightPosition, Quaternion.identity);
+                        rightgrab.tag = "rightGrab";
                     }
 
                     if (noTileAbove && noTileToLeft || noTileAbove && noTileToRight)
@@ -361,6 +374,23 @@ public class Gamemanager : MonoBehaviour
             foreach (GameObject shadowCast in shadowCaster)
             {
                 shadowCast.SetActive(true);
+            }
+        }
+    }
+
+    public void HandleParticles()
+    {
+        if (saveGame.menuStats.particleEnabled == 1)
+        {
+            foreach (GameObject particleRenderer in particleRenderer)
+            {
+                particleRenderer.SetActive(true);
+            }
+        } else
+        {
+            foreach (GameObject particleRenderer in particleRenderer)
+            {
+                particleRenderer.SetActive(false);
             }
         }
     }

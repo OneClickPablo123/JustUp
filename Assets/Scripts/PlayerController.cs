@@ -125,7 +125,6 @@ public class PlayerController : MonoBehaviour
         managerscript = gamemanager.GetComponent<Gamemanager>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         joyStick = GameObject.Find("VirtualJoyStick");
-        mainCam = Camera.main;
         activeCheckPoint = checkPointPrefab;
 
         //Start Variables
@@ -167,7 +166,6 @@ public class PlayerController : MonoBehaviour
         //Not Mobile
         else
         {
-            mainCam.orthographicSize = 8f;
             joyStick.SetActive(false);
             checkPointButton.SetActive(false);
         }
@@ -244,36 +242,10 @@ public class PlayerController : MonoBehaviour
             {
                 GetComponent<SpriteRenderer>().flipX = true;
             }
-            //Set the maxSpeed at Higher Values if the Player is pressing Shift to Run
-            if (Input.GetKey(KeyCode.LeftShift) && moveX != 0)
+
+            if (moveX != 0 && rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
             {
-                //Checks if Velocity is Bigger as maxrunSpeed
-                if (rb.velocity.x < maxSpeedRun && rb.velocity.x > -maxSpeedRun)
-                {
-                    //Checks if Velocity is Bigger as MaxSpeed / 2
-                    if (rb.velocity.x < maxSpeedRun / 2 || rb.velocity.x > -maxSpeedRun / 2)
-                    {
-                        //Multiply the RunSpeed * 1.5f 
-                        rb.AddForce(new Vector2(moveX * runSpeed * 1.5f * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                    }
-                    else
-
-                    {
-                        //Set the Runspeed to normal Value
-                        rb.AddForce(new Vector2(moveX * runSpeed * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                    }
-                }
-            }
-            //Set the Velocity to normal Speed if the player is not pushing Shift
-            else if (moveX != 0 && !Input.GetKey(KeyCode.LeftShift))
-
-            {
-
-                //Only Apply force if the players velocity is smaller as maxSpeed
-                if (rb.velocity.x < maxSpeed && rb.velocity.x > -maxSpeed)
-                {
-                    rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
-                }
+                rb.AddForce(new Vector2(moveX * speed * Time.deltaTime, 0f), ForceMode2D.Impulse);
             }
 
         }
@@ -305,7 +277,7 @@ public class PlayerController : MonoBehaviour
 
             if (!isClimbing && !usedItem && !isHang && !isPullUp)
             {
-                rb.gravityScale = 8f;
+                rb.gravityScale = 6f;
             }
 
             //Reduce Velocity.y -0.01, maximum till fallspeed
@@ -358,25 +330,13 @@ public class PlayerController : MonoBehaviour
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
         }
-       
+
         if (rgrabPos != Vector2.zero && facePosition.x == -1 && transform.position.x > rgrabPos.x && !isHang && canHang)
         {
             isHang = true;
             this.transform.position = rgrabPos;
             rb.velocity = Vector2.zero;
             rb.gravityScale = 0;
-        }
-
-        if (cornerGrabPos.x != 0 && canHang)
-        {
-
-            if (directionToCorner.x <= -0.1f && facePosition.x == -1 && directionToCorner.x != 0|| directionToCorner.x >= 0.1f && facePosition.x == 1 && directionToCorner.x != 0)
-            {          
-                isHang = true;
-                this.transform.position = cornerGrabPos;
-                rb.velocity = Vector2.zero;
-                rb.gravityScale = 0;          
-            }
         }
     }
     public int PullPositionCalc(GameObject obj1, GameObject obj2)
